@@ -611,12 +611,12 @@ function loadSettings() {
 // ─── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   const path = window.location.pathname;
-  if (path.endsWith('index.html')  || path.endsWith('/admin/')) loadDashboard();
-  if (path.endsWith('users.html'))                               loadUsers();
-  if (path.endsWith('orders.html'))                              loadOrders();
-  if (path.endsWith('deposits.html'))                            loadDeposits();
-  if (path.endsWith('existing-products.html'))                   loadProducts();
-  if (path.endsWith('settings.html'))                            loadSettings();
+  if (path.endsWith('index.html') || path.endsWith('/admin') || path.endsWith('/admin/')) loadDashboard();
+  if (path.endsWith('users.html') || path.endsWith('/admin/users')) loadUsers();
+  if (path.endsWith('orders.html') || path.endsWith('/admin/orders')) loadOrders();
+  if (path.endsWith('deposits.html') || path.endsWith('/admin/deposits')) loadDeposits();
+  if (path.endsWith('existing-products.html') || path.endsWith('/admin/existing-products')) loadProducts();
+  if (path.endsWith('settings.html') || path.endsWith('/admin/settings')) loadSettings();
 
   // Mobile sidebar toggle
   const avatar = document.querySelector('.a-avatar');
