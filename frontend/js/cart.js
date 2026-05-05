@@ -1,7 +1,7 @@
-﻿// API_BASE set globally by nav.js â€” use window.API_BASE with fallback
+﻿// API_BASE set globally by nav.js — use window.API_BASE with fallback
 const API_BASE = window.__API_BASE__ || window.API_BASE || 'http://localhost:5000/api';
 
-// â”€â”€â”€ Cart Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Cart Helpers ──────────────────────────────────────────────────────────────
 function getCart() {
   try { return JSON.parse(localStorage.getItem('lognest_cart') || '[]'); }
   catch { return []; }
@@ -14,7 +14,7 @@ function saveCart(cart) {
 
 function addToCart(product) {
   const cart = getCart();
-  // Each log is unique â€” no quantity stacking
+  // Each log is unique — no quantity stacking
   if (cart.find(i => i.id === product.id)) {
     toast('This item is already in your cart!', 'warning');
     return false;
@@ -50,7 +50,7 @@ function updateCartBadge() {
   });
 }
 
-// â”€â”€â”€ Render Cart Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Render Cart Page ──────────────────────────────────────────────────────────
 function renderCart() {
   const cart = getCart();
   const container = document.getElementById('cart-items');
@@ -62,7 +62,7 @@ function renderCart() {
     container.style.gridColumn = '1 / -1';
     container.innerHTML = `
       <div class="empty-cart">
-        <div style="font-size:3rem; margin-bottom:0.75rem;">ðŸ›’</div>
+        <div style="font-size:3rem; margin-bottom:0.75rem;">🛒</div>
         <h3 style="font-size:1.25rem; color:var(--text-main); margin-bottom:0.4rem;">Your cart is empty</h3>
         <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.25rem;">Head to the store to browse available bank logs.</p>
         <a href="store.html" class="btn btn-primary">Browse Store</a>
@@ -81,7 +81,7 @@ function renderCart() {
     const initial = item.category_name ? item.category_name.charAt(0) : 'B';
     const shortName = item.category_name || item.name.split(/ log/i)[0].trim();
 
-    // Parse balance from product name e.g. "PayPal Log â€” $81,773 Balance"
+    // Parse balance from product name e.g. "PayPal Log — $81,773 Balance"
     const balanceMatch = item.name.match(/\$[\d,]+/);
     const balance = balanceMatch ? balanceMatch[0] : null;
 
@@ -99,8 +99,8 @@ function renderCart() {
         <div class="cart-item-name" title="${item.name}">${shortName}</div>
         <div class="cart-item-info">${item.description || ''}</div>
         <div class="cart-item-tags">
-          ${balance ? `<span class="cart-tag">ðŸ’° Balance: ${balance}</span>` : ''}
-          ${type    ? `<span class="cart-tag">ðŸ“‹ ${type}</span>` : ''}
+          ${balance ? `<span class="cart-tag">💰 Balance: ${balance}</span>` : ''}
+          ${type    ? `<span class="cart-tag">📋 ${type}</span>` : ''}
         </div>
       </div>
       <div class="cart-item-price">$${parseFloat(item.price).toFixed(2)}</div>
@@ -136,7 +136,7 @@ function renderCart() {
   if (summary) summary.style.display = 'block';
 }
 
-// â”€â”€â”€ Checkout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Checkout ──────────────────────────────────────────────────────────────────
 async function checkout() {
   const token = localStorage.getItem('token');
   if (!token) { window.location.href = 'login.html'; return; }
@@ -181,7 +181,7 @@ async function checkout() {
 
 
   if (user) localStorage.setItem('user', JSON.stringify(user));
-  // Filter by ID, not name â€” names can collide or be truncated
+  // Filter by ID, not name — names can collide or be truncated
   const remaining = getCart().filter(i => !results.successIds.includes(i.id));
   saveCart(remaining);
 
@@ -194,12 +194,12 @@ async function checkout() {
     if (results.success.length > 0) toast(`${results.success.length} item(s) purchased.`, 'success');
     if (results.failed.length > 0) toast(`${results.failed.length} item(s) failed. Check your balance.`, 'error', 6000);
     renderCart();
-    btn.textContent = 'âœ… Confirm & Checkout';
+    btn.textContent = '✅ Confirm & Checkout';
     btn.disabled = false;
   }
 }
 
-// â”€â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Init ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   updateCartBadge();
   renderCart();

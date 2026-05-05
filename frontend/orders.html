@@ -1,9 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/images/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Orders â€“ LogNest</title>
+  <title>My Orders – LogNest</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <script src="js/toast.js"></script>
@@ -107,7 +108,7 @@
     body.dark-mode .o-view  { background:var(--bg-card); }
     body.dark-mode .o-pg-btn { background:var(--bg-card); }
 
-    /* â”€â”€ Mobile: table ←’ stacked cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* ── Mobile: table ←’ stacked cards ──────────────────────── */
     @media (max-width: 640px) {
       .o-stats { gap: 0.5rem; }
       .o-stat  { min-width: 0; padding: 0.6rem 0.75rem; }
@@ -137,7 +138,7 @@
         white-space: normal !important;
       }
 
-      /* Hide the "View ←’" cell â€” show as bottom link instead */
+      /* Hide the "View ←’" cell — show as bottom link instead */
       .o-table tbody td:last-child {
         justify-content: center;
         margin-top: 0.4rem;
@@ -194,24 +195,24 @@
       <!-- Stats -->
       <div class="o-stats">
         <div class="o-stat">
-          <span class="o-stat-icon">ðŸ“¦</span>
+          <span class="o-stat-icon">📦</span>
           <div>
             <div class="o-stat-label">Orders</div>
-            <div class="o-stat-val" id="stat-total">â€”</div>
+            <div class="o-stat-val" id="stat-total">—</div>
           </div>
         </div>
         <div class="o-stat">
-          <span class="o-stat-icon">ðŸ’µ</span>
+          <span class="o-stat-icon">💵</span>
           <div>
             <div class="o-stat-label">Spent</div>
-            <div class="o-stat-val" id="stat-spent" style="color:#15803d;">â€”</div>
+            <div class="o-stat-val" id="stat-spent" style="color:#15803d;">—</div>
           </div>
         </div>
         <div class="o-stat">
-          <span class="o-stat-icon">ðŸ’³</span>
+          <span class="o-stat-icon">💳</span>
           <div>
             <div class="o-stat-label">Balance</div>
-            <div class="o-stat-val" id="stat-balance" style="color:var(--primary);">â€”</div>
+            <div class="o-stat-val" id="stat-balance" style="color:var(--primary);">—</div>
           </div>
         </div>
       </div>
@@ -272,7 +273,7 @@
       const start  = (page - 1) * PAGE_SIZE;
       const rows   = allOrders.slice(start, start + PAGE_SIZE);
 
-      info.textContent = `${start + 1}â€“${Math.min(start + PAGE_SIZE, total)} of ${total}`;
+      info.textContent = `${start + 1}–${Math.min(start + PAGE_SIZE, total)} of ${total}`;
 
       btns.innerHTML = `
         <button class="o-pg-btn" onclick="renderPage(${page-1})" ${page<=1?'disabled':''}>← Prev</button>
@@ -329,7 +330,7 @@
           document.getElementById('orders-tbody').innerHTML = `
             <tr><td colspan="7">
               <div class="o-empty">
-                <div class="o-empty-icon">ðŸ“¦</div>
+                <div class="o-empty-icon">📦</div>
                 <h3>No orders yet</h3>
                 <p>Browse the store to make your first purchase.</p>
                 <a href="store.html" class="btn btn-primary" style="font-size:0.82rem;padding:0.5rem 1.1rem;">Browse Store</a>
