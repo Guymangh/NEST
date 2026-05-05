@@ -1,10 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/png" href="/images/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Orders – LogNest</title>
+  <title>My Orders â€“ LogNest</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <script src="js/toast.js"></script>
@@ -108,7 +107,7 @@
     body.dark-mode .o-view  { background:var(--bg-card); }
     body.dark-mode .o-pg-btn { background:var(--bg-card); }
 
-    /* ── Mobile: table ?� stacked cards ──────────────────────── */
+    /* â”€â”€ Mobile: table ←’ stacked cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     @media (max-width: 640px) {
       .o-stats { gap: 0.5rem; }
       .o-stat  { min-width: 0; padding: 0.6rem 0.75rem; }
@@ -138,7 +137,7 @@
         white-space: normal !important;
       }
 
-      /* Hide the "View ?�" cell — show as bottom link instead */
+      /* Hide the "View ←’" cell â€” show as bottom link instead */
       .o-table tbody td:last-child {
         justify-content: center;
         margin-top: 0.4rem;
@@ -195,24 +194,24 @@
       <!-- Stats -->
       <div class="o-stats">
         <div class="o-stat">
-          <span class="o-stat-icon">📦</span>
+          <span class="o-stat-icon">ðŸ“¦</span>
           <div>
             <div class="o-stat-label">Orders</div>
-            <div class="o-stat-val" id="stat-total">—</div>
+            <div class="o-stat-val" id="stat-total">â€”</div>
           </div>
         </div>
         <div class="o-stat">
-          <span class="o-stat-icon">💵</span>
+          <span class="o-stat-icon">ðŸ’µ</span>
           <div>
             <div class="o-stat-label">Spent</div>
-            <div class="o-stat-val" id="stat-spent" style="color:#15803d;">—</div>
+            <div class="o-stat-val" id="stat-spent" style="color:#15803d;">â€”</div>
           </div>
         </div>
         <div class="o-stat">
-          <span class="o-stat-icon">💳</span>
+          <span class="o-stat-icon">ðŸ’³</span>
           <div>
             <div class="o-stat-label">Balance</div>
-            <div class="o-stat-val" id="stat-balance" style="color:var(--primary);">—</div>
+            <div class="o-stat-val" id="stat-balance" style="color:var(--primary);">â€”</div>
           </div>
         </div>
       </div>
@@ -233,7 +232,7 @@
               </tr>
             </thead>
             <tbody id="orders-tbody">
-              <tr><td colspan="7" style="text-align:center;padding:2.5rem;color:var(--text-muted);">Loading�</td></tr>
+              <tr><td colspan="7" style="text-align:center;padding:2.5rem;color:var(--text-muted);">Loading…</td></tr>
             </tbody>
           </table>
         </div>
@@ -258,10 +257,10 @@
     let allOrders   = [];
 
     const STATUS = {
-      completed: { cls:'ob-completed', dot:'?�', label:'Completed' },
-      refunded:  { cls:'ob-refunded',  dot:'?�', label:'Refunded'  },
-      pending:   { cls:'ob-pending',   dot:'?�', label:'Pending'   },
-      cancelled: { cls:'ob-cancelled', dot:'?', label:'Cancelled' },
+      completed: { cls:'ob-completed', dot:'◉', label:'Completed' },
+      refunded:  { cls:'ob-refunded',  dot:'←©', label:'Refunded'  },
+      pending:   { cls:'ob-pending',   dot:'◉', label:'Pending'   },
+      cancelled: { cls:'ob-cancelled', dot:'✕', label:'Cancelled' },
     };
 
     function renderPage(page) {
@@ -273,12 +272,12 @@
       const start  = (page - 1) * PAGE_SIZE;
       const rows   = allOrders.slice(start, start + PAGE_SIZE);
 
-      info.textContent = `${start + 1}–${Math.min(start + PAGE_SIZE, total)} of ${total}`;
+      info.textContent = `${start + 1}â€“${Math.min(start + PAGE_SIZE, total)} of ${total}`;
 
       btns.innerHTML = `
-        <button class="o-pg-btn" onclick="renderPage(${page-1})" ${page<=1?'disabled':''}>?� Prev</button>
+        <button class="o-pg-btn" onclick="renderPage(${page-1})" ${page<=1?'disabled':''}>← Prev</button>
         <span class="o-pg-label">Page ${page} / ${pages}</span>
-        <button class="o-pg-btn" onclick="renderPage(${page+1})" ${page>=pages?'disabled':''}>Next ?�</button>
+        <button class="o-pg-btn" onclick="renderPage(${page+1})" ${page>=pages?'disabled':''}>Next ←’</button>
       `;
 
       if (!rows.length) {
@@ -287,9 +286,9 @@
       }
 
       tbody.innerHTML = rows.map(o => {
-        const s    = STATUS[o.status] || { cls:'ob-pending', dot:'?�', label: o.status };
+        const s    = STATUS[o.status] || { cls:'ob-pending', dot:'◉', label: o.status };
         const name = o.product_name || 'N/A';
-        const show = name.length > 42 ? name.slice(0, 39) + '�' : name;
+        const show = name.length > 42 ? name.slice(0, 39) + '…' : name;
         const date = new Date(o.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
         return `
           <tr onclick="window.location='order-detail.html?id=${o.id}'">
@@ -300,7 +299,7 @@
             <td data-label="Amount" style="font-weight:700;color:#15803d;">$${parseFloat(o.total).toFixed(2)}</td>
             <td data-label="Status"><span class="o-badge ${s.cls}">${s.dot} ${s.label}</span></td>
             <td onclick="event.stopPropagation()">
-              <a href="order-detail.html?id=${o.id}" class="o-view">View ?�</a>
+              <a href="order-detail.html?id=${o.id}" class="o-view">View ←’</a>
             </td>
           </tr>`;
       }).join('');
@@ -330,7 +329,7 @@
           document.getElementById('orders-tbody').innerHTML = `
             <tr><td colspan="7">
               <div class="o-empty">
-                <div class="o-empty-icon">📦</div>
+                <div class="o-empty-icon">ðŸ“¦</div>
                 <h3>No orders yet</h3>
                 <p>Browse the store to make your first purchase.</p>
                 <a href="store.html" class="btn btn-primary" style="font-size:0.82rem;padding:0.5rem 1.1rem;">Browse Store</a>

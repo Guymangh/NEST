@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/png" href="../images/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard – LogNest Admin</title>
+  <title>Dashboard — LogNest Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/admin.css" />
   <script src="../js/config.js"></script>
@@ -23,13 +23,13 @@
         <a href="index.html" class="a-nav-item active"><span class="a-nav-icon">📊</span> Dashboard</a>
         <span class="a-nav-label">Products</span>
         <a href="add-product.html" class="a-nav-item"><span class="a-nav-icon">➕</span> Add Product</a>
-        <a href="existing-products.html" class="a-nav-item"><span class="a-nav-icon">??</span> All Products</a>
+        <a href="existing-products.html" class="a-nav-item"><span class="a-nav-icon">📂</span> All Products</a>
         <span class="a-nav-label">Management</span>
         <a href="orders.html" class="a-nav-item"><span class="a-nav-icon">🛒</span> Orders</a>
         
-        <a href="refunded-logs.html" class="a-nav-item"><span class="a-nav-icon">?</span> Refunded Logs</a>
-        <a href="users.html" class="a-nav-item"><span class="a-nav-icon">??</span> Users</a>
-        <a href="deposits.html" class="a-nav-item"><span class="a-nav-icon">??</span> Deposits</a>
+        <a href="refunded-logs.html" class="a-nav-item"><span class="a-nav-icon">↩️</span> Refunded Logs</a>
+        <a href="users.html" class="a-nav-item"><span class="a-nav-icon">👥</span> Users</a>
+        <a href="deposits.html" class="a-nav-item"><span class="a-nav-icon">💰</span> Deposits</a>
         <span class="a-nav-label">System</span>
         <a href="settings.html" class="a-nav-item"><span class="a-nav-icon">⚙️</span> Settings</a>
       </nav>
@@ -53,31 +53,31 @@
       <!-- Stat Cards -->
       <section class="a-stats">
         <div class="a-stat-card">
-          <div class="a-stat-icon" style="background: rgba(99,102,241,0.12); color:#6366f1;">??</div>
+          <div class="a-stat-icon" style="background: rgba(99,102,241,0.12); color:#6366f1;">👥</div>
           <div class="a-stat-body">
             <p class="a-stat-label">Total Users</p>
-            <p class="a-stat-value" id="total-users">—</p>
+            <p class="a-stat-value" id="total-users">"”</p>
           </div>
         </div>
         <div class="a-stat-card">
-          <div class="a-stat-icon" style="background: rgba(16,185,129,0.12); color:#10b981;">💵</div>
+          <div class="a-stat-icon" style="background: rgba(16,185,129,0.12); color:#10b981;">ðŸ’µ</div>
           <div class="a-stat-body">
             <p class="a-stat-label">Total Revenue</p>
-            <p class="a-stat-value" id="total-revenue" style="color:#10b981;">—</p>
+            <p class="a-stat-value" id="total-revenue" style="color:#10b981;">"”</p>
           </div>
         </div>
         <div class="a-stat-card">
-          <div class="a-stat-icon" style="background: rgba(245,158,11,0.12); color:#f59e0b;">🛒</div>
+          <div class="a-stat-icon" style="background: rgba(245,158,11,0.12); color:#f59e0b;">ðŸ›’</div>
           <div class="a-stat-body">
             <p class="a-stat-label">Total Orders</p>
-            <p class="a-stat-value" id="total-orders">—</p>
+            <p class="a-stat-value" id="total-orders">"”</p>
           </div>
         </div>
         <div class="a-stat-card">
-          <div class="a-stat-icon" style="background: rgba(239,68,68,0.12); color:#ef4444;">⏳</div>
+          <div class="a-stat-icon" style="background: rgba(239,68,68,0.12); color:#ef4444;">â³</div>
           <div class="a-stat-body">
             <p class="a-stat-label">Pending Deposits</p>
-            <p class="a-stat-value" id="pending-deposits" style="color:#ef4444;">—</p>
+            <p class="a-stat-value" id="pending-deposits" style="color:#ef4444;">"”</p>
           </div>
         </div>
       </section>
@@ -87,7 +87,7 @@
         <div class="a-panel">
           <div class="a-panel-header">
             <h2 class="a-panel-title">Recent Orders</h2>
-            <a href="orders.html" class="a-panel-link">View all →</a>
+            <a href="orders.html" class="a-panel-link">View all â†’</a>
           </div>
           <table class="a-table">
             <thead><tr><th>Order ID</th><th>User</th><th>Amount</th></tr></thead>
@@ -99,7 +99,7 @@
         <div class="a-panel">
           <div class="a-panel-header">
             <h2 class="a-panel-title">Recent Deposits</h2>
-            <a href="deposits.html" class="a-panel-link">View all →</a>
+            <a href="deposits.html" class="a-panel-link">View all â†’</a>
           </div>
           <table class="a-table">
             <thead><tr><th>Deposit ID</th><th>User</th><th>Amount</th></tr></thead>

@@ -1,10 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/png" href="/images/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Profile � LogNest</title>
+  <title>Profile – LogNest</title>
   <meta name="description" content="Manage your LogNest profile, update account details, and change your password." />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
@@ -18,7 +17,7 @@
       align-items: start;
     }
 
-    /* -- Sidebar Card -- */
+    /* ── Sidebar Card ── */
     .profile-sidebar {
       background: var(--bg-card);
       border: 1px solid var(--border-soft);
@@ -60,7 +59,7 @@
     }
     .sidebar-actions .btn-dash:hover { background: var(--champagne); border-color: var(--primary); }
 
-    /* -- Right Column -- */
+    /* ── Right Column ── */
     .profile-main { display: flex; flex-direction: column; gap: 1.5rem; }
 
     .profile-section {
@@ -148,30 +147,30 @@
   <main class="main-content container" style="padding-top:1.25rem;">
     <div class="profile-grid">
 
-      <!-- -- Sidebar -- -->
+      <!-- ── Sidebar ── -->
       <div class="profile-sidebar">
         <div class="profile-avatar" id="pf-avatar">U</div>
-        <div class="profile-name" id="pf-name">�</div>
-        <div class="profile-email" id="pf-email">�</div>
+        <div class="profile-name" id="pf-name">—</div>
+        <div class="profile-email" id="pf-email">—</div>
         <span class="profile-role-badge" id="pf-role">user</span>
         <div class="sidebar-stats">
           <div class="sidebar-stat"><span>Balance</span><span id="pf-balance">$0.00</span></div>
-          <div class="sidebar-stat"><span>Member Since</span><span id="pf-since">�</span></div>
-          <div class="sidebar-stat"><span>Status</span><span style="color:#16a34a;font-weight:700;">? Active</span></div>
+          <div class="sidebar-stat"><span>Member Since</span><span id="pf-since">—</span></div>
+          <div class="sidebar-stat"><span>Status</span><span style="color:#16a34a;font-weight:700;">● Active</span></div>
         </div>
         <div class="sidebar-actions">
-          <a href="dashboard.html" class="btn-dash">?? Go to Dashboard</a>
-          <a href="deposit.html" class="btn-dash">?? Add Funds</a>
+          <a href="dashboard.html" class="btn-dash">📊 Go to Dashboard</a>
+          <a href="deposit.html" class="btn-dash">💰 Add Funds</a>
         </div>
       </div>
 
-      <!-- -- Main Column -- -->
+      <!-- ── Main Column ── -->
       <div class="profile-main">
 
         <!-- Account Info Section -->
         <div class="profile-section" id="section-profile">
           <div class="section-head">
-            <div class="section-head-icon">??</div>
+            <div class="section-head-icon">👤</div>
             <div>
               <h3>Account Information</h3>
               <p>Update your username and email address</p>
@@ -200,7 +199,7 @@
         <!-- Change Password Section -->
         <div class="profile-section" id="section-password">
           <div class="section-head">
-            <div class="section-head-icon">??</div>
+            <div class="section-head-icon">🔒</div>
             <div>
               <h3>Change Password</h3>
               <p>Keep your account secure with a strong password</p>
@@ -233,21 +232,21 @@
         <!-- Session Info -->
         <div class="profile-section">
           <div class="section-head">
-            <div class="section-head-icon">??</div>
+            <div class="section-head-icon">🛡</div>
             <div>
               <h3>Session & Security</h3>
               <p>Current session details</p>
             </div>
           </div>
-          <div class="session-row"><span class="session-label">Login Status</span><span class="session-value active">? Logged In</span></div>
-          <div class="session-row"><span class="session-label">Token Expires</span><span class="session-value" id="pf-token-exp">�</span></div>
+          <div class="session-row"><span class="session-label">Login Status</span><span class="session-value active">● Logged In</span></div>
+          <div class="session-row"><span class="session-label">Token Expires</span><span class="session-value" id="pf-token-exp">—</span></div>
           <div class="session-row"><span class="session-label">Account Role</span><span class="session-value" id="pf-session-role">user</span></div>
         </div>
 
         <!-- Danger Zone -->
         <div class="profile-section danger-zone">
           <div class="section-head">
-            <div class="section-head-icon" style="background:#fee2e2;border-color:#fecaca;">??</div>
+            <div class="section-head-icon" style="background:#fee2e2;border-color:#fecaca;">⚠️</div>
             <div>
               <h3 style="color:#991b1b;">Danger Zone</h3>
               <p style="color:#b91c1c;">Irreversible actions</p>
@@ -273,16 +272,16 @@
 
       const API = window.API_BASE || 'http://localhost:5000/api';
 
-      // -- Populate sidebar
+      // ── Populate sidebar
       document.getElementById('pf-avatar').textContent  = (user.username || 'U').charAt(0).toUpperCase();
-      document.getElementById('pf-name').textContent     = user.username || '�';
-      document.getElementById('pf-email').textContent    = user.email || '�';
+      document.getElementById('pf-name').textContent     = user.username || '—';
+      document.getElementById('pf-email').textContent    = user.email || '—';
       document.getElementById('pf-role').textContent     = user.role || 'user';
       document.getElementById('pf-balance').textContent  = `$${parseFloat(user.balance || 0).toFixed(2)}`;
-      const since = user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '�';
+      const since = user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '—';
       document.getElementById('pf-since').textContent = since;
 
-      // -- Token expiry
+      // ── Token expiry
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
         if (payload.exp) {
@@ -291,7 +290,7 @@
       } catch {}
       document.getElementById('pf-session-role').textContent = user.role || 'user';
 
-      // -- Populate form fields
+      // ── Populate form fields
       const usernameInput = document.getElementById('input-username');
       const emailInput    = document.getElementById('input-email');
       usernameInput.value = user.username || '';
@@ -302,11 +301,11 @@
         emailInput.value = user.email || '';
       });
 
-      // -- Save Profile
+      // ── Save Profile
       document.getElementById('profile-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = document.getElementById('btn-save-profile');
-        btn.disabled = true; btn.textContent = 'Saving�';
+        btn.disabled = true; btn.textContent = 'Saving…';
         try {
           const res = await fetch(`${API}/auth/profile`, {
             method: 'PUT',
@@ -314,7 +313,7 @@
             body: JSON.stringify({ email: emailInput.value.trim() })
           });
           const data = await res.json();
-          if (res.status === 401) { toast('Session expired. Redirecting to login�', 'error'); setTimeout(() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = 'login.html'; }, 1500); return; }
+          if (res.status === 401) { toast('Session expired. Redirecting to login…', 'error'); setTimeout(() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = 'login.html'; }, 1500); return; }
           if (data.success) {
             localStorage.setItem('user', JSON.stringify({ ...user, ...data.user }));
             toast('Profile updated successfully!', 'success');
@@ -326,7 +325,7 @@
         btn.disabled = false; btn.textContent = 'Save Email';
       });
 
-      // -- Password Strength
+      // ── Password Strength
       const pwBar  = document.getElementById('pw-bar');
       const pwHint = document.getElementById('pw-hint');
       document.getElementById('input-new-pw').addEventListener('input', (e) => {
@@ -350,7 +349,7 @@
         pwHint.textContent = 'Use 8+ characters with letters, numbers & symbols';
       });
 
-      // -- Change Password
+      // ── Change Password
       document.getElementById('password-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const curr    = document.getElementById('input-current-pw').value;
@@ -360,7 +359,7 @@
         if (newPw !== confirm) { toast('New passwords do not match.', 'error'); return; }
 
         const btn = document.getElementById('btn-save-pw');
-        btn.disabled = true; btn.textContent = 'Updating�';
+        btn.disabled = true; btn.textContent = 'Updating…';
         try {
           const res = await fetch(`${API}/auth/change-password`, {
             method: 'PUT',
@@ -368,7 +367,7 @@
             body: JSON.stringify({ currentPassword: curr, newPassword: newPw })
           });
           const data = await res.json();
-          if (res.status === 401) { toast('Session expired. Redirecting to login�', 'error'); setTimeout(() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = 'login.html'; }, 1500); return; }
+          if (res.status === 401) { toast('Session expired. Redirecting to login…', 'error'); setTimeout(() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = 'login.html'; }, 1500); return; }
           if (data.success) {
             toast('Password changed successfully!', 'success');
             document.getElementById('password-form').reset();

@@ -1,17 +1,16 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/png" href="/images/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Order Details � LogNest</title>
+  <title>Order Details – LogNest</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <script src="js/toast.js"></script>
   <script src="js/config.js"></script>
   <script src="js/nav.js"></script>
   <style>
-    /* -- Credential box -- */
+    /* ── Credential box ── */
     .cred-wrapper {
       position: relative;
       border-radius: 10px;
@@ -21,14 +20,14 @@
       min-height: 160px;
     }
 
-    /* Canvas fills the box � text is pixels, not DOM nodes */
+    /* Canvas fills the box — text is pixels, not DOM nodes */
     #cred-canvas {
       display: none;
       width: 100%;
       border-radius: 10px;
     }
 
-    /* Blur overlay � shown by default */
+    /* Blur overlay — shown by default */
     .cred-blur-overlay {
       position: absolute;
       inset: 0;
@@ -123,16 +122,16 @@
   <script>
     const API_BASE = window.API_BASE || 'http://localhost:5000/api';
 
-    // Stored in closure � never in the DOM, never in a global
+    // Stored in closure — never in the DOM, never in a global
     let _rawCredentials = null;
 
-    // -- Decode base64 from server ---------------------------------------------
+    // ── Decode base64 from server ─────────────────────────────────────────────
     function b64Decode(str) {
       try { return decodeURIComponent(escape(atob(str))); }
       catch { return str; }
     }
 
-    // -- Render credentials onto a canvas (text is pixels, not DOM text) -------
+    // ── Render credentials onto a canvas (text is pixels, not DOM text) ───────
     function renderToCanvas(text) {
       const canvas  = document.getElementById('cred-canvas');
       const padding = 20;
@@ -185,9 +184,9 @@
       canvas.style.display = 'block';
     }
 
-    // -- Reveal: two-step token flow --------------------------------------------
-    // Step 1: POST /request-credentials ? get single-use 60s token
-    // Step 2: GET  /credentials?t=TOKEN  ? redeem token, get b64 credentials
+    // ── Reveal: two-step token flow ────────────────────────────────────────────
+    // Step 1: POST /request-credentials → get single-use 60s token
+    // Step 2: GET  /credentials?t=TOKEN  → redeem token, get b64 credentials
     async function revealCredentials() {
       if (_rawCredentials) { showCanvas(); return; }
 
@@ -200,7 +199,7 @@
       if (loading) loading.style.display = 'flex';
 
       try {
-        // -- Step 1: Request a one-time reveal token -------------------------
+        // ── Step 1: Request a one-time reveal token ─────────────────────────
         const tokenRes  = await fetch(`${API_BASE}/orders/${id}/request-credentials`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${jwt}`, 'Content-Type': 'application/json' }
@@ -217,7 +216,7 @@
         const revealToken  = tokenData.token;       // single-use, 60s
         const expiresIn    = tokenData.expires_in;  // seconds
 
-        // -- Step 2: Immediately redeem the token -----------------------------
+        // ── Step 2: Immediately redeem the token ─────────────────────────────
         const credRes  = await fetch(`${API_BASE}/orders/${id}/credentials?t=${revealToken}`, {
           headers: { 'Authorization': `Bearer ${jwt}` }
         });
@@ -230,7 +229,7 @@
           return;
         }
 
-        // Store in closure � never in DOM, never in a global
+        // Store in closure — never in DOM, never in a global
         _rawCredentials = b64Decode(credData.data);
         showCanvas();
 
@@ -250,7 +249,7 @@
       if (actions) actions.style.display = 'flex';
     }
 
-    // -- Re-blur: hide canvas, show overlay again ------------------------------
+    // ── Re-blur: hide canvas, show overlay again ──────────────────────────────
     function hideCredentials() {
       const canvas  = document.getElementById('cred-canvas');
       const overlay = document.getElementById('cred-overlay');
@@ -260,7 +259,7 @@
       if (actions) actions.style.display = 'none';
     }
 
-    // -- Copy credentials to clipboard (from closure var, not DOM) ------------
+    // ── Copy credentials to clipboard (from closure var, not DOM) ────────────
     function copyCredentials() {
       if (!_rawCredentials) { toast('Reveal credentials first.', 'warning'); return; }
       navigator.clipboard.writeText(_rawCredentials).then(() => {
@@ -268,7 +267,7 @@
       }).catch(() => toast('Copy failed. Please select manually.', 'error'));
     }
 
-    // -- Load order metadata (NO credentials in this response) -----------------
+    // ── Load order metadata (NO credentials in this response) ─────────────────
     async function loadOrder() {
       const token = localStorage.getItem('token');
       if (!token) { window.location.href = 'login.html'; return; }
@@ -300,35 +299,35 @@
           refunded:  '#6366f1', cancelled: '#b91c1c'
         };
 
-        // -- Build credential section based on order status -------------------
+        // ── Build credential section based on order status ───────────────────
         let credHtml = '';
 
         if (o.status === 'completed') {
-          // Show reveal box � credentials fetched separately on click
+          // Show reveal box — credentials fetched separately on click
           credHtml = `
           <div class="card" style="margin-bottom:1.5rem;">
-            <h3 style="font-size:1.05rem; margin-bottom:0.5rem; color:var(--primary-deep);">?? Delivered Credentials</h3>
+            <h3 style="font-size:1.05rem; margin-bottom:0.5rem; color:var(--primary-deep);">🔐 Delivered Credentials</h3>
             <p style="color:var(--text-muted); font-size:0.82rem; margin-bottom:1rem;">
-              Click to reveal your purchased access data. Keep this private � do not share.
+              Click to reveal your purchased access data. Keep this private — do not share.
             </p>
             <div class="cred-wrapper" id="cred-wrapper">
               <!-- Loading spinner (hidden by default) -->
               <div class="cred-loading" id="cred-loading">
                 <div class="spinner"></div>
-                <span>Loading credentials�</span>
+                <span>Loading credentials…</span>
               </div>
-              <!-- Canvas: credentials drawn as pixels � not readable via DOM inspection -->
+              <!-- Canvas: credentials drawn as pixels — not readable via DOM inspection -->
               <canvas id="cred-canvas"></canvas>
-              <!-- Blur overlay � default visible -->
+              <!-- Blur overlay — default visible -->
               <div class="cred-blur-overlay" id="cred-overlay" onclick="revealCredentials()">
-                <div class="reveal-icon">??</div>
+                <div class="reveal-icon">🔒</div>
                 <div class="reveal-label">Click to Reveal Credentials</div>
                 <div class="reveal-sub">Requires a fresh authenticated request</div>
               </div>
             </div>
             <div class="cred-actions" id="cred-actions">
-              <button class="copy-all-btn" onclick="copyCredentials()">?? Copy All</button>
-              <button class="hide-btn" onclick="hideCredentials()">?? Hide</button>
+              <button class="copy-all-btn" onclick="copyCredentials()">📋 Copy All</button>
+              <button class="hide-btn" onclick="hideCredentials()">🔒 Hide</button>
             </div>
           </div>`;
 
@@ -336,7 +335,7 @@
           credHtml = `
           <div class="card" style="margin-bottom:1.5rem; border-left:4px solid #ef4444;">
             <div style="display:flex;align-items:flex-start;gap:1rem;">
-              <div style="font-size:2rem;flex-shrink:0;">?</div>
+              <div style="font-size:2rem;flex-shrink:0;">↩</div>
               <div>
                 <h3 style="font-size:1rem;font-weight:700;color:#b91c1c;margin-bottom:0.4rem;">Refund Issued</h3>
                 <p style="font-size:0.875rem;color:var(--text-muted);line-height:1.6;">
@@ -351,14 +350,14 @@
         } else {
           credHtml = `
           <div class="card" style="margin-bottom:1.5rem; text-align:center; padding:2rem;">
-            <div style="font-size:2rem; margin-bottom:0.5rem;">?</div>
+            <div style="font-size:2rem; margin-bottom:0.5rem;">⏳</div>
             <p style="color:var(--text-muted);">Credentials are being prepared. Please refresh in a moment.</p>
           </div>`;
         }
 
         document.getElementById('page-content').innerHTML = `
           <div style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-bottom:1.5rem;">
-            <a href="orders.html" class="btn btn-outline" style="font-size:0.85rem;padding:0.5rem 1rem;">? Back to Orders</a>
+            <a href="orders.html" class="btn btn-outline" style="font-size:0.85rem;padding:0.5rem 1rem;">← Back to Orders</a>
             <a href="store.html"  class="btn btn-primary" style="font-size:0.85rem;padding:0.5rem 1rem;">Continue Shopping</a>
           </div>
 
