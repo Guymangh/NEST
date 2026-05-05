@@ -66,20 +66,69 @@
           </form>
         </div>
 
-        <!-- Admin Info -->
+        <!-- Change Password -->
         <div class="a-card">
-          <h2 style="font-size:1rem; font-weight:700; margin-bottom: 1rem;">🔐 Admin Credentials</h2>
-          <table class="a-table">
-            <thead>
-              <tr><th>Field</th><th>Value</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>Username</td><td><code style="background:#f1f5f9; padding:0.2rem 0.5rem; border-radius:4px;">admin</code></td></tr>
-              <tr><td>Default Password</td><td><code style="background:#f1f5f9; padding:0.2rem 0.5rem; border-radius:4px;">Admin@123456</code></td></tr>
-              <tr><td>Role</td><td><span class="a-badge a-badge-blue">admin</span></td></tr>
-            </tbody>
-          </table>
+          <h2 style="font-size:1rem; font-weight:700; margin-bottom: 1.25rem;">🔑 Change Admin Password</h2>
+          <form id="change-password-form">
+            <div class="a-form-grid">
+              <div class="a-form-group">
+                <label for="current_password">Current Password</label>
+                <input type="password" id="current_password" name="current_password" class="a-input" placeholder="Enter current password" required autocomplete="current-password" />
+              </div>
+              <div class="a-form-group">
+                <label for="new_password">New Password</label>
+                <input type="password" id="new_password" name="new_password" class="a-input" placeholder="Min 8 characters" required autocomplete="new-password" />
+              </div>
+              <div class="a-form-group">
+                <label for="confirm_password">Confirm New Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" class="a-input" placeholder="Repeat new password" required autocomplete="new-password" />
+              </div>
+            </div>
+            <button type="submit" class="a-btn a-btn-primary" id="change-pw-btn">Update Password</button>
+          </form>
         </div>
+
+        <script>
+          (function() {
+            const API_BASE = window.__API_BASE__ || window.API_BASE || 'http://localhost:5000/api';
+            const token    = localStorage.getItem('token');
+
+            document.getElementById('change-password-form').addEventListener('submit', async (e) => {
+              e.preventDefault();
+              const btn     = document.getElementById('change-pw-btn');
+              const current = document.getElementById('current_password').value;
+              const next    = document.getElementById('new_password').value;
+              const confirm = document.getElementById('confirm_password').value;
+
+              if (next !== confirm) {
+                adminToast('New passwords do not match.', 'error'); return;
+              }
+              if (next.length < 8) {
+                adminToast('New password must be at least 8 characters.', 'error'); return;
+              }
+
+              btn.textContent = 'Updating...'; btn.disabled = true;
+              try {
+                const res  = await fetch(API_BASE + '/auth/change-password', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                  body: JSON.stringify({ current_password: current, new_password: next })
+                });
+                const data = await res.json();
+                if (data.success) {
+                  adminToast('Password updated successfully!', 'success');
+                  e.target.reset();
+                } else {
+                  adminToast(data.message || 'Failed to update password.', 'error');
+                }
+              } catch (err) {
+                adminToast('Connection error. Try again.', 'error');
+              } finally {
+                btn.textContent = 'Update Password'; btn.disabled = false;
+              }
+            });
+          })();
+        </script>
       </div>
     </main>
   </div>

@@ -177,10 +177,13 @@ router.put('/profile', authMiddleware, async (req, res) => {
   }
 });
 
-// ─── Change Password ──────────────────────────────────────────────────────────
-router.put('/change-password', authMiddleware, async (req, res) => {
+// ─── Change Password (PUT = user profile, POST = admin settings form) ─────────
+async function handleChangePassword(req, res) {
   try {
-    const { currentPassword, newPassword } = req.body;
+    // Accept both camelCase (old) and snake_case (new form)
+    const currentPassword = req.body.current_password || req.body.currentPassword;
+    const newPassword     = req.body.new_password     || req.body.newPassword;
+
     if (!currentPassword || !newPassword) {
       return res.status(400).json({ success: false, message: 'Both passwords are required.' });
     }
@@ -188,7 +191,7 @@ router.put('/change-password', authMiddleware, async (req, res) => {
       return res.status(400).json({ success: false, message: 'New password must be at least 8 characters.' });
     }
 
-    const result = await pool.query('SELECT password FROM users WHERE id = $1', [req.user.id]);
+    const result  = await pool.query('SELECT password FROM users WHERE id = $1', [req.user.id]);
     const isValid = await bcrypt.compare(currentPassword, result.rows[0].password);
     if (!isValid) {
       return res.status(401).json({ success: false, message: 'Current password is incorrect.' });
@@ -202,6 +205,9 @@ router.put('/change-password', authMiddleware, async (req, res) => {
     console.error('Change password error:', error);
     return res.status(500).json({ success: false, message: 'Server error.' });
   }
-});
+}
+
+router.put('/change-password',  authMiddleware, handleChangePassword);
+router.post('/change-password', authMiddleware, handleChangePassword);
 
 module.exports = router;
