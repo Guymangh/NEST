@@ -17,15 +17,24 @@ window.API_BASE = window.__API_BASE__ || 'http://localhost:5000/api';
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
     if (payload.exp && Date.now() / 1000 > payload.exp) {
-      // Token expired — clear everything
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       localStorage.removeItem('lognest_cart');
     }
   } catch {
-    // Malformed token — clear it
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+  }
+})();
+
+// ── Homepage = public landing page: always log out when landing here ───────────
+(function logoutOnHomepage() {
+  const p = window.location.pathname;
+  const isHome = p === '/' || p.endsWith('/index.html') || p.endsWith('/index');
+  if (isHome) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('lognest_cart');
   }
 })();
 
