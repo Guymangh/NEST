@@ -43,7 +43,11 @@ function nowpaymentsRequest(method, endpoint, body) {
 const router = express.Router();
 
 // ─── Multer Setup (Proof of Payment Uploads) ──────────────────────────────────
-const uploadDir = path.join(__dirname, '..', 'uploads', 'proofs');
+// Vercel serverless only allows writes to /tmp
+const uploadDir = process.env.VERCEL === '1'
+  ? '/tmp/uploads/proofs'
+  : path.join(__dirname, '..', 'uploads', 'proofs');
+
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
 const storage = multer.diskStorage({
