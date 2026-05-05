@@ -203,7 +203,7 @@ router.get('/wallets', async (req, res) => {
 // ─── Admin: Get All Deposits ──────────────────────────────────────────────────
 router.get('/admin/all', authMiddleware, adminOnly, async (req, res) => {
   try {
-    const { status, page = 1, limit = 20 } = req.query;
+    const { status, method, page = 1, limit = 20 } = req.query;
     const offset = (page - 1) * limit;
 
     let query = `
@@ -219,6 +219,11 @@ router.get('/admin/all', authMiddleware, adminOnly, async (req, res) => {
       paramCount++;
       query += ` AND d.status = $${paramCount}`;
       params.push(status);
+    }
+    if (method) {
+      paramCount++;
+      query += ` AND d.method = $${paramCount}`;
+      params.push(method);
     }
 
     const countResult = await pool.query(
@@ -514,6 +519,75 @@ function oxapayRequest(endpoint, merchantKey, body) {
     req.end();
   });
 }
+// ─── OxaPay: White-Label (Inline Address — no redirect) ──────────────────────
+router.post('/oxapay/whitelabel', authMiddleware, async (req, res) => {
+  try {
+    const { amount, pay_currency, network } = req.body;
+
+    if (!amount || isNaN(amount) || parseFloat(amount) < 5) {
+      return res.status(400).json({ success: false, message: 'Minimum deposit is $5.00.' });
+    }
+    if (!pay_currency) {
+      return res.status(400).json({ success: false, message: 'Please select a cryptocurrency.' });
+    }
+
+    const merchantKey = process.env.OXAPAY_MERCHANT_KEY;
+    if (!merchantKey || merchantKey === 'YOUR_OXAPAY_API_KEY_HERE') {
+      return res.status(503).json({ success: false, message: 'Payment gateway not configured. Contact admin.' });
+    }
+
+    // Pre-create pending deposit record
+    const depositRecord = await pool.query(
+      `INSERT INTO deposits (user_id, amount, method, notes, status)
+       VALUES ($1, $2, 'oxapay', $3, 'pending') RETURNING id`,
+      [req.user.id, parseFloat(amount), `Crypto deposit - ${pay_currency}${network ? ' '+network : ''} - $${parseFloat(amount).toFixed(2)} USD`]
+    );
+    const depositId = depositRecord.rows[0].id;
+
+    // Build white-label payload
+    const payload = {
+      amount:       parseFloat(amount),
+      currency:     'USD',
+      pay_currency,
+      lifetime:     30,
+      order_id:     `deposit_${depositId}`,
+      description:  `LogNest Top-Up $${parseFloat(amount).toFixed(2)}`,
+      callback_url: process.env.OXAPAY_CALLBACK_URL,
+      return_url:   process.env.OXAPAY_RETURN_URL,
+    };
+    if (network) payload.network = network;
+
+    const result = await oxapayRequest('/v1/payment/white-label', merchantKey, payload);
+
+    if (!result || result.status !== 200) {
+      await pool.query('DELETE FROM deposits WHERE id = $1', [depositId]);
+      console.error('OxaPay white-label error:', result);
+      return res.status(502).json({ success: false, message: result?.message || 'Could not generate address.' });
+    }
+
+    const d = result.data;
+    // Store track_id for webhook matching
+    await pool.query(
+      'UPDATE deposits SET transaction_hash = $1 WHERE id = $2',
+      [String(d.track_id), depositId]
+    );
+
+    return res.status(201).json({
+      success:     true,
+      deposit_id:  depositId,
+      address:     d.address,
+      pay_amount:  d.pay_amount,
+      pay_currency:d.pay_currency,
+      network:     d.network,
+      qr_code:     d.qr_code,
+      expired_at:  d.expired_at,
+      track_id:    String(d.track_id),
+    });
+  } catch (error) {
+    console.error('OxaPay white-label error:', error);
+    return res.status(500).json({ success: false, message: 'Server error generating address.' });
+  }
+});
 
 // ─── OxaPay: Create Invoice ───────────────────────────────────────────────────
 router.post('/oxapay/create', authMiddleware, async (req, res) => {

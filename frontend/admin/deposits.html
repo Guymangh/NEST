@@ -9,12 +9,50 @@
   <link rel="stylesheet" href="../css/admin.css" />
   <script src="../js/config.js"></script>
   <script defer src="../js/admin.js"></script>
+  <style>
+    .dep-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.5rem; }
+    @media(max-width:900px){ .dep-stats{grid-template-columns:repeat(2,1fr);} }
+    .filter-tabs { display:flex; gap:0.4rem; flex-wrap:wrap; margin-bottom:1.25rem; }
+    .ftab {
+      padding:0.45rem 1rem; border-radius:20px; border:1px solid var(--a-border);
+      font-size:0.8rem; font-weight:600; cursor:pointer;
+      background:var(--a-surface); color:var(--a-muted); transition:all .18s;
+    }
+    .ftab.on { background:var(--a-primary); color:#fff; border-color:var(--a-primary); }
+    .method-badge {
+      display:inline-flex; align-items:center; gap:0.3rem;
+      padding:0.2rem 0.6rem; border-radius:6px; font-size:0.72rem; font-weight:700;
+    }
+    .method-badge.oxapay  { background:rgba(88,214,141,0.12); color:#16a34a; }
+    .method-badge.manual  { background:rgba(250,204,21,0.15); color:#92400e; }
+    .method-badge.bitcoin { background:rgba(247,147,26,0.15); color:#b45309; }
+    .method-badge.usdt    { background:rgba(38,161,123,0.12); color:#065f46; }
+
+    /* Modal overlay */
+    .dep-modal-overlay {
+      display:none; position:fixed; inset:0;
+      background:rgba(10,26,26,0.7); backdrop-filter:blur(4px);
+      z-index:10000; align-items:center; justify-content:center;
+    }
+    .dep-modal-overlay.open { display:flex; }
+    .dep-modal {
+      background:#0d1117; border:1px solid #2a4a3a; border-radius:16px;
+      padding:2rem; width:100%; max-width:540px; max-height:90vh; overflow-y:auto;
+      box-shadow:0 24px 60px rgba(0,0,0,0.5);
+    }
+    .dep-modal h3 { font-size:1.1rem; font-weight:700; margin-bottom:1.25rem; color:#fff; }
+    .dep-field { margin-bottom:0.9rem; }
+    .dep-field label { font-size:0.72rem; text-transform:uppercase; letter-spacing:.08em; color:#6b7280; font-weight:700; display:block; margin-bottom:0.3rem; }
+    .dep-field .val { font-size:0.9rem; color:#e5e7eb; font-weight:500; word-break:break-all; }
+    .dep-modal-actions { display:flex; gap:0.75rem; margin-top:1.5rem; flex-wrap:wrap; }
+    .modal-proof-img { width:100%; border-radius:10px; border:1px solid #2a4a3a; margin-top:0.5rem; cursor:pointer; }
+  </style>
 </head>
 <body>
   <div class="a-shell">
     <aside class="a-sidebar">
       <div class="a-brand">
-        <img src="../images/logo.png" alt="LogNest" style="height:38px; width:auto; object-fit:contain;" /><span class="a-brand-tag" style="margin-left:0.4rem;">Admin</span>
+        <img src="../images/logo.png" alt="LogNest" style="height:38px;width:auto;object-fit:contain;" /><span class="a-brand-tag" style="margin-left:0.4rem;">Admin</span>
       </div>
       <nav class="a-nav">
         <span class="a-nav-label">Main</span>
@@ -24,7 +62,6 @@
         <a href="existing-products.html" class="a-nav-item"><span class="a-nav-icon">📂</span> All Products</a>
         <span class="a-nav-label">Management</span>
         <a href="orders.html" class="a-nav-item"><span class="a-nav-icon">🛒</span> Orders</a>
-        
         <a href="refunded-logs.html" class="a-nav-item"><span class="a-nav-icon">↩️</span> Refunded Logs</a>
         <a href="users.html" class="a-nav-item"><span class="a-nav-icon">👥</span> Users</a>
         <a href="deposits.html" class="a-nav-item active"><span class="a-nav-icon">💰</span> Deposits</a>
@@ -40,7 +77,7 @@
       <header class="a-topbar">
         <div class="a-topbar-left">
           <h1 class="a-page-title">Deposits</h1>
-          <p class="a-page-sub">Review and approve or reject user deposit requests.</p>
+          <p class="a-page-sub">Review, approve, or reject user deposit requests.</p>
         </div>
         <div class="a-topbar-right">
           <div class="a-avatar">A</div>
@@ -48,14 +85,46 @@
       </header>
 
       <div class="a-content">
+
+        <!-- Stats -->
+        <div class="dep-stats">
+          <div class="a-card" style="padding:1rem 1.25rem;">
+            <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--a-muted);margin-bottom:0.35rem;">Pending</div>
+            <div id="stat-pending" style="font-size:1.6rem;font-weight:800;color:#f59e0b;">—</div>
+          </div>
+          <div class="a-card" style="padding:1rem 1.25rem;">
+            <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--a-muted);margin-bottom:0.35rem;">Approved Today</div>
+            <div id="stat-today" style="font-size:1.6rem;font-weight:800;color:#10b981;">—</div>
+          </div>
+          <div class="a-card" style="padding:1rem 1.25rem;">
+            <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--a-muted);margin-bottom:0.35rem;">Total Volume</div>
+            <div id="stat-volume" style="font-size:1.6rem;font-weight:800;color:var(--a-primary);">—</div>
+          </div>
+          <div class="a-card" style="padding:1rem 1.25rem;">
+            <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--a-muted);margin-bottom:0.35rem;">Auto-credited</div>
+            <div id="stat-auto" style="font-size:1.6rem;font-weight:800;color:#6366f1;">—</div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-tabs">
+          <button class="ftab on" onclick="setFilter('')">All</button>
+          <button class="ftab" onclick="setFilter('pending')">⏳ Pending</button>
+          <button class="ftab" onclick="setFilter('approved')">✅ Approved</button>
+          <button class="ftab" onclick="setFilter('rejected')">❌ Rejected</button>
+          <button class="ftab" onclick="setFilter('oxapay')">⚡ Auto-Crypto</button>
+        </div>
+
+        <!-- Table -->
         <div class="a-panel">
           <div class="a-panel-header">
-            <h2 class="a-panel-title">All Deposits</h2>
+            <h2 class="a-panel-title" id="table-title">All Deposits</h2>
+            <button class="a-btn a-btn-outline a-btn-sm" onclick="loadDeposits(currentPage)">↻ Refresh</button>
           </div>
           <table class="a-table" id="admin-deposits-table">
             <thead>
               <tr>
-                <th>Deposit ID</th>
+                <th>ID</th>
                 <th>User</th>
                 <th>Amount</th>
                 <th>Method</th>
@@ -65,7 +134,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr><td colspan="7" class="a-empty">Loading deposits...</td></tr>
+              <tr><td colspan="7" class="a-empty">Loading deposits…</td></tr>
             </tbody>
           </table>
           <div class="a-pagination" id="deposits-pagination"></div>
@@ -73,6 +142,182 @@
       </div>
     </main>
   </div>
+
+  <!-- ── Deposit Detail Modal ── -->
+  <div class="dep-modal-overlay" id="dep-modal-overlay" onclick="closeModal(event)">
+    <div class="dep-modal">
+      <h3>💰 Deposit Details</h3>
+      <div id="dep-modal-body"></div>
+      <div class="dep-modal-actions" id="dep-modal-actions"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = window.__API_BASE__ || window.API_BASE || 'http://localhost:5000/api';
+    const token    = localStorage.getItem('token');
+    const user     = JSON.parse(localStorage.getItem('user') || 'null');
+    if (!token || !user || user.role !== 'admin') window.location.href = '../login.html';
+
+    let currentPage = 1, currentFilter = '', allDeposits = [];
+    const PAGE = 20;
+
+    /* ── Filter tabs ── */
+    function setFilter(f) {
+      currentFilter = f;
+      currentPage   = 1;
+      document.querySelectorAll('.ftab').forEach(t => t.classList.remove('on'));
+      event.target.classList.add('on');
+      const labels = { '':'All Deposits', pending:'Pending Deposits', approved:'Approved Deposits', rejected:'Rejected Deposits', oxapay:'Auto-Crypto Deposits' };
+      document.getElementById('table-title').textContent = labels[f] || 'All Deposits';
+      loadDeposits(1);
+    }
+
+    /* ── Load deposits ── */
+    async function loadDeposits(page = 1) {
+      currentPage = page;
+      const tbody = document.querySelector('#admin-deposits-table tbody');
+      tbody.innerHTML = '<tr><td colspan="7" class="a-empty">Loading…</td></tr>';
+
+      try {
+        // Build query: for oxapay filter, use method param
+        let url = `${API_BASE}/deposits/admin/all?page=${page}&limit=${PAGE}`;
+        if (currentFilter === 'oxapay') url += '&method=oxapay';
+        else if (currentFilter) url += `&status=${currentFilter}`;
+
+        const res  = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+        const data = await res.json();
+        if (!data.success) { tbody.innerHTML = '<tr><td colspan="7" class="a-empty">Failed to load.</td></tr>'; return; }
+
+        allDeposits = data.deposits || [];
+        renderStats(allDeposits);
+        renderTable(allDeposits);
+        renderPagination(data.total, page);
+      } catch (err) {
+        console.error(err);
+        tbody.innerHTML = '<tr><td colspan="7" class="a-empty">Server error.</td></tr>';
+      }
+    }
+
+    function renderStats(deps) {
+      const pending = deps.filter(d => d.status === 'pending').length;
+      const today   = new Date().toDateString();
+      const todayAmt = deps.filter(d => d.status === 'approved' && new Date(d.reviewed_at||d.created_at).toDateString() === today)
+                           .reduce((a,d) => a + parseFloat(d.amount), 0);
+      const volume  = deps.filter(d => d.status === 'approved').reduce((a,d) => a + parseFloat(d.amount), 0);
+      const auto    = deps.filter(d => d.method === 'oxapay' && d.status === 'approved').length;
+      document.getElementById('stat-pending').textContent  = pending;
+      document.getElementById('stat-today').textContent    = '$' + todayAmt.toFixed(2);
+      document.getElementById('stat-volume').textContent   = '$' + volume.toFixed(2);
+      document.getElementById('stat-auto').textContent     = auto;
+    }
+
+    function methodBadge(m) {
+      const map = {
+        oxapay:  ['⚡','oxapay','Auto-Crypto'],
+        manual:  ['📋','manual','Manual'],
+        bitcoin: ['₿','bitcoin','Bitcoin'],
+        usdt:    ['₮','usdt','USDT'],
+      };
+      const [icon, cls, label] = map[m] || ['?','manual', m];
+      return `<span class="method-badge ${cls}">${icon} ${label}</span>`;
+    }
+
+    function statusBadge(s) {
+      const map = { pending:'a-badge-yellow', approved:'a-badge-green', rejected:'a-badge-red' };
+      return `<span class="a-badge ${map[s]||''}">${s}</span>`;
+    }
+
+    function renderTable(deps) {
+      const tbody = document.querySelector('#admin-deposits-table tbody');
+      if (!deps.length) { tbody.innerHTML = '<tr><td colspan="7" class="a-empty">No deposits found.</td></tr>'; return; }
+      tbody.innerHTML = deps.map(d => {
+        const date = new Date(d.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+        return `<tr>
+          <td><code style="font-size:.72rem;background:var(--a-accent);padding:.1rem .4rem;border-radius:4px;color:var(--a-primary);">#${String(d.id).substring(0,8).toUpperCase()}</code></td>
+          <td><strong>${d.username||'—'}</strong><br><span style="font-size:.75rem;color:#6b7280;">${d.email||''}</span></td>
+          <td><strong style="color:var(--a-primary);">$${parseFloat(d.amount).toFixed(2)}</strong></td>
+          <td>${methodBadge(d.method)}</td>
+          <td>${statusBadge(d.status)}</td>
+          <td style="font-size:.8rem;color:#6b7280;white-space:nowrap;">${date}</td>
+          <td>
+            <button class="a-btn a-btn-outline a-btn-sm" onclick="openModal('${d.id}')">View</button>
+            ${d.status === 'pending' ? `
+              <button class="a-btn a-btn-primary a-btn-sm" style="margin-left:.3rem;" onclick="approveDeposit('${d.id}')">✓ Approve</button>
+              <button class="a-btn a-btn-outline a-btn-sm" style="margin-left:.3rem;border-color:#ef4444;color:#ef4444;" onclick="rejectDeposit('${d.id}')">✕</button>
+            ` : ''}
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    function renderPagination(total, page) {
+      const pages = Math.ceil(total / PAGE);
+      const pg = document.getElementById('deposits-pagination');
+      pg.innerHTML = pages > 1 ? `
+        <button class="a-btn a-btn-outline a-btn-sm" onclick="loadDeposits(${page-1})" ${page<=1?'disabled':''}>← Prev</button>
+        <span style="font-size:.82rem;color:#6b7280;padding:0 .5rem;">Page ${page} / ${pages}</span>
+        <button class="a-btn a-btn-outline a-btn-sm" onclick="loadDeposits(${page+1})" ${page>=pages?'disabled':''}>Next →</button>
+      ` : '';
+    }
+
+    /* ── Modal ── */
+    function openModal(id) {
+      const d = allDeposits.find(x => x.id === id);
+      if (!d) return;
+      const date = new Date(d.created_at).toLocaleString('en-US');
+      const body = document.getElementById('dep-modal-body');
+      body.innerHTML = `
+        <div class="dep-field"><label>Deposit ID</label><div class="val">${d.id}</div></div>
+        <div class="dep-field"><label>User</label><div class="val">${d.username} · ${d.email}</div></div>
+        <div class="dep-field"><label>Amount (USD)</label><div class="val" style="font-size:1.25rem;font-weight:800;color:#58d68d;">$${parseFloat(d.amount).toFixed(2)}</div></div>
+        <div class="dep-field"><label>Method</label><div class="val">${methodBadge(d.method)}</div></div>
+        <div class="dep-field"><label>Status</label><div class="val">${statusBadge(d.status)}</div></div>
+        <div class="dep-field"><label>Submitted</label><div class="val">${date}</div></div>
+        ${d.transaction_hash ? `<div class="dep-field"><label>Track / Tx ID</label><div class="val" style="font-size:.8rem;">${d.transaction_hash}</div></div>` : ''}
+        ${d.notes ? `<div class="dep-field"><label>Notes</label><div class="val">${d.notes}</div></div>` : ''}
+        ${d.proof_url ? `<div class="dep-field"><label>Proof of Payment</label><a href="${d.proof_url}" target="_blank"><img src="${d.proof_url}" class="modal-proof-img" /></a></div>` : ''}
+      `;
+      const actions = document.getElementById('dep-modal-actions');
+      actions.innerHTML = d.status === 'pending' ? `
+        <button class="a-btn a-btn-primary" onclick="approveDeposit('${d.id}');closeModal()">✓ Approve & Credit</button>
+        <button class="a-btn a-btn-outline" style="border-color:#ef4444;color:#ef4444;" onclick="rejectDeposit('${d.id}');closeModal()">✕ Reject</button>
+        <button class="a-btn a-btn-outline" onclick="closeModal()">Cancel</button>
+      ` : `<button class="a-btn a-btn-outline" onclick="closeModal()">Close</button>`;
+      document.getElementById('dep-modal-overlay').classList.add('open');
+    }
+
+    function closeModal(e) {
+      if (!e || e.target === document.getElementById('dep-modal-overlay')) {
+        document.getElementById('dep-modal-overlay').classList.remove('open');
+      }
+    }
+
+    /* ── Approve / Reject ── */
+    async function approveDeposit(id) {
+      if (!confirm('Approve this deposit and credit the user?')) return;
+      try {
+        const res  = await fetch(`${API_BASE}/deposits/admin/approve/${id}`, { method:'POST', headers:{Authorization:`Bearer ${token}`} });
+        const data = await res.json();
+        if (data.success) { adminToast(data.message, 'success'); loadDeposits(currentPage); }
+        else adminToast(data.message||'Failed.', 'error');
+      } catch { adminToast('Connection error.','error'); }
+    }
+
+    async function rejectDeposit(id) {
+      const reason = prompt('Reason for rejection (optional):') || 'Rejected by admin';
+      try {
+        const res  = await fetch(`${API_BASE}/deposits/admin/reject/${id}`, {
+          method:'POST',
+          headers:{'Content-Type':'application/json', Authorization:`Bearer ${token}`},
+          body: JSON.stringify({ reason }),
+        });
+        const data = await res.json();
+        if (data.success) { adminToast('Deposit rejected.', 'success'); loadDeposits(currentPage); }
+        else adminToast(data.message||'Failed.', 'error');
+      } catch { adminToast('Connection error.','error'); }
+    }
+
+    loadDeposits();
+  </script>
 </body>
 </html>
-

@@ -4,230 +4,228 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/png" href="/images/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Top Up Balance – LogNest</title>
-  <meta name="description" content="Add funds to your LogNest account using cryptocurrency via NowPayments." />
+  <title>Add Funds – LogNest</title>
+  <meta name="description" content="Add funds to your LogNest account using cryptocurrency. Instant, automatic balance credit." />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <script src="js/toast.js"></script>
   <script src="js/config.js"></script>
   <script src="js/nav.js"></script>
   <style>
-    /* ── Tab Switcher ── */
-    .deposit-tabs {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 2rem;
+    /* ── Deposit Page Layout ── */
+    .dep-wrap {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 2rem;
+      align-items: start;
+      max-width: 980px;
+    }
+    @media (max-width: 860px) { .dep-wrap { grid-template-columns: 1fr; } }
+
+    /* ── Main Card ── */
+    .dep-card {
       background: var(--bg-card);
       border: 1px solid var(--border-soft);
-      border-radius: 12px;
-      padding: 0.4rem;
-      width: fit-content;
-    }
-    .dep-tab {
-      padding: 0.6rem 1.4rem;
-      border: none;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      background: transparent;
-      color: var(--text-muted);
-      transition: all 0.2s;
-    }
-    .dep-tab.active {
-      background: var(--primary-deep);
-      color: #fff;
-      box-shadow: 0 2px 8px rgba(13,79,79,0.18);
+      border-radius: 20px;
+      padding: 2.25rem;
+      box-shadow: var(--shadow-soft);
     }
 
-    /* ── NowPayments Panel ── */
-    .np-panel {
-      background: var(--bg-card);
-      border: 1px solid var(--border-soft);
-      border-radius: 16px;
-      padding: 2.5rem;
-      box-shadow: var(--shadow-soft);
-      max-width: 540px;
-    }
-    .np-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: linear-gradient(135deg,#e8f9f2,#f0fffe);
-      border: 1px solid #26a17b44;
-      border-radius: 8px;
-      padding: 0.35rem 0.9rem;
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: #26a17b;
-      margin-bottom: 1.25rem;
-    }
-    .np-title {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--text-main);
-      margin-bottom: 0.4rem;
-    }
-    .np-sub {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      margin-bottom: 2rem;
-      line-height: 1.5;
-    }
-    .amount-row {
+    /* ── Amount Row ── */
+    .amount-chips {
       display: flex;
-      gap: 0.75rem;
+      gap: 0.6rem;
       flex-wrap: wrap;
       margin-bottom: 1rem;
     }
-    .amount-chip {
-      padding: 0.5rem 1.1rem;
+    .chip {
+      padding: 0.55rem 1.2rem;
       border: 2px solid var(--border-soft);
-      border-radius: 8px;
-      font-size: 0.88rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
       font-weight: 700;
       cursor: pointer;
       background: var(--bg-card);
       color: var(--text-main);
       transition: all 0.18s;
     }
-    .amount-chip:hover, .amount-chip.selected {
+    .chip:hover, .chip.on {
       border-color: var(--primary-deep);
       background: var(--bg-accent);
       color: var(--primary-deep);
     }
-    .np-input-wrap {
+    .amt-input-wrap {
       position: relative;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.75rem;
     }
-    .np-input-wrap .currency-label {
-      position: absolute;
-      left: 1rem;
-      top: 50%;
+    .amt-input-wrap .sym {
+      position: absolute; left: 1rem; top: 50%;
       transform: translateY(-50%);
-      font-weight: 700;
-      color: var(--text-muted);
-      font-size: 1rem;
+      font-weight: 700; color: var(--text-muted); font-size: 1.05rem;
       pointer-events: none;
     }
-    .np-input-wrap input {
-      width: 100%;
-      padding: 0.85rem 1rem 0.85rem 2.8rem;
-      border: 2px solid var(--border-soft);
-      border-radius: 10px;
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--text-main);
-      background: var(--bg-main);
-      transition: border-color 0.2s;
-      box-sizing: border-box;
-    }
-    .np-input-wrap input:focus {
-      outline: none;
-      border-color: var(--primary-deep);
-    }
-    .np-pay-btn {
-      width: 100%;
-      padding: 0.95rem;
-      background: linear-gradient(135deg, var(--primary-deep), #0a6e6e);
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: opacity 0.2s, transform 0.15s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-    .np-pay-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-    .np-pay-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-    .np-coins {
-      margin-top: 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-    .np-coins span { font-size: 1rem; }
-
-    /* Status card shown after invoice creation */
-    .np-status-card {
-      display: none;
-      background: var(--bg-accent);
-      border: 1px solid var(--border-soft);
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-top: 1.5rem;
-      text-align: center;
-    }
-    .np-status-card.visible { display: block; }
-    .np-status-card .status-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
-    .np-status-card h3 { font-size: 1.05rem; color: var(--text-main); margin-bottom: 0.4rem; }
-    .np-status-card p { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem; }
-    .np-open-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: var(--primary-deep);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 0.65rem 1.4rem;
-      font-size: 0.9rem;
-      font-weight: 700;
-      cursor: pointer;
-      text-decoration: none;
-      transition: opacity 0.2s;
-    }
-    .np-open-btn:hover { opacity: 0.85; }
-
-    /* ── Manual Crypto Panel (legacy) ── */
-    .deposit-layout {
-      display: grid;
-      grid-template-columns: 260px 1fr;
-      gap: 2rem;
-      align-items: start;
-    }
-    .network-list { display: flex; flex-direction: column; gap: 0.75rem; }
-    .network-btn {
-      display: flex; align-items: center; gap: 1rem;
-      padding: 1rem 1.25rem;
+    .amt-input-wrap input {
+      width: 100%; padding: 0.85rem 1rem 0.85rem 2.5rem;
       border: 2px solid var(--border-soft); border-radius: 12px;
-      background: var(--bg-card); cursor: pointer;
-      transition: all 0.2s; text-align: left; width: 100%;
+      font-size: 1.15rem; font-weight: 700;
+      color: var(--text-main); background: var(--bg-main);
+      transition: border-color 0.2s; box-sizing: border-box;
     }
-    .network-btn:hover { border-color: var(--primary); background: var(--bg-accent); }
-    .network-btn.active { border-color: var(--primary-deep); background: var(--bg-accent); box-shadow: 0 0 0 3px rgba(13,79,79,0.08); }
-    .network-icon { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 800; flex-shrink: 0; }
-    .network-icon.usdt { background:#e8f9f2; color:#26a17b; }
-    .network-icon.btc  { background:#fff5e6; color:#f7931a; }
-    .network-label { display:flex; flex-direction:column; gap:0.1rem; }
-    .network-label strong { font-size:0.95rem; color:var(--text-main); font-weight:700; }
-    .network-label span   { font-size:0.8rem; color:var(--text-muted); }
-    .address-panel { background:var(--bg-card); border:1px solid var(--border-soft); border-radius:16px; padding:2.5rem; box-shadow:var(--shadow-soft); }
-    .address-placeholder { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:220px; color:var(--text-muted); text-align:center; gap:1rem; }
-    .address-placeholder .icon { font-size:3rem; opacity:0.4; }
-    .address-box { display:none; flex-direction:column; gap:1.5rem; }
-    .address-box.visible { display:flex; }
-    .address-tag { display:inline-flex; align-items:center; gap:0.5rem; background:var(--bg-accent); border:1px solid var(--border-soft); border-radius:8px; padding:0.4rem 0.9rem; font-size:0.8rem; font-weight:700; color:var(--primary-deep); width:fit-content; }
-    .wallet-address-wrap { background:#fff; border:1px solid var(--border-soft); border-radius:10px; padding:1rem 1.25rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; }
-    .wallet-address-wrap code { font-family:monospace; font-size:0.9rem; color:var(--text-main); word-break:break-all; line-height:1.5; }
-    .copy-btn { flex-shrink:0; background:var(--primary-deep); color:#fff; border:none; border-radius:8px; padding:0.5rem 1rem; font-size:0.82rem; font-weight:600; cursor:pointer; transition:background 0.2s; }
-    .copy-btn:hover { background:var(--primary); }
-    .copy-btn.copied { background:#16a34a; }
-    .notice-box { background:rgba(212,168,83,0.08); border:1px solid rgba(212,168,83,0.3); border-radius:10px; padding:1rem 1.25rem; font-size:0.875rem; color:var(--text-muted); line-height:1.6; }
-    .notice-box strong { color:var(--accent-terra); }
+    .amt-input-wrap input:focus { outline: none; border-color: var(--primary-deep); }
 
-    @media (max-width: 768px) {
-      .deposit-layout { grid-template-columns:1fr; }
-      .network-list { flex-direction:row; flex-wrap:wrap; }
-      .network-btn { flex:1; min-width:140px; }
+    /* ── Coin Picker ── */
+    .coin-label {
+      font-size: 0.78rem; text-transform: uppercase; letter-spacing: .08em;
+      font-weight: 700; color: var(--text-muted); margin-bottom: 0.75rem;
     }
+    .coin-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.6rem;
+      margin-bottom: 1.75rem;
+    }
+    @media (max-width: 500px) { .coin-grid { grid-template-columns: repeat(2, 1fr); } }
+    .coin-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+      padding: 0.85rem 0.5rem;
+      border: 2px solid var(--border-soft); border-radius: 12px;
+      background: var(--bg-card); cursor: pointer; transition: all 0.18s;
+    }
+    .coin-btn:hover, .coin-btn.on {
+      border-color: var(--primary-deep);
+      background: var(--bg-accent);
+    }
+    .coin-btn .ci { font-size: 1.5rem; }
+    .coin-btn .cn { font-size: 0.78rem; font-weight: 700; color: var(--text-main); }
+    .coin-btn .net { font-size: 0.68rem; color: var(--text-muted); }
+
+    /* ── Generate Button ── */
+    .gen-btn {
+      width: 100%; padding: 1rem;
+      background: linear-gradient(135deg, var(--primary-deep), #0a6e6e);
+      color: #fff; border: none; border-radius: 12px;
+      font-size: 1rem; font-weight: 700; cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    }
+    .gen-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .gen-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ── Address Result Panel ── */
+    .addr-panel {
+      display: none;
+      margin-top: 1.75rem;
+      padding-top: 1.75rem;
+      border-top: 1px solid var(--border-soft);
+      animation: fadeIn .35s ease;
+    }
+    .addr-panel.show { display: block; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+    .addr-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .addr-coin-tag {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--bg-accent); border: 1px solid var(--border-soft);
+      border-radius: 8px; padding: 0.4rem 0.9rem;
+      font-size: 0.8rem; font-weight: 700; color: var(--primary-deep);
+    }
+    .timer {
+      font-size: 0.82rem; font-weight: 700; color: #ef4444;
+      background: rgba(239,68,68,0.08); border-radius: 6px;
+      padding: 0.3rem 0.7rem;
+    }
+    .qr-addr-grid {
+      display: flex; gap: 1.5rem; align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+    .qr-img { width: 120px; height: 120px; border-radius: 10px; border: 1px solid var(--border-soft); flex-shrink: 0; }
+    .addr-details { flex: 1; min-width: 0; }
+    .addr-sub { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-bottom: 0.4rem; }
+    .addr-box {
+      background: var(--bg-main); border: 1px solid var(--border-soft);
+      border-radius: 10px; padding: 0.85rem 1rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .addr-box code {
+      font-family: 'Courier New', monospace; font-size: 0.82rem;
+      color: var(--text-main); word-break: break-all; line-height: 1.5; flex: 1;
+    }
+    .copy-btn {
+      flex-shrink: 0; background: var(--primary-deep); color: #fff;
+      border: none; border-radius: 8px; padding: 0.45rem 0.9rem;
+      font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: background 0.2s; white-space: nowrap;
+    }
+    .copy-btn:hover { background: var(--primary); }
+    .copy-btn.done { background: #16a34a; }
+
+    .pay-amount-row {
+      background: var(--bg-accent); border: 1px solid var(--border-soft);
+      border-radius: 10px; padding: 0.85rem 1rem;
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 0.75rem;
+    }
+    .pay-amount-row .label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
+    .pay-amount-row .val { font-size: 1.05rem; font-weight: 800; color: var(--primary-deep); }
+
+    .warn-box {
+      background: rgba(212,168,83,0.08); border: 1px solid rgba(212,168,83,0.28);
+      border-radius: 10px; padding: 0.9rem 1.1rem;
+      font-size: 0.84rem; color: var(--text-muted); line-height: 1.6;
+      margin-top: 1rem;
+    }
+    .warn-box strong { color: #b45309; }
+
+    /* ── Right Sidebar ── */
+    .dep-sidebar { display: flex; flex-direction: column; gap: 1.25rem; }
+    .info-card {
+      background: var(--bg-card); border: 1px solid var(--border-soft);
+      border-radius: 16px; padding: 1.5rem;
+    }
+    .info-card h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 1rem; }
+    .info-step {
+      display: flex; gap: 0.9rem; margin-bottom: 1rem;
+    }
+    .step-num {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--primary-deep); color: #fff;
+      font-size: 0.75rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .step-text { font-size: 0.84rem; color: var(--text-muted); line-height: 1.5; }
+    .step-text strong { color: var(--text-main); }
+    .coin-supported-list {
+      display: flex; flex-wrap: wrap; gap: 0.4rem;
+    }
+    .csup {
+      background: var(--bg-accent); border: 1px solid var(--border-soft);
+      border-radius: 6px; padding: 0.3rem 0.65rem;
+      font-size: 0.75rem; font-weight: 600; color: var(--text-muted);
+    }
+
+    /* ── My Deposits ── */
+    .my-dep-section { max-width: 980px; margin-top: 2.5rem; }
+    .dep-hist-table { width: 100%; border-collapse: collapse; }
+    .dep-hist-table th {
+      text-align: left; padding: 0.7rem 1rem;
+      font-size: 0.75rem; text-transform: uppercase; letter-spacing: .07em;
+      color: var(--text-muted); font-weight: 700;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .dep-hist-table td {
+      padding: 0.85rem 1rem; font-size: 0.875rem;
+      border-bottom: 1px solid var(--border-soft); vertical-align: middle;
+    }
+    .dep-hist-table tr:last-child td { border-bottom: none; }
+    .dep-badge {
+      display: inline-block; padding: 0.25rem 0.65rem; border-radius: 20px;
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    }
+    .dep-badge.pending  { background:#fef3c7; color:#b45309; }
+    .dep-badge.approved { background:#dcfce7; color:#15803d; }
+    .dep-badge.rejected { background:#fee2e2; color:#b91c1c; }
   </style>
 </head>
 <body data-require-auth="true">
@@ -239,147 +237,152 @@
   </header>
 
   <main class="main-content container">
-    <!-- Page Header -->
     <div style="margin-bottom:2rem;" data-fm="fadeIn">
-      <h1 style="font-size:2.25rem;margin-bottom:0.5rem;">Top Up Balance</h1>
+      <h1 style="font-size:2.25rem;margin-bottom:0.5rem;">Add Funds</h1>
       <p style="color:var(--text-muted);max-width:560px;">
-        Add funds to your LogNest account using cryptocurrency. Balances are credited in USD equivalent automatically.
+        Pay with cryptocurrency — your balance is credited automatically once confirmed.
       </p>
     </div>
 
-    <!-- Tabs -->
-    <div class="deposit-tabs">
-      <button class="dep-tab active" id="tab-np" onclick="switchTab('np')">⚡ Pay with OxaPay</button>
-      <button class="dep-tab" id="tab-manual" onclick="switchTab('manual')">🔑 Manual Crypto</button>
-    </div>
+    <div class="dep-wrap">
+      <!-- ── Left: Main Deposit Card ── -->
+      <div class="dep-card">
 
-    <div id="section-np">
-      <div class="np-panel">
-        <div class="np-badge">⚡ Instant · Automatic · 50+ Coins</div>
-        <p class="np-title">Choose an Amount</p>
-        <p class="np-sub">Select a preset or enter a custom USD amount. You'll be redirected to OxaPay to choose your coin and complete the payment — your balance is credited automatically.</p>
-
-        <!-- Quick amount chips -->
-        <div class="amount-row" id="amount-chips">
-          <button class="amount-chip" onclick="setAmount(10)">$10</button>
-          <button class="amount-chip" onclick="setAmount(25)">$25</button>
-          <button class="amount-chip" onclick="setAmount(50)">$50</button>
-          <button class="amount-chip" onclick="setAmount(100)">$100</button>
-          <button class="amount-chip" onclick="setAmount(250)">$250</button>
+        <!-- Amount -->
+        <p class="coin-label" style="margin-bottom:0.75rem;">Select Amount (USD)</p>
+        <div class="amount-chips" id="chips">
+          <button class="chip" onclick="pickAmt(10,this)">$10</button>
+          <button class="chip" onclick="pickAmt(25,this)">$25</button>
+          <button class="chip" onclick="pickAmt(50,this)">$50</button>
+          <button class="chip" onclick="pickAmt(100,this)">$100</button>
+          <button class="chip" onclick="pickAmt(250,this)">$250</button>
+        </div>
+        <div class="amt-input-wrap">
+          <span class="sym">$</span>
+          <input type="number" id="dep-amount" min="5" step="1" placeholder="Custom amount…" oninput="clearChips()" />
         </div>
 
-        <!-- Custom amount input -->
-        <div class="np-input-wrap">
-          <span class="currency-label">$</span>
-          <input type="number" id="np-amount" min="5" step="1" placeholder="Custom amount…" oninput="clearChips()" />
+        <!-- Coin Selector -->
+        <p class="coin-label">Select Cryptocurrency</p>
+        <div class="coin-grid">
+          <button class="coin-btn" id="coin-BTC" onclick="pickCoin('BTC','','₿','Bitcoin','BTC Network')">
+            <span class="ci">₿</span><span class="cn">Bitcoin</span><span class="net">BTC</span>
+          </button>
+          <button class="coin-btn" id="coin-USDT-TRC20" onclick="pickCoin('USDT','TRC20','₮','Tether','TRC-20')">
+            <span class="ci">₮</span><span class="cn">USDT</span><span class="net">TRC-20</span>
+          </button>
+          <button class="coin-btn" id="coin-USDT-ERC20" onclick="pickCoin('USDT','ERC20','₮','USDT','ERC-20')">
+            <span class="ci" style="color:#627eea;">₮</span><span class="cn">USDT</span><span class="net">ERC-20</span>
+          </button>
+          <button class="coin-btn" id="coin-TRX" onclick="pickCoin('TRX','','🔴','Tron','TRX')">
+            <span class="ci">🔴</span><span class="cn">Tron</span><span class="net">TRX</span>
+          </button>
+          <button class="coin-btn" id="coin-LTC" onclick="pickCoin('LTC','','🥈','Litecoin','LTC')">
+            <span class="ci">🥈</span><span class="cn">Litecoin</span><span class="net">LTC</span>
+          </button>
+          <button class="coin-btn" id="coin-USDT-BSC" onclick="pickCoin('USDT','BSC','₮','USDT','BEP-20')">
+            <span class="ci" style="color:#f0b90b;">₮</span><span class="cn">USDT</span><span class="net">BEP-20</span>
+          </button>
         </div>
 
-        <button class="np-pay-btn" id="np-pay-btn" onclick="createPayment()">
-          ⚡ Pay Now with Crypto
+        <!-- Generate Button -->
+        <button class="gen-btn" id="gen-btn" onclick="generateAddress()">
+          <span>🔑</span> Get Payment Address
         </button>
 
-        <!-- Status card (shown after invoice created) -->
-        <div class="np-status-card" id="np-status-card">
-          <div class="status-icon">🔗</div>
-          <h3>Invoice Created!</h3>
-          <p>Click the button below to open the OxaPay checkout page. Your balance will be credited <strong>automatically</strong> once payment is confirmed.</p>
-          <a href="#" id="np-invoice-link" class="np-open-btn" target="_blank" rel="noopener">
-            Open Payment Page ↗
-          </a>
-          <p style="margin-top:1rem;font-size:0.78rem;color:var(--text-muted);">You can safely close this tab — the payment will be detected automatically.</p>
+        <!-- ── Address Result ── -->
+        <div class="addr-panel" id="addr-panel">
+          <div class="addr-header">
+            <span class="addr-coin-tag" id="addr-coin-tag">—</span>
+            <span class="timer" id="addr-timer">—</span>
+          </div>
+
+          <div class="qr-addr-grid">
+            <img id="addr-qr" class="qr-img" src="" alt="QR Code" />
+            <div class="addr-details">
+              <p class="addr-sub">Send exactly to this address</p>
+              <div class="addr-box">
+                <code id="addr-val">—</code>
+                <button class="copy-btn" id="copy-addr-btn" onclick="copyAddr()">Copy</button>
+              </div>
+              <div class="pay-amount-row" id="pay-amount-row">
+                <span class="label">Amount to send</span>
+                <span class="val" id="pay-crypto-amount">—</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="warn-box">
+            <strong>⚠ Important:</strong> Send <strong id="warn-exact">the exact amount</strong> shown above.
+            Do <strong>not</strong> send from an exchange — use a personal wallet.
+            Your balance is credited <strong>automatically</strong> once the network confirms.
+          </div>
+
+          <div style="margin-top:1rem;text-align:center;">
+            <button onclick="resetFlow()" style="background:none;border:none;color:var(--text-muted);font-size:0.82rem;cursor:pointer;text-decoration:underline;">
+              ← Generate a new address
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Right Sidebar ── -->
+      <div class="dep-sidebar">
+        <div class="info-card">
+          <h3>💡 How it works</h3>
+          <div class="info-step">
+            <div class="step-num">1</div>
+            <div class="step-text"><strong>Pick amount & coin</strong><br>Choose your deposit amount in USD and select a cryptocurrency.</div>
+          </div>
+          <div class="info-step">
+            <div class="step-num">2</div>
+            <div class="step-text"><strong>Get your address</strong><br>We generate a unique payment address valid for 30 minutes.</div>
+          </div>
+          <div class="info-step">
+            <div class="step-num">3</div>
+            <div class="step-text"><strong>Send & done</strong><br>Send the exact crypto amount. Your USD balance is credited automatically.</div>
+          </div>
         </div>
 
-        <div class="np-coins">
-          <span>₿</span><span>₮</span><span>Ξ</span>
-          Accepts BTC, ETH, USDT, LTC, TRX and 50+ more coins
+        <div class="info-card">
+          <h3>💰 Accepted Currencies</h3>
+          <div class="coin-supported-list">
+            <span class="csup">₿ BTC</span>
+            <span class="csup">₮ USDT TRC20</span>
+            <span class="csup">₮ USDT ERC20</span>
+            <span class="csup">₮ USDT BEP20</span>
+            <span class="csup">🔴 TRX</span>
+            <span class="csup">🥈 LTC</span>
+          </div>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:1rem;">Min. deposit: <strong>$5.00</strong> · Address valid for 30 min</p>
+        </div>
+
+        <!-- Balance card -->
+        <div class="info-card" style="background:linear-gradient(135deg,var(--primary-deep),#0a6e6e);border-color:transparent;">
+          <p style="font-size:0.78rem;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,0.7);font-weight:700;margin-bottom:0.35rem;">Current Balance</p>
+          <p id="sidebar-balance" style="font-size:2rem;font-weight:800;color:#fff;">—</p>
+          <a href="store.html" style="font-size:0.82rem;color:rgba(255,255,255,0.8);text-decoration:none;">Go to Store →</a>
         </div>
       </div>
     </div>
 
-    <!-- ════ Manual Crypto Tab ════ -->
-    <div id="section-manual" style="display:none;">
-      <div class="deposit-layout">
-        <!-- Left: Network Selector -->
-        <div>
-          <p style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);font-weight:700;margin-bottom:1rem;">Select Network</p>
-          <div class="network-list">
-            <button class="network-btn" id="btn-usdt" onclick="selectNetwork('usdt')">
-              <div class="network-icon usdt">₮</div>
-              <div class="network-label"><strong>Tether TRC20</strong><span>USDT</span></div>
-            </button>
-            <button class="network-btn" id="btn-btc" onclick="selectNetwork('btc')">
-              <div class="network-icon btc">₿</div>
-              <div class="network-label"><strong>Bitcoin</strong><span>BTC</span></div>
-            </button>
-          </div>
-        </div>
-
-        <!-- Right: Address Panel -->
-        <div class="address-panel">
-          <div class="address-placeholder" id="deposit-placeholder">
-            <div class="icon">💳</div>
-            <p style="font-size:1rem;font-weight:600;color:var(--text-main);">No network selected</p>
-            <p style="font-size:0.875rem;">Select a cryptocurrency network to view your deposit address.</p>
-          </div>
-
-          <!-- USDT Address -->
-          <div class="address-box" id="box-usdt">
-            <div class="address-tag"><span style="font-size:1rem;">₮</span> Tether (USDT) · TRC20 Network</div>
-            <div>
-              <p style="font-size:0.85rem;font-weight:600;color:var(--text-muted);margin-bottom:0.5rem;">Deposit Address</p>
-              <div class="wallet-address-wrap">
-                <code id="usdt-address">Loading…</code>
-                <button class="copy-btn" onclick="copyAddress('usdt-address',this)">Copy</button>
-              </div>
-            </div>
-            <div class="notice-box"><strong>⚠ Important:</strong> Only send <strong>USDT via TRC20 (Tron)</strong> to this address. Minimum deposit: <strong>$5.00</strong>.</div>
-            <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border-soft);">
-              <h3 style="font-size:1rem;margin-bottom:1rem;">Confirm Your Payment</h3>
-              <form onsubmit="submitCryptoDeposit(event,'usdt')">
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
-                  <div>
-                    <label style="font-size:0.85rem;font-weight:600;color:var(--text-muted);margin-bottom:0.4rem;display:block;">Amount Sent (USDT)</label>
-                    <input type="number" step="0.01" class="form-control" id="usdt-amount" required placeholder="0.00" />
-                  </div>
-                  <div>
-                    <label style="font-size:0.85rem;font-weight:600;color:var(--text-muted);margin-bottom:0.4rem;display:block;">Transaction Hash</label>
-                    <input type="text" class="form-control" id="usdt-hash" required placeholder="Enter TXID" />
-                  </div>
-                </div>
-                <button type="submit" class="btn btn-primary" style="width:100%;">Submit Payment Proof</button>
-              </form>
-            </div>
-          </div>
-
-          <!-- BTC Address -->
-          <div class="address-box" id="box-btc">
-            <div class="address-tag"><span style="font-size:1rem;">₿</span> Bitcoin (BTC) · Native SegWit</div>
-            <div>
-              <p style="font-size:0.85rem;font-weight:600;color:var(--text-muted);margin-bottom:0.5rem;">Deposit Address</p>
-              <div class="wallet-address-wrap">
-                <code id="btc-address">Loading…</code>
-                <button class="copy-btn" onclick="copyAddress('btc-address',this)">Copy</button>
-              </div>
-            </div>
-            <div class="notice-box"><strong>⚠ Important:</strong> Only send <strong>Bitcoin (BTC)</strong> to this address. Minimum deposit: <strong>$5.00</strong>. Allow up to 3 confirmations.</div>
-            <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border-soft);">
-              <h3 style="font-size:1rem;margin-bottom:1rem;">Confirm Your Payment</h3>
-              <form onsubmit="submitCryptoDeposit(event,'bitcoin')">
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
-                  <div>
-                    <label style="font-size:0.85rem;font-weight:600;color:var(--text-muted);margin-bottom:0.4rem;display:block;">Amount Sent (USD Equivalent)</label>
-                    <input type="number" step="0.01" class="form-control" id="btc-amount" required placeholder="0.00" />
-                  </div>
-                  <div>
-                    <label style="font-size:0.85rem;font-weight:600;color:var(--text-muted);margin-bottom:0.4rem;display:block;">Transaction Hash</label>
-                    <input type="text" class="form-control" id="btc-hash" required placeholder="Enter TXID" />
-                  </div>
-                </div>
-                <button type="submit" class="btn btn-primary" style="width:100%;">Submit Payment Proof</button>
-              </form>
-            </div>
-          </div>
-        </div>
+    <!-- ── Deposit History ── -->
+    <div class="my-dep-section">
+      <h2 style="font-size:1.15rem;font-weight:700;margin-bottom:1.25rem;">Deposit History</h2>
+      <div class="dep-card" style="padding:0;overflow:hidden;">
+        <table class="dep-hist-table" id="dep-hist-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Amount</th>
+              <th>Coin</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="dep-hist-body">
+            <tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--text-muted);">Loading…</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </main>
@@ -390,131 +393,144 @@
 
   <script>
     const API_BASE = window.__API_BASE__ || window.API_BASE || 'http://localhost:5000/api';
-    let settings = {};
+    let selectedCoin = null, selectedNetwork = null, timerInterval = null;
 
-    /* ── Tab switching ── */
-    function switchTab(tab) {
-      document.getElementById('tab-np').classList.toggle('active', tab === 'np');
-      document.getElementById('tab-manual').classList.toggle('active', tab === 'manual');
-      document.getElementById('section-np').style.display     = tab === 'np'     ? '' : 'none';
-      document.getElementById('section-manual').style.display = tab === 'manual' ? '' : 'none';
-    }
-
-    /* ── Quick-amount chips ── */
-    function setAmount(val) {
-      document.getElementById('np-amount').value = val;
-      document.querySelectorAll('.amount-chip').forEach(c => c.classList.remove('selected'));
-      event.target.classList.add('selected');
+    /* ── Amount chips ── */
+    function pickAmt(v, el) {
+      document.getElementById('dep-amount').value = v;
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+      el.classList.add('on');
     }
     function clearChips() {
-      document.querySelectorAll('.amount-chip').forEach(c => c.classList.remove('selected'));
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
     }
 
-    /* ── OxaPay: Create Invoice ── */
-    async function createPayment() {
-      const token = localStorage.getItem('token');
-      if (!token) return toast('Please log in to make a deposit.', 'warning');
+    /* ── Coin selection ── */
+    function pickCoin(coin, network, icon, name, netLabel) {
+      selectedCoin = coin; selectedNetwork = network;
+      document.querySelectorAll('.coin-btn').forEach(b => b.classList.remove('on'));
+      const id = network ? `coin-${coin}-${network}` : `coin-${coin}`;
+      document.getElementById(id)?.classList.add('on');
+    }
 
-      const amount = parseFloat(document.getElementById('np-amount').value);
+    /* ── Generate address ── */
+    async function generateAddress() {
+      const token = localStorage.getItem('token');
+      if (!token) return toast('Please log in first.', 'warning');
+      if (!selectedCoin) return toast('Please select a cryptocurrency first.', 'warning');
+
+      const amount = parseFloat(document.getElementById('dep-amount').value);
       if (!amount || amount < 5) return toast('Minimum deposit is $5.00.', 'warning');
 
-      const btn = document.getElementById('np-pay-btn');
+      const btn = document.getElementById('gen-btn');
       btn.disabled = true;
-      btn.innerHTML = '⏳ Creating invoice…';
+      btn.innerHTML = '<span>⏳</span> Generating address…';
 
       try {
-        const res  = await fetch(`${API_BASE}/deposits/oxapay/create`, {
+        const res  = await fetch(`${API_BASE}/deposits/oxapay/whitelabel`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ amount }),
+          body: JSON.stringify({ amount, pay_currency: selectedCoin, network: selectedNetwork || undefined }),
         });
         const data = await res.json();
 
-        if (data.success && data.payment_url) {
-          document.getElementById('np-invoice-link').href = data.payment_url;
-          document.getElementById('np-status-card').classList.add('visible');
-          window.open(data.payment_url, '_blank', 'noopener');
-          toast('Invoice created! Opening OxaPay payment page…', 'success');
+        if (data.success) {
+          showAddressPanel(data);
+          loadHistory();
         } else {
-          toast(data.message || 'Failed to create invoice.', 'error');
+          toast(data.message || 'Failed to generate address.', 'error');
         }
       } catch (err) {
         console.error(err);
-        toast('Server error. Please try again.', 'error');
+        toast('Connection error. Try again.', 'error');
       } finally {
         btn.disabled = false;
-        btn.innerHTML = '⚡ Pay Now with Crypto';
+        btn.innerHTML = '<span>🔑</span> Get Payment Address';
       }
     }
 
-    /* ── Manual Crypto ── */
-    async function loadSettings() {
-      try {
-        const res  = await fetch(`${API_BASE}/admin/settings/public`);
-        const data = await res.json();
-        if (data.success && data.settings) settings = data.settings;
-      } catch {}
-    }
+    function showAddressPanel(d) {
+      document.getElementById('addr-coin-tag').textContent = `${d.pay_currency} · ${d.network}`;
+      document.getElementById('addr-val').textContent = d.address;
+      document.getElementById('addr-qr').src = d.qr_code;
+      document.getElementById('pay-crypto-amount').textContent = `${d.pay_amount} ${d.pay_currency}`;
+      document.getElementById('warn-exact').textContent = `exactly ${d.pay_amount} ${d.pay_currency}`;
 
-    function selectNetwork(type) {
-      document.querySelectorAll('.network-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('btn-' + type).classList.add('active');
-      document.getElementById('deposit-placeholder').style.display = 'none';
-      document.querySelectorAll('.address-box').forEach(b => b.classList.remove('visible'));
-      document.getElementById('box-' + type).classList.add('visible');
-      if (type === 'usdt') {
-        document.getElementById('usdt-address').textContent = settings.usdt_wallet || 'Address not configured — contact admin.';
-      } else {
-        document.getElementById('btc-address').textContent = settings.btc_wallet || 'Address not configured — contact admin.';
+      // Timer
+      if (timerInterval) clearInterval(timerInterval);
+      let secs = Math.max(0, Math.floor((new Date(d.expired_at * 1000) - Date.now()) / 1000));
+      const timerEl = document.getElementById('addr-timer');
+      function tick() {
+        if (secs <= 0) { timerEl.textContent = 'Expired'; clearInterval(timerInterval); return; }
+        const m = String(Math.floor(secs/60)).padStart(2,'0');
+        const s = String(secs % 60).padStart(2,'0');
+        timerEl.textContent = `Expires in ${m}:${s}`;
+        secs--;
       }
+      tick();
+      timerInterval = setInterval(tick, 1000);
+
+      document.getElementById('addr-panel').classList.add('show');
+      document.getElementById('addr-panel').scrollIntoView({ behavior:'smooth', block:'nearest' });
     }
 
-    function copyAddress(elId, btn) {
-      const text = document.getElementById(elId).textContent;
-      if (text.includes('not configured')) return;
-      navigator.clipboard.writeText(text).then(() => {
-        btn.textContent = 'Copied!';
-        btn.classList.add('copied');
-        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    function copyAddr() {
+      const addr = document.getElementById('addr-val').textContent;
+      const btn = document.getElementById('copy-addr-btn');
+      navigator.clipboard.writeText(addr).then(() => {
+        btn.textContent = 'Copied!'; btn.classList.add('done');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('done'); }, 2500);
       });
     }
 
-    async function submitCryptoDeposit(e, method) {
-      e.preventDefault();
-      const token = localStorage.getItem('token');
-      if (!token) return toast('Please login to submit a deposit.', 'warning');
-
-      const prefix = method === 'bitcoin' ? 'btc' : 'usdt';
-      const amount = document.getElementById(`${prefix}-amount`).value;
-      const transaction_hash = document.getElementById(`${prefix}-hash`).value;
-
-      const btn = e.target.querySelector('button[type="submit"]');
-      btn.textContent = 'Submitting...';
-      btn.disabled = true;
-
-      try {
-        const res  = await fetch(`${API_BASE}/deposits/crypto`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ amount, method, transaction_hash }),
-        });
-        const data = await res.json();
-        if (data.success) {
-          toast('Deposit submitted! Please wait for admin approval.', 'success');
-          document.getElementById(`${prefix}-amount`).value = '';
-          document.getElementById(`${prefix}-hash`).value = '';
-        } else {
-          toast(data.message || 'Error submitting deposit.', 'error');
-        }
-      } catch (err) {
-        toast('Server error connecting to API.', 'error');
-      } finally {
-        btn.textContent = 'Submit Payment Proof';
-        btn.disabled = false;
-      }
+    function resetFlow() {
+      document.getElementById('addr-panel').classList.remove('show');
+      if (timerInterval) clearInterval(timerInterval);
     }
 
-    loadSettings();
+    /* ── Balance ── */
+    function loadBalance() {
+      const u = JSON.parse(localStorage.getItem('user') || 'null');
+      if (u) document.getElementById('sidebar-balance').textContent = '$' + parseFloat(u.balance || 0).toFixed(2);
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      fetch(`${API_BASE}/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json()).then(d => {
+          if (d.success) {
+            const b = parseFloat(d.user.balance || 0).toFixed(2);
+            document.getElementById('sidebar-balance').textContent = '$' + b;
+            localStorage.setItem('user', JSON.stringify(d.user));
+          }
+        }).catch(() => {});
+    }
+
+    /* ── History ── */
+    async function loadHistory() {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      try {
+        const res  = await fetch(`${API_BASE}/deposits/my-deposits`, { headers: { Authorization: `Bearer ${token}` } });
+        const data = await res.json();
+        const tbody = document.getElementById('dep-hist-body');
+        if (!data.success || !data.deposits.length) {
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--text-muted);">No deposits yet.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = data.deposits.map(d => {
+          const date = new Date(d.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+          const method = d.method === 'oxapay' ? 'Crypto (auto)' : d.method;
+          return `<tr>
+            <td style="color:var(--text-muted);font-size:.82rem;">${date}</td>
+            <td style="font-weight:700;">$${parseFloat(d.amount).toFixed(2)}</td>
+            <td style="font-size:.82rem;">${method}</td>
+            <td><span class="dep-badge ${d.status}">${d.status}</span></td>
+          </tr>`;
+        }).join('');
+      } catch {}
+    }
+
+    loadBalance();
+    loadHistory();
   </script>
 </body>
 </html>
