@@ -11,7 +11,7 @@ async function loadCategories() {
     const res = await fetch(`${API_BASE}/products/categories`);
     const data = await res.json();
     if (data.success) {
-      allCategories = data.categories;
+      allCategories = data.categories.sort((a, b) => a.name.localeCompare(b.name));
       renderCategories(allCategories);
       const total = allCategories.reduce((acc, c) => acc + parseInt(c.product_count || 0), 0);
       const tEl = document.getElementById('total-count');
