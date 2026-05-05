@@ -11,214 +11,155 @@
   <script src="js/config.js"></script>
   <script src="js/nav.js"></script>
   <style>
-    :root { --radius-xl: 24px; --radius-lg: 16px; --radius-md: 12px; }
+    :root { --radius-md: 8px; --radius-lg: 12px; --border-color: #E2E8F0; }
 
     .dh-page {
-      min-height: 80vh;
-      padding: 0 1rem 4rem;
-      position: relative;
-      z-index: 10;
-    }
-
-    /* ── Hero Banner ── */
-    .dh-hero-banner {
-      background: radial-gradient(circle at top right, var(--bg-accent), var(--bg-main));
-      padding: 5rem 1rem 7rem;
-      text-align: center;
-      border-bottom: 1px solid var(--border-soft);
-      position: relative;
-      overflow: hidden;
-    }
-    .dh-hero-banner::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: url('data:image/svg+xml;utf8,<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="2" cy="2" r="1.5" fill="rgba(13,79,79,0.05)"/></svg>') repeat;
-      z-index: 0;
-    }
-    body.dark-mode .dh-hero-banner::before {
-      background: url('data:image/svg+xml;utf8,<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="2" cy="2" r="1.5" fill="rgba(255,255,255,0.03)"/></svg>') repeat;
-    }
-    .dh-hero-content {
-      position: relative; z-index: 1;
-      max-width: 680px;
+      padding: 2rem 1rem 4rem;
+      max-width: 960px;
       margin: 0 auto;
     }
-    .dh-hero-badge {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      background: var(--bg-card); border: 1px solid var(--border-soft);
-      border-radius: 30px; padding: 0.4rem 1.2rem;
-      font-size: 0.8rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: .08em;
-      color: var(--primary-deep); margin-bottom: 1.5rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-    }
-    .dh-hero-banner h1 {
-      font-size: clamp(2.5rem, 6vw, 3.5rem); font-weight: 900; line-height: 1.1; margin-bottom: 1rem;
-      background: linear-gradient(135deg, var(--text-main) 30%, var(--primary-deep));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    }
-    .dh-hero-banner p { color: var(--text-muted); font-size: 1.1rem; max-width: 500px; margin: 0 auto; }
 
-    /* ── Stats bar ── */
-    .dh-stats {
-      display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 1.5rem; max-width: 780px; margin: -4rem auto 3rem;
-      position: relative; z-index: 10;
+    /* ── Header ── */
+    .dh-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1.5rem;
     }
-    @media(max-width:600px){ .dh-stats{ grid-template-columns: 1fr; gap:1rem; margin-top: -3rem; } }
-    .dh-stat {
-      background: var(--bg-card); border: 1px solid var(--border-soft);
-      border-radius: var(--radius-xl); padding: 1.8rem 1.5rem;
-      text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.06);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      position: relative;
-      overflow: hidden;
+    body.dark-mode .dh-header { border-color: #334155; }
+    
+    .dh-title-group h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0 0 0.25rem 0;
+      letter-spacing: -0.02em;
     }
-    .dh-stat::after {
-      content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
-      background: var(--border-soft);
+    .dh-title-group p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin: 0;
     }
-    .dh-stat:nth-child(1)::after { background: var(--primary-deep); }
-    .dh-stat:nth-child(2)::after { background: #16a34a; }
-    .dh-stat:nth-child(3)::after { background: #d97706; }
-    .dh-stat:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.12);
-    }
-    body.dark-mode .dh-stat { box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
-    body.dark-mode .dh-stat:hover { box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
-    .dh-stat .sv {
-      font-size: 2.2rem; font-weight: 900; color: var(--text-main);
-      display: block; margin-bottom: 0.2rem; line-height: 1;
-    }
-    .dh-stat .sv.green  { color: #16a34a; }
-    .dh-stat .sv.amber  { color: #d97706; }
-    .dh-stat .sv.teal   { color: var(--primary-deep); }
-    .dh-stat .sl { font-size: 0.8rem; text-transform: uppercase; letter-spacing: .1em; font-weight: 700; color: var(--text-muted); }
 
-    /* ── Table card ── */
-    .dh-card {
-      max-width: 780px; margin: 0 auto;
-      background: var(--bg-card); border: 1px solid var(--border-soft);
-      border-radius: var(--radius-xl);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.08);
-      overflow: hidden;
-    }
-    body.dark-mode .dh-card { box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
-    .dh-card-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 1.5rem 2rem; border-bottom: 1px solid var(--border-soft);
-      background: var(--bg-main);
-    }
-    .dh-card-header h2 { font-size: 1.1rem; font-weight: 800; color: var(--text-main); }
     .dh-add-btn {
       display: inline-flex; align-items: center; gap: 0.5rem;
-      background: var(--primary-deep); color: #fff;
-      padding: 0.6rem 1.25rem; border-radius: 12px;
-      font-size: 0.85rem; font-weight: 700; text-decoration: none;
-      transition: all 0.2s; box-shadow: 0 4px 12px rgba(13,79,79,0.2);
+      background: var(--text-main); color: var(--bg-main);
+      padding: 0.6rem 1.25rem; border-radius: var(--radius-md);
+      font-size: 0.85rem; font-weight: 600; text-decoration: none;
+      transition: opacity 0.2s;
     }
-    .dh-add-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(13,79,79,0.3); }
+    body.dark-mode .dh-add-btn { background: #fff; color: #000; }
+    .dh-add-btn:hover { opacity: 0.85; }
 
-    /* ── DESKTOP TABLE ── */
+    /* ── Stats ── */
+    .dh-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem; margin-bottom: 2rem;
+    }
+    @media(max-width:600px){ .dh-stats{ grid-template-columns: 1fr; } .dh-header { flex-direction: column; align-items: flex-start; gap: 1rem; } }
+    .dh-stat {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: var(--radius-md); padding: 1.25rem 1.5rem;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    body.dark-mode .dh-stat { border-color: #334155; }
+    .dh-stat .sl {
+      font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;
+      font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 0.5rem;
+    }
+    .dh-stat .sv {
+      font-size: 1.75rem; font-weight: 700; color: var(--text-main); line-height: 1;
+    }
+
+    /* ── Table ── */
+    .dh-card {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: var(--radius-md); overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    body.dark-mode .dh-card { border-color: #334155; }
+
     .dh-table { width: 100%; border-collapse: collapse; }
     .dh-table th {
-      text-align: left; padding: 1rem 2rem;
-      font-size: 0.75rem; text-transform: uppercase; letter-spacing: .1em;
-      color: var(--text-muted); font-weight: 700;
-      border-bottom: 1px solid var(--border-soft);
-      background: rgba(13,79,79,0.02);
+      text-align: left; padding: 1rem 1.5rem;
+      font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--text-muted); font-weight: 600;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-main);
     }
-    body.dark-mode .dh-table th { background: rgba(0,0,0,0.2); }
+    body.dark-mode .dh-table th { background: #0f172a; border-color: #334155; }
     .dh-table td {
-      padding: 1.25rem 2rem; font-size: 0.9rem;
-      border-bottom: 1px solid var(--border-soft); vertical-align: middle;
+      padding: 1.25rem 1.5rem; font-size: 0.9rem; color: var(--text-main);
+      border-bottom: 1px solid var(--border-color); vertical-align: middle;
     }
+    body.dark-mode .dh-table td { border-color: #334155; }
     .dh-table tbody tr:last-child td { border-bottom: none; }
-    .dh-table tbody tr { transition: background .15s ease; }
     .dh-table tbody tr:hover td { background: var(--bg-accent); }
 
-    /* ── MOBILE CARDS (< 640px) ── */
+    /* ── Mobile Table ── */
     @media(max-width:639px) {
-      .dh-card-header { flex-direction: column; gap: 1rem; align-items: flex-start; }
       .dh-table thead { display: none; }
       .dh-table, .dh-table tbody, .dh-table tr, .dh-table td { display: block; width: 100%; box-sizing: border-box; }
       .dh-table tbody tr {
-        padding: 1.25rem;
-        border-bottom: 1px solid var(--border-soft);
-        display: grid;
-        grid-template-columns: 1fr auto;
-        grid-template-rows: auto auto;
-        gap: 0.75rem 1rem;
-        align-items: center;
+        padding: 1.25rem; border-bottom: 1px solid var(--border-color);
+        display: flex; flex-direction: column; gap: 0.6rem;
       }
-      .dh-table tbody tr:last-child { border-bottom: none; }
-      .dh-table td { padding: 0; border: none; }
+      body.dark-mode .dh-table tbody tr { border-color: #334155; }
+      .dh-table td { padding: 0; border: none; display: flex; justify-content: space-between; align-items: center; }
       .dh-table td::before {
         content: attr(data-label);
-        font-size: 0.7rem; text-transform: uppercase; letter-spacing: .08em;
-        font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;
+        font-size: 0.75rem; color: var(--text-muted);
       }
-      /* Date — top left, Amount — top right */
-      .dh-table td[data-label="Date"]   { grid-column: 1; grid-row: 1; }
-      .dh-table td[data-label="Amount"] { grid-column: 2; grid-row: 1; text-align: right; }
-      .dh-table td[data-label="Coin"]   { grid-column: 1; grid-row: 2; }
-      .dh-table td[data-label="Status"] { grid-column: 2; grid-row: 2; text-align: right; }
-      .dh-table td[data-label="Amount"]::before { text-align: right; }
-      .dh-table td[data-label="Status"]::before { text-align: right; }
     }
 
     /* ── Badges ── */
     .dep-badge {
       display: inline-flex; align-items: center; gap: 0.35rem;
-      padding: 0.35rem 0.85rem; border-radius: 30px;
-      font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap;
+      padding: 0.25rem 0.6rem; border-radius: 4px;
+      font-size: 0.75rem; font-weight: 600; text-transform: capitalize;
     }
-    .dep-badge.pending  { background: rgba(217,119,6,0.12);  color: #d97706; border: 1px solid rgba(217,119,6,0.25); }
-    .dep-badge.approved { background: rgba(22,163,74,0.12);  color: #16a34a; border: 1px solid rgba(22,163,74,0.25); }
-    .dep-badge.rejected { background: rgba(220,38,38,0.1);   color: #dc2626; border: 1px solid rgba(220,38,38,0.2); }
+    .dep-badge.pending  { background: #fef3c7; color: #b45309; }
+    .dep-badge.approved { background: #dcfce7; color: #15803d; }
+    .dep-badge.rejected { background: #fee2e2; color: #b91c1c; }
+    body.dark-mode .dep-badge.pending { background: rgba(180,83,9,0.2); color: #fcd34d; }
+    body.dark-mode .dep-badge.approved{ background: rgba(21,128,61,0.2); color: #86efac; }
+    body.dark-mode .dep-badge.rejected{ background: rgba(185,28,28,0.2); color: #fca5a5; }
 
-    .coin-pill {
-      display: inline-flex; align-items: center; gap: 0.4rem;
-      background: var(--bg-main); border: 1px solid var(--border-soft);
-      border-radius: 8px; padding: 0.3rem 0.75rem;
-      font-size: 0.85rem; font-weight: 700; color: var(--text-main); white-space: nowrap;
-    }
+    .coin-pill { font-weight: 500; color: var(--text-main); display: inline-flex; align-items: center; gap: 0.4rem; }
 
     /* ── Pagination ── */
     .dh-pag {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 1.25rem 2rem; border-top: 1px solid var(--border-soft);
-      background: var(--bg-main); flex-wrap: wrap; gap: 1rem;
+      padding: 1rem 1.5rem; border-top: 1px solid var(--border-color);
     }
-    .dh-pag-info { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+    body.dark-mode .dh-pag { border-color: #334155; }
+    .dh-pag-info { font-size: 0.85rem; color: var(--text-muted); }
     .dh-pag-btns { display: flex; gap: 0.5rem; }
     .dh-pag-btn {
-      padding: 0.5rem 1.25rem; border: 1px solid var(--border-soft); border-radius: 10px;
+      padding: 0.4rem 0.8rem; border: 1px solid var(--border-color); border-radius: var(--radius-md);
       background: var(--bg-card); color: var(--text-main);
-      font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all .2s ease;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      font-size: 0.85rem; cursor: pointer; transition: all .2s;
     }
-    .dh-pag-btn:hover:not(:disabled) { border-color: var(--primary-deep); color: var(--primary-deep); transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
-    .dh-pag-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; transform: none; }
+    body.dark-mode .dh-pag-btn { border-color: #334155; background: #0f172a; color: #e2e8f0; }
+    .dh-pag-btn:hover:not(:disabled) { border-color: var(--text-muted); }
+    .dh-pag-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
     /* ── Empty state ── */
     .empty-state {
-      display: flex; flex-direction: column; align-items: center;
-      justify-content: center; padding: 5rem 2rem; text-align: center; gap: 1.25rem;
+      padding: 4rem 1rem; text-align: center; color: var(--text-muted);
     }
-    .empty-state .e-icon { font-size: 4rem; filter: grayscale(1); opacity: .4; margin-bottom: -0.5rem; }
-    .empty-state h3 { font-size: 1.25rem; font-weight: 800; color: var(--text-main); }
-    .empty-state p { color: var(--text-muted); font-size: 0.95rem; max-width: 300px; line-height: 1.5; }
     .empty-cta {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      background: var(--primary-deep); color: #fff;
-      padding: 0.75rem 1.75rem; border-radius: 12px;
-      font-size: 0.95rem; font-weight: 700; text-decoration: none; transition: all .2s;
-      box-shadow: 0 4px 12px rgba(13,79,79,0.2); margin-top: 0.5rem;
+      display: inline-block; margin-top: 1rem; color: var(--text-main);
+      text-decoration: underline; font-weight: 500;
     }
-    .empty-cta:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(13,79,79,0.3); }
+    
+    .view-link {
+      font-size: 0.75rem; color: #0284c7; text-decoration: none; font-weight: 600; margin-left: 0.75rem;
+    }
+    body.dark-mode .view-link { color: #38bdf8; }
+    .view-link:hover { text-decoration: underline; }
   </style>
 </head>
 <body data-require-auth="true">
@@ -229,55 +170,47 @@
     </div>
   </header>
 
-  <section class="dh-hero-banner" data-fm="fadeIn">
-    <div class="container dh-hero-content">
-      <div class="dh-hero-badge">📋 Transaction History</div>
-      <h1>Deposit History</h1>
-      <p>All your past deposits and their current status.</p>
-    </div>
-  </section>
+  <main class="container dh-page">
+    <div data-fm="fadeIn">
 
-  <main class="main-content container">
-    <div class="dh-page" data-fm="fadeIn">
+      <div class="dh-header">
+        <div class="dh-title-group">
+          <h1>Deposit History</h1>
+          <p>Review your past deposits and current status.</p>
+        </div>
+        <a href="add-funds.html" class="dh-add-btn">+ Add Funds</a>
+      </div>
 
       <!-- Stats -->
       <div class="dh-stats" id="dh-stats">
         <div class="dh-stat">
-          <span class="sv teal" id="stat-total">—</span>
           <span class="sl">Total Deposits</span>
+          <span class="sv" id="stat-total">—</span>
         </div>
         <div class="dh-stat">
-          <span class="sv green" id="stat-approved">—</span>
           <span class="sl">Approved</span>
+          <span class="sv" id="stat-approved" style="color: #15803d;">—</span>
         </div>
         <div class="dh-stat">
-          <span class="sv amber" id="stat-pending">—</span>
           <span class="sl">Pending</span>
+          <span class="sv" id="stat-pending" style="color: #b45309;">—</span>
         </div>
       </div>
 
       <!-- Table card -->
       <div class="dh-card">
-        <div class="dh-card-header">
-          <h2>All Deposits</h2>
-          <a href="add-funds.html" class="dh-add-btn">+ Add Funds</a>
-        </div>
-
         <table class="dh-table">
           <thead>
             <tr>
               <th>Date</th>
               <th>Amount</th>
-              <th>Coin</th>
+              <th>Method</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody id="hist-body">
             <tr><td colspan="4">
-              <div class="empty-state">
-                <div class="e-icon">⏳</div>
-                <p>Loading your deposits…</p>
-              </div>
+              <div class="empty-state">Loading your deposits…</div>
             </td></tr>
           </tbody>
         </table>
@@ -285,8 +218,8 @@
         <div class="dh-pag" id="dh-pag" style="display:none;">
           <span class="dh-pag-info" id="pag-info">—</span>
           <div class="dh-pag-btns">
-            <button class="dh-pag-btn" id="pag-prev" onclick="loadHistory(currentPage-1)">← Prev</button>
-            <button class="dh-pag-btn" id="pag-next" onclick="loadHistory(currentPage+1)">Next →</button>
+            <button class="dh-pag-btn" id="pag-prev" onclick="loadHistory(currentPage-1)">Previous</button>
+            <button class="dh-pag-btn" id="pag-next" onclick="loadHistory(currentPage+1)">Next</button>
           </div>
         </div>
       </div>
@@ -332,10 +265,7 @@
         if (!data.success || !data.deposits.length) {
           tbody.innerHTML = `<tr><td colspan="4">
             <div class="empty-state">
-              <div class="e-icon">📭</div>
-              <h3>No deposits yet</h3>
-              <p>Make your first crypto deposit to get started.</p>
-              <a href="add-funds.html" class="empty-cta">💳 Add Funds</a>
+              <p>No deposits found. <a href="add-funds.html" class="empty-cta">Add Funds</a></p>
             </div></td></tr>`;
           document.getElementById('dh-pag').style.display = 'none';
           document.getElementById('stat-total').textContent    = '0';
@@ -360,20 +290,16 @@
         tbody.innerHTML = data.deposits.map(d => {
           const date = new Date(d.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
           
-          let statusHtml = `<span class="dep-badge ${d.status}">${d.status === 'approved' ? '✓' : d.status === 'pending' ? '⏳' : '✕'} ${d.status}</span>`;
+          let statusHtml = `<span class="dep-badge ${d.status}">${d.status}</span>`;
           
-          if (d.status === 'pending') {
-            if (activePayment && activePayment.deposit_id === d.id) {
-              statusHtml += ` <a href="payment.html" class="dep-badge" style="background:var(--primary-deep);color:#fff;border-color:var(--primary-deep);text-decoration:none;margin-left:0.5rem;box-shadow:0 2px 6px rgba(13,79,79,0.3);">👁 View Address</a>`;
-            } else {
-              statusHtml += ` <a href="add-funds.html" class="dep-badge" style="background:var(--bg-main);color:var(--text-main);text-decoration:none;margin-left:0.5rem;">Pay</a>`;
-            }
+          if (d.status === 'pending' && activePayment && activePayment.deposit_id === d.id) {
+            statusHtml += ` <a href="payment.html" class="view-link">View Address</a>`;
           }
 
           return `<tr>
-            <td data-label="Date"   style="color:var(--text-muted);font-size:.82rem;white-space:nowrap;">${date}</td>
-            <td data-label="Amount"><strong style="color:var(--primary-deep);font-size:.95rem;">$${parseFloat(d.amount).toFixed(2)}</strong></td>
-            <td data-label="Coin"  >${coinPill(d.notes, d.method)}</td>
+            <td data-label="Date"><span style="color:var(--text-muted);font-size:.85rem;">${date}</span></td>
+            <td data-label="Amount"><strong>$${parseFloat(d.amount).toFixed(2)}</strong></td>
+            <td data-label="Method">${coinPill(d.notes, d.method)}</td>
             <td data-label="Status">${statusHtml}</td>
           </tr>`;
         }).join('');
