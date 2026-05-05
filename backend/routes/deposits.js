@@ -482,4 +482,190 @@ router.post('/nowpayments/webhook', express.json(), async (req, res) => {
   }
 });
 
+// ─── OxaPay Helper ────────────────────────────────────────────────────────────
+function oxapayRequest(endpoint, body) {
+  return new Promise((resolve, reject) => {
+    const payload = JSON.stringify(body);
+    const options = {
+      hostname: 'api.oxapay.com',
+      port: 443,
+      path: endpoint,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(payload),
+      },
+    };
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => (data += chunk));
+      res.on('end', () => {
+        try { resolve(JSON.parse(data)); }
+        catch { reject(new Error('Invalid JSON from OxaPay')); }
+      });
+    });
+    req.on('error', reject);
+    req.write(payload);
+    req.end();
+  });
+}
+
+// ─── OxaPay: Create Invoice ───────────────────────────────────────────────────
+router.post('/oxapay/create', authMiddleware, async (req, res) => {
+  try {
+    const { amount } = req.body;
+
+    if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+      return res.status(400).json({ success: false, message: 'Valid amount is required.' });
+    }
+
+    const settingResult = await pool.query("SELECT value FROM site_settings WHERE key = 'min_deposit'");
+    const minDeposit = settingResult.rows.length > 0 ? parseFloat(settingResult.rows[0].value) : 5;
+    if (parseFloat(amount) < minDeposit) {
+      return res.status(400).json({ success: false, message: `Minimum deposit is $${minDeposit}.` });
+    }
+
+    const merchantKey = process.env.OXAPAY_MERCHANT_KEY;
+    if (!merchantKey || merchantKey === 'YOUR_OXAPAY_API_KEY_HERE') {
+      return res.status(503).json({ success: false, message: 'Payment gateway not configured. Contact admin.' });
+    }
+
+    // Pre-create pending deposit record
+    const depositRecord = await pool.query(
+      `INSERT INTO deposits (user_id, amount, method, notes, status)
+       VALUES ($1, $2, 'oxapay', $3, 'pending') RETURNING id`,
+      [req.user.id, parseFloat(amount), `OxaPay invoice - $${parseFloat(amount).toFixed(2)} USD`]
+    );
+    const depositId = depositRecord.rows[0].id;
+
+    // Create OxaPay invoice
+    const invoice = await oxapayRequest('/v1/payment/invoice', {
+      merchant_api_key: merchantKey,
+      amount: parseFloat(amount),
+      currency: 'USD',
+      lifetime: 60,
+      order_id: `deposit_${depositId}`,
+      description: `LogNest Balance Top-Up – $${parseFloat(amount).toFixed(2)}`,
+      callback_url: process.env.OXAPAY_CALLBACK_URL,
+      return_url: process.env.OXAPAY_RETURN_URL,
+    });
+
+    if (!invoice || invoice.result !== 100) {
+      await pool.query('DELETE FROM deposits WHERE id = $1', [depositId]);
+      console.error('OxaPay invoice error:', invoice);
+      return res.status(502).json({ success: false, message: invoice?.message || 'Payment gateway error.' });
+    }
+
+    // Store OxaPay trackId for reference
+    await pool.query(
+      'UPDATE deposits SET transaction_hash = $1 WHERE id = $2',
+      [String(invoice.trackId), depositId]
+    );
+
+    return res.status(201).json({
+      success: true,
+      payment_url: invoice.payLink,
+      track_id: invoice.trackId,
+      deposit_id: depositId,
+    });
+  } catch (error) {
+    console.error('OxaPay create error:', error);
+    return res.status(500).json({ success: false, message: 'Server error creating payment.' });
+  }
+});
+
+// ─── OxaPay: Check Payment Status ─────────────────────────────────────────────
+router.get('/oxapay/status/:depositId', authMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM deposits WHERE id = $1 AND user_id = $2',
+      [req.params.depositId, req.user.id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Deposit not found.' });
+    }
+    const deposit = result.rows[0];
+    return res.json({ success: true, status: deposit.status, amount: parseFloat(deposit.amount) });
+  } catch (error) {
+    console.error('OxaPay status error:', error);
+    return res.status(500).json({ success: false, message: 'Server error.' });
+  }
+});
+
+// ─── OxaPay: IPN Webhook (auto-credit on paid) ───────────────────────────────
+router.post('/oxapay/webhook', express.json(), async (req, res) => {
+  try {
+    const merchantKey = process.env.OXAPAY_MERCHANT_KEY || '';
+
+    // Verify HMAC-SHA512 signature
+    if (merchantKey) {
+      const receivedHmac = req.headers['hmac'];
+      if (!receivedHmac) {
+        console.warn('OxaPay webhook: missing HMAC header');
+        return res.status(400).send('ok'); // Still return ok to avoid retries
+      }
+      const rawBody = JSON.stringify(req.body);
+      const expected = crypto.createHmac('sha512', merchantKey).update(rawBody).digest('hex');
+      if (expected !== receivedHmac) {
+        console.warn('OxaPay webhook: invalid HMAC signature');
+        return res.status(403).send('ok');
+      }
+    }
+
+    const { status, order_id, amount } = req.body;
+
+    // order_id format: "deposit_{id}"
+    const depositId = order_id ? order_id.replace('deposit_', '') : null;
+    if (!depositId) return res.send('ok');
+
+    // Only credit on 'paid' status
+    if (status !== 'paid') {
+      console.log(`OxaPay webhook: status "${status}" for deposit #${depositId} — no action.`);
+      return res.send('ok');
+    }
+
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      const depositResult = await client.query(
+        "SELECT * FROM deposits WHERE id = $1 AND status = 'pending' FOR UPDATE",
+        [depositId]
+      );
+
+      if (depositResult.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return res.send('ok'); // Already processed — idempotent
+      }
+
+      const deposit = depositResult.rows[0];
+      const creditAmount = parseFloat(amount) || parseFloat(deposit.amount);
+
+      await client.query(
+        'UPDATE users SET balance = balance + $1 WHERE id = $2',
+        [creditAmount, deposit.user_id]
+      );
+
+      await client.query(
+        "UPDATE deposits SET status = 'approved', reviewed_at = NOW(), notes = COALESCE(notes,'') || ' [Auto-approved via OxaPay IPN]' WHERE id = $1",
+        [depositId]
+      );
+
+      await client.query('COMMIT');
+      console.log(`✅ OxaPay IPN: Deposit #${depositId} approved — $${creditAmount} credited to user #${deposit.user_id}`);
+    } catch (innerErr) {
+      await client.query('ROLLBACK');
+      throw innerErr;
+    } finally {
+      client.release();
+    }
+
+    // OxaPay requires plain "ok" response
+    return res.send('ok');
+  } catch (error) {
+    console.error('OxaPay webhook error:', error);
+    return res.send('ok'); // Always respond ok to prevent retries
+  }
+});
+
 module.exports = router;

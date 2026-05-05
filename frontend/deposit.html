@@ -248,16 +248,15 @@
 
     <!-- Tabs -->
     <div class="deposit-tabs">
-      <button class="dep-tab active" id="tab-np" onclick="switchTab('np')">⚡ Pay with NowPayments</button>
+      <button class="dep-tab active" id="tab-np" onclick="switchTab('np')">⚡ Pay with OxaPay</button>
       <button class="dep-tab" id="tab-manual" onclick="switchTab('manual')">🔑 Manual Crypto</button>
     </div>
 
-    <!-- ════ NowPayments Tab ════ -->
     <div id="section-np">
       <div class="np-panel">
-        <div class="np-badge">⚡ Instant · Automatic · 100+ Coins</div>
+        <div class="np-badge">⚡ Instant · Automatic · 50+ Coins</div>
         <p class="np-title">Choose an Amount</p>
-        <p class="np-sub">Select a preset or enter a custom USD amount. You'll be redirected to NowPayments to choose your coin and complete the payment.</p>
+        <p class="np-sub">Select a preset or enter a custom USD amount. You'll be redirected to OxaPay to choose your coin and complete the payment — your balance is credited automatically.</p>
 
         <!-- Quick amount chips -->
         <div class="amount-row" id="amount-chips">
@@ -274,7 +273,7 @@
           <input type="number" id="np-amount" min="5" step="1" placeholder="Custom amount…" oninput="clearChips()" />
         </div>
 
-        <button class="np-pay-btn" id="np-pay-btn" onclick="createNowPayment()">
+        <button class="np-pay-btn" id="np-pay-btn" onclick="createPayment()">
           ⚡ Pay Now with Crypto
         </button>
 
@@ -282,7 +281,7 @@
         <div class="np-status-card" id="np-status-card">
           <div class="status-icon">🔗</div>
           <h3>Invoice Created!</h3>
-          <p>Click the button below to open the NowPayments checkout page. Your balance will be credited <strong>automatically</strong> once payment is confirmed.</p>
+          <p>Click the button below to open the OxaPay checkout page. Your balance will be credited <strong>automatically</strong> once payment is confirmed.</p>
           <a href="#" id="np-invoice-link" class="np-open-btn" target="_blank" rel="noopener">
             Open Payment Page ↗
           </a>
@@ -291,7 +290,7 @@
 
         <div class="np-coins">
           <span>₿</span><span>₮</span><span>Ξ</span>
-          Accepts BTC, ETH, USDT, LTC, and 100+ more coins
+          Accepts BTC, ETH, USDT, LTC, TRX and 50+ more coins
         </div>
       </div>
     </div>
@@ -410,8 +409,8 @@
       document.querySelectorAll('.amount-chip').forEach(c => c.classList.remove('selected'));
     }
 
-    /* ── NowPayments: Create Invoice ── */
-    async function createNowPayment() {
+    /* ── OxaPay: Create Invoice ── */
+    async function createPayment() {
       const token = localStorage.getItem('token');
       if (!token) return toast('Please log in to make a deposit.', 'warning');
 
@@ -423,21 +422,18 @@
       btn.innerHTML = '⏳ Creating invoice…';
 
       try {
-        const res  = await fetch(`${API_BASE}/deposits/nowpayments/create`, {
+        const res  = await fetch(`${API_BASE}/deposits/oxapay/create`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ amount, currency: 'usd' }),
+          body: JSON.stringify({ amount }),
         });
         const data = await res.json();
 
-        if (data.success && data.invoice_url) {
-          // Show status card with link
-          const card = document.getElementById('np-status-card');
-          document.getElementById('np-invoice-link').href = data.invoice_url;
-          card.classList.add('visible');
-          // Open in new tab automatically
-          window.open(data.invoice_url, '_blank', 'noopener');
-          toast('Invoice created! Redirecting to payment page…', 'success');
+        if (data.success && data.payment_url) {
+          document.getElementById('np-invoice-link').href = data.payment_url;
+          document.getElementById('np-status-card').classList.add('visible');
+          window.open(data.payment_url, '_blank', 'noopener');
+          toast('Invoice created! Opening OxaPay payment page…', 'success');
         } else {
           toast(data.message || 'Failed to create invoice.', 'error');
         }
