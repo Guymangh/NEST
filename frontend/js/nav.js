@@ -216,23 +216,28 @@ window.API_BASE = window.__API_BASE__ || 'http://localhost:5000/api';
       </div>
     `;
 
-      // Background fetch to sync balance
-      fetch(`${window.API_BASE || 'http://localhost:5000/api'}/auth/me`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.success && data.user) {
-          localStorage.setItem('user', JSON.stringify(data.user));
-          const newBalance = parseFloat(data.user.balance || 0).toFixed(2);
-          document.querySelectorAll('.nav-balance-amount').forEach(el => {
-            el.innerHTML = `💰 $${newBalance}`;
-          });
-          const statBal = document.getElementById('stat-balance');
-          if(statBal) statBal.textContent = `$${newBalance}`;
-        }
-      })
-      .catch(() => {});
+      // Background fetch to sync balance in real-time
+      function syncAuth() {
+        fetch(`${window.API_BASE || 'http://localhost:5000/api'}/auth/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.success && data.user) {
+            localStorage.setItem('user', JSON.stringify(data.user));
+            const newBalance = parseFloat(data.user.balance || 0).toFixed(2);
+            document.querySelectorAll('.nav-balance-amount').forEach(el => {
+              el.innerHTML = `💰 $${newBalance}`;
+            });
+            const statBal = document.getElementById('stat-balance');
+            if(statBal) statBal.textContent = `$${newBalance}`;
+          }
+        })
+        .catch(() => {});
+      }
+      
+      syncAuth();
+      setInterval(syncAuth, 15000);
 
       // Attach dropdown handlers (always, not just non-index)
       const btn      = document.getElementById('nav-user-btn');
