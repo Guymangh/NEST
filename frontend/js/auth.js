@@ -1,6 +1,6 @@
 // ─── Config ───────────────────────────────────────────────────────────────────
-// API_BASE is set by nav.js. Fallback here in case nav.js isn't loaded.
-const API_BASE = window.API_BASE || 'http://localhost:5000/api';
+// API_BASE is set by config.js (__API_BASE__) or nav.js (API_BASE).
+const API_BASE = window.__API_BASE__ || window.API_BASE || 'http://localhost:5000/api';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function showError(msg) {
