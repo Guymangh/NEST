@@ -1,4 +1,4 @@
-const API_BASE = window.API_BASE || 'http://localhost:5000/api';
+const API_BASE = window.__API_BASE__ || window.API_BASE || 'http://localhost:5000/api';
 
 // ─── Admin Toast (no browser alerts!) ─────────────────────────────────────
 function adminToast(message, type = 'success') {
