@@ -11,6 +11,7 @@
   <script src="js/config.js"></script>
   <script src="js/nav.js"></script>
   <style>
+    /* ── Page Header ── */
     .page-hero {
       text-align: center;
       padding: 2rem 0 1.75rem;
@@ -18,13 +19,14 @@
     .page-hero .back {
       display: inline-flex; align-items: center; gap: 0.4rem;
       font-size: 0.82rem; color: var(--text-muted);
-      text-decoration: none; font-weight: 600; margin-bottom: 1.25rem;
+      text-decoration: none; font-weight: 600; margin-bottom: 1.1rem;
       transition: color .18s;
     }
     .page-hero .back:hover { color: var(--primary-deep); }
     .page-hero h1 { font-size: 2rem; font-weight: 800; margin-bottom: 0.35rem; }
     .page-hero p  { color: var(--text-muted); font-size: 0.92rem; }
 
+    /* ── Wrapper ── */
     .hist-wrap {
       max-width: 780px;
       margin: 0 auto;
@@ -36,6 +38,10 @@
       overflow: hidden;
       box-shadow: var(--shadow-soft);
     }
+
+    /* ══════════════════════════════════════
+       DESKTOP TABLE  (≥ 600px)
+    ══════════════════════════════════════ */
     .hist-table { width: 100%; border-collapse: collapse; }
     .hist-table th {
       text-align: left; padding: 0.9rem 1.4rem;
@@ -49,12 +55,66 @@
       border-bottom: 1px solid var(--border-soft); vertical-align: middle;
     }
     .hist-table tbody tr:last-child td { border-bottom: none; }
-    .hist-table tbody tr { transition: background 0.15s; }
+    .hist-table tbody tr { transition: background .15s; }
     .hist-table tbody tr:hover td { background: var(--bg-accent); }
 
+    /* ══════════════════════════════════════
+       MOBILE CARD LAYOUT  (< 600px)
+    ══════════════════════════════════════ */
+    @media (max-width: 599px) {
+      /* Hide table header row */
+      .hist-table thead { display: none; }
+
+      /* Each row becomes a card */
+      .hist-table,
+      .hist-table tbody,
+      .hist-table tr,
+      .hist-table td { display: block; width: 100%; }
+
+      .hist-table tbody tr {
+        border-bottom: 1px solid var(--border-soft);
+        padding: 1rem 1.1rem;
+        position: relative;
+      }
+      .hist-table tbody tr:last-child { border-bottom: none; }
+      .hist-table tbody tr:hover { background: var(--bg-accent); }
+
+      /* Each cell becomes a label+value row */
+      .hist-table td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.3rem 0;
+        border-bottom: none;
+        font-size: 0.875rem;
+      }
+
+      /* Data-label attribute becomes the left label */
+      .hist-table td::before {
+        content: attr(data-label);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: .07em;
+        font-weight: 700;
+        color: var(--text-muted);
+        flex-shrink: 0;
+        margin-right: 1rem;
+      }
+
+      /* Amount stands out on mobile */
+      .hist-table td[data-label="Amount"] {
+        font-size: 1rem;
+        padding-bottom: 0.5rem;
+        margin-bottom: 0.25rem;
+        border-bottom: 1px solid var(--border-soft) !important;
+      }
+    }
+
+    /* ── Shared badges & pills ── */
     .dep-badge {
       display: inline-block; padding: 0.28rem 0.75rem; border-radius: 20px;
       font-size: 0.73rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+      white-space: nowrap;
     }
     .dep-badge.pending  { background: #fef3c7; color: #b45309; }
     .dep-badge.approved { background: #dcfce7; color: #15803d; }
@@ -65,9 +125,10 @@
       background: var(--bg-accent); border: 1px solid var(--border-soft);
       border-radius: 6px; padding: 0.22rem 0.65rem;
       font-size: 0.78rem; font-weight: 700; color: var(--text-main);
+      white-space: nowrap;
     }
 
-    /* Pagination */
+    /* ── Pagination ── */
     .pag-bar {
       display: flex; align-items: center; justify-content: space-between;
       padding: 1.1rem 1.4rem; border-top: 1px solid var(--border-soft);
@@ -84,7 +145,7 @@
     .pag-btn:hover:not(:disabled) { border-color: var(--primary-deep); color: var(--primary-deep); }
     .pag-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-    /* Empty / loading */
+    /* ── Empty / loading state ── */
     .empty-state {
       display: flex; flex-direction: column; align-items: center;
       justify-content: center; padding: 4rem 2rem; text-align: center; gap: 0.75rem;
@@ -119,7 +180,7 @@
 
     <div class="hist-wrap" data-fm="fadeIn">
       <div class="hist-card">
-        <table class="hist-table">
+        <table class="hist-table" id="hist-table">
           <thead>
             <tr>
               <th>Date</th>
@@ -129,19 +190,22 @@
             </tr>
           </thead>
           <tbody id="hist-body">
-            <tr><td colspan="4">
-              <div class="empty-state">
-                <span class="icon">⏳</span>
-                <p>Loading your deposits…</p>
-              </div>
-            </td></tr>
+            <tr>
+              <td colspan="4">
+                <div class="empty-state">
+                  <span class="icon">⏳</span>
+                  <p>Loading your deposits…</p>
+                </div>
+              </td>
+            </tr>
           </tbody>
         </table>
+
         <div class="pag-bar" id="pag-bar" style="display:none;">
           <span class="pag-info" id="pag-info">—</span>
           <div class="pag-btns">
-            <button class="pag-btn" id="pag-prev" onclick="loadHistory(currentPage-1)">← Prev</button>
-            <button class="pag-btn" id="pag-next" onclick="loadHistory(currentPage+1)">Next →</button>
+            <button class="pag-btn" id="pag-prev" onclick="loadHistory(currentPage - 1)">← Prev</button>
+            <button class="pag-btn" id="pag-next" onclick="loadHistory(currentPage + 1)">Next →</button>
           </div>
         </div>
       </div>
@@ -153,13 +217,14 @@
   </footer>
 
   <script>
-    const API_BASE = window.__API_BASE__ || window.API_BASE || 'http://localhost:5000/api';
+    const API_BASE  = window.__API_BASE__ || window.API_BASE || 'http://localhost:5000/api';
     const PAGE_SIZE = 8;
     let currentPage = 1, totalDeposits = 0;
+
     const COIN_ICONS = { BTC:'₿', USDT:'₮', TRX:'🔴', LTC:'🥈', ETH:'Ξ' };
 
     function coinPill(notes, method) {
-      const m = (notes || '').match(/Crypto deposit - (\w+)/);
+      const m    = (notes || '').match(/Crypto deposit - (\w+)/);
       const coin = m ? m[1] : (method === 'manual' ? 'Manual' : method.toUpperCase());
       const icon = COIN_ICONS[coin] || '💰';
       return `<span class="coin-pill">${icon} ${coin}</span>`;
@@ -169,8 +234,14 @@
       currentPage = page;
       const token = localStorage.getItem('token');
       if (!token) return;
+
       const tbody = document.getElementById('hist-body');
-      tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><span class="icon">⏳</span><p>Loading…</p></div></td></tr>`;
+      tbody.innerHTML = `
+        <tr><td colspan="4">
+          <div class="empty-state">
+            <span class="icon">⏳</span><p>Loading…</p>
+          </div>
+        </td></tr>`;
 
       try {
         const res  = await fetch(`${API_BASE}/deposits/my-deposits?page=${page}&limit=${PAGE_SIZE}`, {
@@ -179,12 +250,14 @@
         const data = await res.json();
 
         if (!data.success || !data.deposits.length) {
-          tbody.innerHTML = `<tr><td colspan="4">
-            <div class="empty-state">
-              <span class="icon">📭</span>
-              <p>No deposits yet.</p>
-              <a href="add-funds.html" class="empty-cta">💳 Make your first deposit</a>
-            </div></td></tr>`;
+          tbody.innerHTML = `
+            <tr><td colspan="4">
+              <div class="empty-state">
+                <span class="icon">📭</span>
+                <p>No deposits yet.</p>
+                <a href="add-funds.html" class="empty-cta">💳 Make your first deposit</a>
+              </div>
+            </td></tr>`;
           document.getElementById('pag-bar').style.display = 'none';
           return;
         }
@@ -192,34 +265,43 @@
         totalDeposits = data.total || data.deposits.length;
         const pages   = Math.ceil(totalDeposits / PAGE_SIZE);
 
+        // Each TD gets a data-label for the mobile ::before pseudo-element
         tbody.innerHTML = data.deposits.map(d => {
           const date = new Date(d.created_at).toLocaleDateString('en-US', {
-            month:'short', day:'numeric', year:'numeric',
+            month: 'short', day: 'numeric', year: 'numeric',
           });
-          return `<tr>
-            <td style="color:var(--text-muted);font-size:.82rem;white-space:nowrap;">${date}</td>
-            <td><strong style="color:var(--primary-deep);">$${parseFloat(d.amount).toFixed(2)}</strong></td>
-            <td>${coinPill(d.notes, d.method)}</td>
-            <td><span class="dep-badge ${d.status}">${d.status}</span></td>
-          </tr>`;
+          const amt = `<strong style="color:var(--primary-deep);">$${parseFloat(d.amount).toFixed(2)}</strong>`;
+          return `
+            <tr>
+              <td data-label="Date"   style="color:var(--text-muted);font-size:.82rem;white-space:nowrap;">${date}</td>
+              <td data-label="Amount">${amt}</td>
+              <td data-label="Coin"  >${coinPill(d.notes, d.method)}</td>
+              <td data-label="Status"><span class="dep-badge ${d.status}">${d.status}</span></td>
+            </tr>`;
         }).join('');
 
+        // Pagination controls
         const pagBar  = document.getElementById('pag-bar');
         const prevBtn = document.getElementById('pag-prev');
         const nextBtn = document.getElementById('pag-next');
         const infoEl  = document.getElementById('pag-info');
 
-        pagBar.style.display = 'flex';
-        infoEl.textContent   = pages > 1
+        pagBar.style.display  = 'flex';
+        infoEl.textContent    = pages > 1
           ? `Page ${page} of ${pages}  ·  ${totalDeposits} total`
           : `${totalDeposits} deposit${totalDeposits !== 1 ? 's' : ''}`;
-        prevBtn.disabled     = page <= 1;
-        nextBtn.disabled     = page >= pages;
+        prevBtn.disabled      = page <= 1;
+        nextBtn.disabled      = page >= pages;
         prevBtn.style.display = pages > 1 ? '' : 'none';
         nextBtn.style.display = pages > 1 ? '' : 'none';
 
       } catch {
-        tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><span class="icon">⚠️</span><p>Error loading history.</p></div></td></tr>`;
+        tbody.innerHTML = `
+          <tr><td colspan="4">
+            <div class="empty-state">
+              <span class="icon">⚠️</span><p>Error loading history.</p>
+            </div>
+          </td></tr>`;
       }
     }
 
