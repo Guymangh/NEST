@@ -5,162 +5,175 @@
   <link rel="icon" type="image/png" href="/images/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Deposit History – LogNest</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <script src="js/toast.js"></script>
   <script src="js/config.js"></script>
   <script src="js/nav.js"></script>
   <style>
-    /* ── Page Header ── */
-    .page-hero {
+    :root { --radius-xl: 24px; --radius-lg: 16px; --radius-md: 12px; }
+
+    .dh-page {
+      min-height: 80vh;
+      padding: 3rem 1rem 4rem;
+    }
+
+    /* ── Hero ── */
+    .dh-hero {
       text-align: center;
-      padding: 2rem 0 1.75rem;
+      margin-bottom: 2.5rem;
     }
-    .page-hero .back {
+    .dh-hero-badge {
       display: inline-flex; align-items: center; gap: 0.4rem;
-      font-size: 0.82rem; color: var(--text-muted);
-      text-decoration: none; font-weight: 600; margin-bottom: 1.1rem;
-      transition: color .18s;
+      background: var(--bg-accent); border: 1px solid var(--border-soft);
+      border-radius: 20px; padding: 0.35rem 1rem;
+      font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em;
+      color: var(--primary-deep); margin-bottom: 1rem;
     }
-    .page-hero .back:hover { color: var(--primary-deep); }
-    .page-hero h1 { font-size: 2rem; font-weight: 800; margin-bottom: 0.35rem; }
-    .page-hero p  { color: var(--text-muted); font-size: 0.92rem; }
+    .dh-hero h1 {
+      font-size: 2.5rem; font-weight: 900; line-height: 1.1; margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--text-main) 40%, var(--primary-deep));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .dh-hero p { color: var(--text-muted); font-size: 0.95rem; }
 
-    /* ── Wrapper ── */
-    .hist-wrap {
-      max-width: 780px;
-      margin: 0 auto;
+    /* ── Stats bar ── */
+    .dh-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1rem; max-width: 680px; margin: 0 auto 1.75rem;
     }
-    .hist-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-soft);
-      border-radius: 20px;
+    @media(max-width:480px){ .dh-stats{ grid-template-columns: 1fr; gap:.65rem; } }
+    .dh-stat {
+      background: var(--bg-card); border: 1px solid var(--border-soft);
+      border-radius: var(--radius-lg); padding: 1.2rem 1.25rem;
+      text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    .dh-stat .sv {
+      font-size: 1.55rem; font-weight: 900; color: var(--text-main);
+      display: block; margin-bottom: 0.2rem;
+    }
+    .dh-stat .sv.green  { color: #16a34a; }
+    .dh-stat .sv.amber  { color: #d97706; }
+    .dh-stat .sv.teal   { color: var(--primary-deep); }
+    .dh-stat .sl { font-size: 0.72rem; text-transform: uppercase; letter-spacing: .07em; font-weight: 700; color: var(--text-muted); }
+
+    /* ── Table card ── */
+    .dh-card {
+      max-width: 680px; margin: 0 auto;
+      background: var(--bg-card); border: 1px solid var(--border-soft);
+      border-radius: var(--radius-xl);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.14);
       overflow: hidden;
-      box-shadow: var(--shadow-soft);
     }
-
-    /* ══════════════════════════════════════
-       DESKTOP TABLE  (≥ 600px)
-    ══════════════════════════════════════ */
-    .hist-table { width: 100%; border-collapse: collapse; }
-    .hist-table th {
-      text-align: left; padding: 0.9rem 1.4rem;
-      font-size: 0.73rem; text-transform: uppercase;
-      letter-spacing: .07em; color: var(--text-muted);
-      font-weight: 700; border-bottom: 1px solid var(--border-soft);
+    .dh-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-soft);
       background: var(--bg-main);
     }
-    .hist-table td {
-      padding: 1rem 1.4rem; font-size: 0.875rem;
+    .dh-card-header h2 { font-size: 0.92rem; font-weight: 700; }
+    .dh-add-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: var(--primary-deep); color: #fff;
+      padding: 0.45rem 1rem; border-radius: 8px;
+      font-size: 0.8rem; font-weight: 700; text-decoration: none;
+      transition: opacity .18s;
+    }
+    .dh-add-btn:hover { opacity: 0.88; }
+
+    /* ── DESKTOP TABLE ── */
+    .dh-table { width: 100%; border-collapse: collapse; }
+    .dh-table th {
+      text-align: left; padding: 0.8rem 1.5rem;
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: .07em;
+      color: var(--text-muted); font-weight: 700;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .dh-table td {
+      padding: 1rem 1.5rem; font-size: 0.875rem;
       border-bottom: 1px solid var(--border-soft); vertical-align: middle;
     }
-    .hist-table tbody tr:last-child td { border-bottom: none; }
-    .hist-table tbody tr { transition: background .15s; }
-    .hist-table tbody tr:hover td { background: var(--bg-accent); }
+    .dh-table tbody tr:last-child td { border-bottom: none; }
+    .dh-table tbody tr { transition: background .14s; }
+    .dh-table tbody tr:hover td { background: var(--bg-accent); }
 
-    /* ══════════════════════════════════════
-       MOBILE CARD LAYOUT  (< 600px)
-    ══════════════════════════════════════ */
-    @media (max-width: 599px) {
-      /* Hide table header row */
-      .hist-table thead { display: none; }
-
-      /* Each row becomes a card */
-      .hist-table,
-      .hist-table tbody,
-      .hist-table tr,
-      .hist-table td { display: block; width: 100%; }
-
-      .hist-table tbody tr {
+    /* ── MOBILE CARDS (< 580px) ── */
+    @media(max-width:579px) {
+      .dh-table thead { display: none; }
+      .dh-table, .dh-table tbody, .dh-table tr, .dh-table td { display: block; width: 100%; box-sizing: border-box; }
+      .dh-table tbody tr {
+        padding: 1rem 1.25rem;
         border-bottom: 1px solid var(--border-soft);
-        padding: 1rem 1.1rem;
-        position: relative;
-      }
-      .hist-table tbody tr:last-child { border-bottom: none; }
-      .hist-table tbody tr:hover { background: var(--bg-accent); }
-
-      /* Each cell becomes a label+value row */
-      .hist-table td {
-        display: flex;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
+        gap: 0.5rem 1rem;
         align-items: center;
-        justify-content: space-between;
-        padding: 0.3rem 0;
-        border-bottom: none;
-        font-size: 0.875rem;
       }
-
-      /* Data-label attribute becomes the left label */
-      .hist-table td::before {
+      .dh-table tbody tr:last-child { border-bottom: none; }
+      .dh-table td { padding: 0; border: none; }
+      .dh-table td::before {
         content: attr(data-label);
-        font-size: 0.72rem;
-        text-transform: uppercase;
-        letter-spacing: .07em;
-        font-weight: 700;
-        color: var(--text-muted);
-        flex-shrink: 0;
-        margin-right: 1rem;
+        font-size: 0.68rem; text-transform: uppercase; letter-spacing: .07em;
+        font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 2px;
       }
-
-      /* Amount stands out on mobile */
-      .hist-table td[data-label="Amount"] {
-        font-size: 1rem;
-        padding-bottom: 0.5rem;
-        margin-bottom: 0.25rem;
-        border-bottom: 1px solid var(--border-soft) !important;
-      }
+      /* Date — top left, Amount — top right */
+      .dh-table td[data-label="Date"]   { grid-column: 1; grid-row: 1; }
+      .dh-table td[data-label="Amount"] { grid-column: 2; grid-row: 1; text-align: right; }
+      .dh-table td[data-label="Coin"]   { grid-column: 1; grid-row: 2; }
+      .dh-table td[data-label="Status"] { grid-column: 2; grid-row: 2; text-align: right; }
+      .dh-table td[data-label="Amount"]::before { text-align: right; }
+      .dh-table td[data-label="Status"]::before { text-align: right; }
     }
 
-    /* ── Shared badges & pills ── */
+    /* ── Badges ── */
     .dep-badge {
-      display: inline-block; padding: 0.28rem 0.75rem; border-radius: 20px;
-      font-size: 0.73rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
-      white-space: nowrap;
+      display: inline-flex; align-items: center; gap: 0.25rem;
+      padding: 0.28rem 0.75rem; border-radius: 20px;
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap;
     }
-    .dep-badge.pending  { background: #fef3c7; color: #b45309; }
-    .dep-badge.approved { background: #dcfce7; color: #15803d; }
-    .dep-badge.rejected { background: #fee2e2; color: #b91c1c; }
+    .dep-badge.pending  { background: rgba(217,119,6,0.12);  color: #d97706; border: 1px solid rgba(217,119,6,0.2); }
+    .dep-badge.approved { background: rgba(22,163,74,0.12);  color: #16a34a; border: 1px solid rgba(22,163,74,0.2); }
+    .dep-badge.rejected { background: rgba(220,38,38,0.1);   color: #dc2626; border: 1px solid rgba(220,38,38,0.18); }
 
     .coin-pill {
-      display: inline-flex; align-items: center; gap: 0.35rem;
+      display: inline-flex; align-items: center; gap: 0.3rem;
       background: var(--bg-accent); border: 1px solid var(--border-soft);
-      border-radius: 6px; padding: 0.22rem 0.65rem;
-      font-size: 0.78rem; font-weight: 700; color: var(--text-main);
-      white-space: nowrap;
+      border-radius: 6px; padding: 0.2rem 0.6rem;
+      font-size: 0.78rem; font-weight: 700; color: var(--text-main); white-space: nowrap;
     }
 
     /* ── Pagination ── */
-    .pag-bar {
+    .dh-pag {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 1.1rem 1.4rem; border-top: 1px solid var(--border-soft);
-      flex-wrap: wrap; gap: 0.75rem;
+      padding: 1rem 1.5rem; border-top: 1px solid var(--border-soft);
+      background: var(--bg-main); flex-wrap: wrap; gap: .65rem;
     }
-    .pag-info { font-size: 0.82rem; color: var(--text-muted); }
-    .pag-btns { display: flex; gap: 0.5rem; }
-    .pag-btn {
-      padding: 0.45rem 1.1rem;
-      border: 1px solid var(--border-soft); border-radius: 8px;
+    .dh-pag-info { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+    .dh-pag-btns { display: flex; gap: .45rem; }
+    .dh-pag-btn {
+      padding: 0.45rem 1rem; border: 1px solid var(--border-soft); border-radius: 8px;
       background: var(--bg-card); color: var(--text-main);
-      font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all .18s;
+      font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all .18s;
     }
-    .pag-btn:hover:not(:disabled) { border-color: var(--primary-deep); color: var(--primary-deep); }
-    .pag-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .dh-pag-btn:hover:not(:disabled) { border-color: var(--primary-deep); color: var(--primary-deep); }
+    .dh-pag-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-    /* ── Empty / loading state ── */
+    /* ── Empty state ── */
     .empty-state {
       display: flex; flex-direction: column; align-items: center;
-      justify-content: center; padding: 4rem 2rem; text-align: center; gap: 0.75rem;
+      justify-content: center; padding: 4rem 2rem; text-align: center; gap: 1rem;
     }
-    .empty-state .icon { font-size: 3rem; opacity: 0.35; }
-    .empty-state p { color: var(--text-muted); font-size: 0.9rem; }
+    .empty-state .e-icon { font-size: 3.5rem; filter: grayscale(1); opacity: .35; }
+    .empty-state h3 { font-size: 1rem; font-weight: 700; }
+    .empty-state p { color: var(--text-muted); font-size: 0.875rem; max-width: 280px; }
     .empty-cta {
-      margin-top: 0.5rem;
       display: inline-flex; align-items: center; gap: 0.4rem;
       background: var(--primary-deep); color: #fff;
       padding: 0.65rem 1.5rem; border-radius: 10px;
-      font-size: 0.88rem; font-weight: 700; text-decoration: none;
-      transition: opacity .2s;
+      font-size: 0.88rem; font-weight: 700; text-decoration: none; transition: opacity .2s;
     }
-    .empty-cta:hover { opacity: 0.88; }
+    .empty-cta:hover { opacity: .88; }
   </style>
 </head>
 <body data-require-auth="true">
@@ -172,14 +185,38 @@
   </header>
 
   <main class="main-content container">
-    <div class="page-hero" data-fm="fadeIn">
-      <h1>Deposit History</h1>
-      <p>All your past deposits and their current status.</p>
-    </div>
+    <div class="dh-page" data-fm="fadeIn">
 
-    <div class="hist-wrap" data-fm="fadeIn">
-      <div class="hist-card">
-        <table class="hist-table" id="hist-table">
+      <div class="dh-hero">
+        <div class="dh-hero-badge">📋 Transaction History</div>
+        <h1>Deposit History</h1>
+        <p>All your past deposits and their current status.</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="dh-stats" id="dh-stats">
+        <div class="dh-stat">
+          <span class="sv teal" id="stat-total">—</span>
+          <span class="sl">Total Deposits</span>
+        </div>
+        <div class="dh-stat">
+          <span class="sv green" id="stat-approved">—</span>
+          <span class="sl">Approved</span>
+        </div>
+        <div class="dh-stat">
+          <span class="sv amber" id="stat-pending">—</span>
+          <span class="sl">Pending</span>
+        </div>
+      </div>
+
+      <!-- Table card -->
+      <div class="dh-card">
+        <div class="dh-card-header">
+          <h2>All Deposits</h2>
+          <a href="add-funds.html" class="dh-add-btn">+ Add Funds</a>
+        </div>
+
+        <table class="dh-table">
           <thead>
             <tr>
               <th>Date</th>
@@ -189,25 +226,24 @@
             </tr>
           </thead>
           <tbody id="hist-body">
-            <tr>
-              <td colspan="4">
-                <div class="empty-state">
-                  <span class="icon">⏳</span>
-                  <p>Loading your deposits…</p>
-                </div>
-              </td>
-            </tr>
+            <tr><td colspan="4">
+              <div class="empty-state">
+                <div class="e-icon">⏳</div>
+                <p>Loading your deposits…</p>
+              </div>
+            </td></tr>
           </tbody>
         </table>
 
-        <div class="pag-bar" id="pag-bar" style="display:none;">
-          <span class="pag-info" id="pag-info">—</span>
-          <div class="pag-btns">
-            <button class="pag-btn" id="pag-prev" onclick="loadHistory(currentPage - 1)">← Prev</button>
-            <button class="pag-btn" id="pag-next" onclick="loadHistory(currentPage + 1)">Next →</button>
+        <div class="dh-pag" id="dh-pag" style="display:none;">
+          <span class="dh-pag-info" id="pag-info">—</span>
+          <div class="dh-pag-btns">
+            <button class="dh-pag-btn" id="pag-prev" onclick="loadHistory(currentPage-1)">← Prev</button>
+            <button class="dh-pag-btn" id="pag-next" onclick="loadHistory(currentPage+1)">Next →</button>
           </div>
         </div>
       </div>
+
     </div>
   </main>
 
@@ -218,29 +254,27 @@
   <script>
     const API_BASE  = window.__API_BASE__ || window.API_BASE || 'http://localhost:5000/api';
     const PAGE_SIZE = 8;
-    let currentPage = 1, totalDeposits = 0;
-
-    const COIN_ICONS = { BTC:'₿', USDT:'₮', TRX:'🔴', LTC:'🥈', ETH:'Ξ' };
+    let currentPage = 1, allLoaded = [];
+    const ICONS = { BTC:'₿', USDT:'₮', TRX:'🔴', LTC:'🥈', ETH:'Ξ' };
 
     function coinPill(notes, method) {
       const m    = (notes || '').match(/Crypto deposit - (\w+)/);
       const coin = m ? m[1] : (method === 'manual' ? 'Manual' : method.toUpperCase());
-      const icon = COIN_ICONS[coin] || '💰';
-      return `<span class="coin-pill">${icon} ${coin}</span>`;
+      return `<span class="coin-pill">${ICONS[coin]||'💰'} ${coin}</span>`;
+    }
+
+    function updateStats(deps) {
+      document.getElementById('stat-total').textContent    = deps.length;
+      document.getElementById('stat-approved').textContent = deps.filter(d=>d.status==='approved').length;
+      document.getElementById('stat-pending').textContent  = deps.filter(d=>d.status==='pending').length;
     }
 
     async function loadHistory(page = 1) {
       currentPage = page;
       const token = localStorage.getItem('token');
       if (!token) return;
-
       const tbody = document.getElementById('hist-body');
-      tbody.innerHTML = `
-        <tr><td colspan="4">
-          <div class="empty-state">
-            <span class="icon">⏳</span><p>Loading…</p>
-          </div>
-        </td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="e-icon">⏳</div><p>Loading…</p></div></td></tr>`;
 
       try {
         const res  = await fetch(`${API_BASE}/deposits/my-deposits?page=${page}&limit=${PAGE_SIZE}`, {
@@ -249,58 +283,48 @@
         const data = await res.json();
 
         if (!data.success || !data.deposits.length) {
-          tbody.innerHTML = `
-            <tr><td colspan="4">
-              <div class="empty-state">
-                <span class="icon">📭</span>
-                <p>No deposits yet.</p>
-                <a href="add-funds.html" class="empty-cta">💳 Make your first deposit</a>
-              </div>
-            </td></tr>`;
-          document.getElementById('pag-bar').style.display = 'none';
+          tbody.innerHTML = `<tr><td colspan="4">
+            <div class="empty-state">
+              <div class="e-icon">📭</div>
+              <h3>No deposits yet</h3>
+              <p>Make your first crypto deposit to get started.</p>
+              <a href="add-funds.html" class="empty-cta">💳 Add Funds</a>
+            </div></td></tr>`;
+          document.getElementById('dh-pag').style.display = 'none';
+          document.getElementById('stat-total').textContent    = '0';
+          document.getElementById('stat-approved').textContent = '0';
+          document.getElementById('stat-pending').textContent  = '0';
           return;
         }
 
-        totalDeposits = data.total || data.deposits.length;
-        const pages   = Math.ceil(totalDeposits / PAGE_SIZE);
+        allLoaded = data.deposits;
+        updateStats(data.deposits);
+        const total = data.total || data.deposits.length;
+        const pages = Math.ceil(total / PAGE_SIZE);
 
-        // Each TD gets a data-label for the mobile ::before pseudo-element
         tbody.innerHTML = data.deposits.map(d => {
-          const date = new Date(d.created_at).toLocaleDateString('en-US', {
-            month: 'short', day: 'numeric', year: 'numeric',
-          });
-          const amt = `<strong style="color:var(--primary-deep);">$${parseFloat(d.amount).toFixed(2)}</strong>`;
-          return `
-            <tr>
-              <td data-label="Date"   style="color:var(--text-muted);font-size:.82rem;white-space:nowrap;">${date}</td>
-              <td data-label="Amount">${amt}</td>
-              <td data-label="Coin"  >${coinPill(d.notes, d.method)}</td>
-              <td data-label="Status"><span class="dep-badge ${d.status}">${d.status}</span></td>
-            </tr>`;
+          const date = new Date(d.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+          return `<tr>
+            <td data-label="Date"   style="color:var(--text-muted);font-size:.82rem;white-space:nowrap;">${date}</td>
+            <td data-label="Amount"><strong style="color:var(--primary-deep);font-size:.95rem;">$${parseFloat(d.amount).toFixed(2)}</strong></td>
+            <td data-label="Coin"  >${coinPill(d.notes, d.method)}</td>
+            <td data-label="Status"><span class="dep-badge ${d.status}">${d.status === 'approved' ? '✓' : d.status === 'pending' ? '⏳' : '✕'} ${d.status}</span></td>
+          </tr>`;
         }).join('');
 
-        // Pagination controls
-        const pagBar  = document.getElementById('pag-bar');
+        const pagEl   = document.getElementById('dh-pag');
         const prevBtn = document.getElementById('pag-prev');
         const nextBtn = document.getElementById('pag-next');
         const infoEl  = document.getElementById('pag-info');
-
-        pagBar.style.display  = 'flex';
-        infoEl.textContent    = pages > 1
-          ? `Page ${page} of ${pages}  ·  ${totalDeposits} total`
-          : `${totalDeposits} deposit${totalDeposits !== 1 ? 's' : ''}`;
-        prevBtn.disabled      = page <= 1;
-        nextBtn.disabled      = page >= pages;
+        pagEl.style.display  = 'flex';
+        infoEl.textContent   = pages > 1 ? `Page ${page} of ${pages} · ${total} deposits` : `${total} deposit${total!==1?'s':''}`;
+        prevBtn.disabled     = page <= 1;
+        nextBtn.disabled     = page >= pages;
         prevBtn.style.display = pages > 1 ? '' : 'none';
         nextBtn.style.display = pages > 1 ? '' : 'none';
 
       } catch {
-        tbody.innerHTML = `
-          <tr><td colspan="4">
-            <div class="empty-state">
-              <span class="icon">⚠️</span><p>Error loading history.</p>
-            </div>
-          </td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="e-icon">⚠️</div><h3>Error loading</h3><p>Could not load deposit history.</p></div></td></tr>`;
       }
     }
 

@@ -5,107 +5,179 @@
   <link rel="icon" type="image/png" href="/images/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Add Funds – LogNest</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <script src="js/toast.js"></script>
   <script src="js/config.js"></script>
   <script src="js/nav.js"></script>
   <style>
-    .page-hero {
-      text-align: center;
-      padding: 2rem 0 1.75rem;
-    }
-    .page-hero .back {
-      display: inline-flex; align-items: center; gap: 0.4rem;
-      font-size: 0.82rem; color: var(--text-muted);
-      text-decoration: none; font-weight: 600; margin-bottom: 1.25rem;
-      transition: color .18s;
-    }
-    .page-hero .back:hover { color: var(--primary-deep); }
-    .page-hero h1 { font-size: 2rem; font-weight: 800; margin-bottom: 0.35rem; }
-    .page-hero p  { color: var(--text-muted); font-size: 0.92rem; }
+    :root { --radius-xl: 24px; --radius-lg: 16px; --radius-md: 12px; }
 
-    /* centered card */
-    .dep-card {
+    .af-page {
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1rem 4rem;
+    }
+
+    /* ── Hero ── */
+    .af-hero {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      max-width: 520px;
+    }
+    .af-hero-badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: var(--bg-accent); border: 1px solid var(--border-soft);
+      border-radius: 20px; padding: 0.35rem 1rem;
+      font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em;
+      color: var(--primary-deep); margin-bottom: 1rem;
+    }
+    .af-hero h1 {
+      font-size: 2.5rem; font-weight: 900;
+      line-height: 1.1; margin-bottom: 0.6rem;
+      background: linear-gradient(135deg, var(--text-main) 40%, var(--primary-deep));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .af-hero p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; }
+
+    /* ── Main card ── */
+    .af-card {
+      width: 100%; max-width: 540px;
       background: var(--bg-card);
       border: 1px solid var(--border-soft);
-      border-radius: 20px;
-      padding: 2.25rem 2.5rem;
-      box-shadow: var(--shadow-soft);
-      max-width: 580px;
-      margin: 0 auto;
+      border-radius: var(--radius-xl);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.18), 0 1px 0 rgba(255,255,255,0.04) inset;
+      overflow: hidden;
     }
 
-    .sec-label {
-      font-size: 0.75rem; text-transform: uppercase; letter-spacing: .08em;
-      font-weight: 700; color: var(--text-muted); margin-bottom: 0.85rem;
+    /* ── Card section dividers ── */
+    .af-section {
+      padding: 1.75rem 2rem;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .af-section:last-of-type { border-bottom: none; }
+    .af-section-label {
+      font-size: 0.72rem; text-transform: uppercase; letter-spacing: .1em;
+      font-weight: 700; color: var(--text-muted); margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .af-section-label::after {
+      content:''; flex:1; height:1px; background: var(--border-soft);
     }
 
-    /* Amount chips */
-    .amount-chips { display: flex; gap: 0.55rem; flex-wrap: wrap; margin-bottom: 1rem; justify-content: center; }
+    /* ── Amount chips ── */
+    .chip-grid {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    @media(max-width:420px){ .chip-grid{ grid-template-columns: repeat(3,1fr); } }
     .chip {
-      padding: 0.55rem 1.2rem; border: 2px solid var(--border-soft);
-      border-radius: 10px; font-size: 0.9rem; font-weight: 700;
-      cursor: pointer; background: var(--bg-card); color: var(--text-main);
-      transition: all 0.18s;
+      padding: 0.65rem 0.5rem; border: 1.5px solid var(--border-soft);
+      border-radius: var(--radius-md); font-size: 0.9rem; font-weight: 700;
+      cursor: pointer; background: var(--bg-main); color: var(--text-main);
+      transition: all 0.18s; text-align: center;
     }
-    .chip:hover, .chip.on { border-color: var(--primary-deep); background: var(--bg-accent); color: var(--primary-deep); }
-
-    .amt-wrap { position: relative; margin-bottom: 2rem; }
-    .amt-wrap .sym {
-      position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
-      font-weight: 700; color: var(--text-muted); font-size: 1.05rem; pointer-events: none;
-    }
-    .amt-wrap input {
-      width: 100%; padding: 0.9rem 1rem 0.9rem 2.4rem;
-      border: 2px solid var(--border-soft); border-radius: 12px;
-      font-size: 1.1rem; font-weight: 700; color: var(--text-main);
-      background: var(--bg-main); transition: border-color 0.2s; box-sizing: border-box;
-    }
-    .amt-wrap input:focus { outline: none; border-color: var(--primary-deep); }
-
-    /* Coin grid */
-    .coin-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.65rem; margin-bottom: 2rem;
-    }
-    @media(max-width:480px) { .coin-grid { grid-template-columns: repeat(2, 1fr); } }
-    .coin-btn {
-      display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
-      padding: 0.9rem 0.5rem; border: 2px solid var(--border-soft);
-      border-radius: 12px; background: var(--bg-card); cursor: pointer; transition: all 0.18s;
-    }
-    .coin-btn:hover, .coin-btn.on { border-color: var(--primary-deep); background: var(--bg-accent); }
-    .coin-btn .ci { font-size: 1.5rem; }
-    .coin-btn .cn { font-size: 0.8rem; font-weight: 700; color: var(--text-main); }
-    .coin-btn .net { font-size: 0.68rem; color: var(--text-muted); }
-
-    /* Generate button */
-    .gen-btn {
-      width: 100%; padding: 1rem;
-      background: linear-gradient(135deg, var(--primary-deep), #0a6e6e);
-      color: #fff; border: none; border-radius: 12px;
-      font-size: 1rem; font-weight: 700; cursor: pointer;
-      transition: opacity 0.2s, transform 0.15s;
-      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-    }
-    .gen-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-    .gen-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-    /* Steps */
-    .how-steps {
-      display: flex; gap: 1.25rem; margin-top: 1.75rem;
-      padding-top: 1.75rem; border-top: 1px solid var(--border-soft);
-    }
-    @media(max-width:480px){ .how-steps { flex-direction:column; gap:.85rem; } }
-    .how-step { display: flex; gap: 0.75rem; align-items: flex-start; flex: 1; }
-    .step-num {
-      width: 24px; height: 24px; border-radius: 50%;
+    .chip:hover { border-color: var(--primary-deep); color: var(--primary-deep); transform: translateY(-1px); }
+    .chip.on {
+      border-color: var(--primary-deep);
       background: var(--primary-deep); color: #fff;
-      font-size: 0.72rem; font-weight: 800;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;
+      box-shadow: 0 4px 14px rgba(13,79,79,0.35);
     }
-    .step-text { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
-    .step-text strong { color: var(--text-main); display: block; }
+    .custom-input-wrap {
+      position: relative;
+    }
+    .custom-input-wrap .sym {
+      position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
+      font-weight: 800; color: var(--text-muted); font-size: 1rem; pointer-events: none;
+    }
+    .custom-input-wrap input {
+      width: 100%; padding: 0.85rem 1rem 0.85rem 2.3rem;
+      border: 1.5px solid var(--border-soft); border-radius: var(--radius-md);
+      font-size: 1rem; font-weight: 700; color: var(--text-main);
+      background: var(--bg-main); transition: border-color 0.2s, box-shadow 0.2s;
+      box-sizing: border-box;
+    }
+    .custom-input-wrap input:focus {
+      outline: none; border-color: var(--primary-deep);
+      box-shadow: 0 0 0 3px rgba(13,79,79,0.12);
+    }
+
+    /* ── Coin grid ── */
+    .coin-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem;
+    }
+    @media(max-width:380px){ .coin-grid{ grid-template-columns: repeat(2,1fr); } }
+    .coin-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 0.35rem;
+      padding: 1rem 0.5rem; border: 1.5px solid var(--border-soft);
+      border-radius: var(--radius-md); background: var(--bg-main);
+      cursor: pointer; transition: all 0.18s; position: relative; overflow: hidden;
+    }
+    .coin-btn::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, transparent, rgba(13,79,79,0.06));
+      opacity: 0; transition: opacity .2s;
+    }
+    .coin-btn:hover { border-color: var(--primary-deep); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(13,79,79,0.14); }
+    .coin-btn:hover::before { opacity: 1; }
+    .coin-btn.on {
+      border-color: var(--primary-deep); background: var(--bg-accent);
+      box-shadow: 0 0 0 3px rgba(13,79,79,0.12);
+    }
+    .coin-btn .ci { font-size: 1.6rem; line-height: 1; }
+    .coin-btn .cn { font-size: 0.8rem; font-weight: 800; color: var(--text-main); }
+    .coin-btn .net {
+      font-size: 0.63rem; font-weight: 600;
+      color: var(--text-muted); background: var(--bg-main);
+      border: 1px solid var(--border-soft); border-radius: 4px;
+      padding: 0.1rem 0.4rem;
+    }
+    .coin-btn.on .net { background: var(--bg-card); }
+
+    /* ── Generate button ── */
+    .af-footer { padding: 1.5rem 2rem; background: var(--bg-main); }
+    .gen-btn {
+      width: 100%; padding: 1.1rem;
+      background: linear-gradient(135deg, var(--primary-deep) 0%, #0a6e6e 100%);
+      color: #fff; border: none; border-radius: var(--radius-md);
+      font-size: 1rem; font-weight: 800; cursor: pointer; letter-spacing: .02em;
+      transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+      box-shadow: 0 6px 20px rgba(13,79,79,0.3);
+      position: relative; overflow: hidden;
+    }
+    .gen-btn::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+    }
+    .gen-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(13,79,79,0.4); }
+    .gen-btn:active { transform: translateY(0); }
+    .gen-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* ── How it works ── */
+    .how-row {
+      display: flex; gap: 0; background: var(--bg-main);
+      border-top: 1px solid var(--border-soft);
+    }
+    .how-step {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; text-align: center; gap: 0.5rem;
+      padding: 1.4rem 0.75rem;
+      border-right: 1px solid var(--border-soft);
+    }
+    .how-step:last-child { border-right: none; }
+    .step-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-deep), #0a6e6e);
+      color: #fff; font-size: 0.75rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 3px 10px rgba(13,79,79,0.3);
+    }
+    .step-text { font-size: 0.75rem; color: var(--text-muted); line-height: 1.45; }
+    .step-text strong { color: var(--text-main); font-size: 0.8rem; display: block; margin-bottom: .1rem; }
   </style>
 </head>
 <body data-require-auth="true">
@@ -117,66 +189,95 @@
   </header>
 
   <main class="main-content container">
-    <div class="page-hero" data-fm="fadeIn">
-      <h1>Add Funds</h1>
-      <p>Pick an amount and a coin — your balance credits automatically.</p>
-    </div>
+    <div class="af-page" data-fm="fadeIn">
 
-    <div class="dep-card" data-fm="fadeIn">
-      <p class="sec-label" style="text-align:center;">Select Amount (USD)</p>
-      <div class="amount-chips">
-        <button class="chip" onclick="pickAmt(10,this)">$10</button>
-        <button class="chip" onclick="pickAmt(25,this)">$25</button>
-        <button class="chip" onclick="pickAmt(50,this)">$50</button>
-        <button class="chip" onclick="pickAmt(100,this)">$100</button>
-        <button class="chip" onclick="pickAmt(250,this)">$250</button>
-      </div>
-      <div class="amt-wrap">
-        <span class="sym">$</span>
-        <input type="number" id="dep-amount" min="5" step="1" placeholder="Custom amount…" oninput="clearChips()" />
+      <!-- Hero -->
+      <div class="af-hero">
+        <div class="af-hero-badge">💳 Crypto Deposit</div>
+        <h1>Add Funds</h1>
+        <p>Select an amount and coin — a unique payment address is generated instantly. Your balance is credited automatically.</p>
       </div>
 
-      <p class="sec-label" style="text-align:center;">Select Cryptocurrency</p>
-      <div class="coin-grid">
-        <button class="coin-btn" id="coin-BTC" onclick="pickCoin('BTC','')">
-          <span class="ci">₿</span><span class="cn">Bitcoin</span><span class="net">BTC</span>
-        </button>
-        <button class="coin-btn" id="coin-USDT-TRC20" onclick="pickCoin('USDT','TRC20')">
-          <span class="ci">₮</span><span class="cn">USDT</span><span class="net">TRC-20</span>
-        </button>
-        <button class="coin-btn" id="coin-USDT-ERC20" onclick="pickCoin('USDT','ERC20')">
-          <span class="ci" style="color:#627eea;">₮</span><span class="cn">USDT</span><span class="net">ERC-20</span>
-        </button>
-        <button class="coin-btn" id="coin-TRX" onclick="pickCoin('TRX','')">
-          <span class="ci">🔴</span><span class="cn">Tron</span><span class="net">TRX</span>
-        </button>
-        <button class="coin-btn" id="coin-LTC" onclick="pickCoin('LTC','')">
-          <span class="ci">🥈</span><span class="cn">Litecoin</span><span class="net">LTC</span>
-        </button>
-        <button class="coin-btn" id="coin-USDT-BSC" onclick="pickCoin('USDT','BSC')">
-          <span class="ci" style="color:#f0b90b;">₮</span><span class="cn">USDT</span><span class="net">BEP-20</span>
-        </button>
-      </div>
+      <!-- Card -->
+      <div class="af-card">
 
-      <button class="gen-btn" id="gen-btn" onclick="generateAddress()">
-        <span>🔑</span> Get Payment Address
-      </button>
-
-      <!-- How it works -->
-      <div class="how-steps">
-        <div class="how-step">
-          <div class="step-num">1</div>
-          <div class="step-text"><strong>Pick amount &amp; coin</strong>Choose your USD amount and a cryptocurrency.</div>
+        <!-- Amount -->
+        <div class="af-section">
+          <div class="af-section-label">Amount (USD)</div>
+          <div class="chip-grid">
+            <button class="chip" onclick="pickAmt(10,this)">$10</button>
+            <button class="chip" onclick="pickAmt(25,this)">$25</button>
+            <button class="chip" onclick="pickAmt(50,this)">$50</button>
+            <button class="chip" onclick="pickAmt(100,this)">$100</button>
+            <button class="chip" onclick="pickAmt(250,this)">$250</button>
+          </div>
+          <div class="custom-input-wrap">
+            <span class="sym">$</span>
+            <input type="number" id="dep-amount" min="5" step="1" placeholder="Enter custom amount…" oninput="clearChips()" />
+          </div>
         </div>
-        <div class="how-step">
-          <div class="step-num">2</div>
-          <div class="step-text"><strong>Get your address</strong>A unique address is generated, valid 30 min.</div>
+
+        <!-- Coin -->
+        <div class="af-section">
+          <div class="af-section-label">Cryptocurrency</div>
+          <div class="coin-grid">
+            <button class="coin-btn" id="coin-BTC" onclick="pickCoin('BTC','')">
+              <span class="ci">₿</span>
+              <span class="cn">Bitcoin</span>
+              <span class="net">BTC</span>
+            </button>
+            <button class="coin-btn" id="coin-USDT-TRC20" onclick="pickCoin('USDT','TRC20')">
+              <span class="ci">₮</span>
+              <span class="cn">USDT</span>
+              <span class="net">TRC-20</span>
+            </button>
+            <button class="coin-btn" id="coin-USDT-ERC20" onclick="pickCoin('USDT','ERC20')">
+              <span class="ci" style="color:#627eea;">₮</span>
+              <span class="cn">USDT</span>
+              <span class="net">ERC-20</span>
+            </button>
+            <button class="coin-btn" id="coin-TRX" onclick="pickCoin('TRX','')">
+              <span class="ci">🔴</span>
+              <span class="cn">Tron</span>
+              <span class="net">TRX</span>
+            </button>
+            <button class="coin-btn" id="coin-LTC" onclick="pickCoin('LTC','')">
+              <span class="ci">🥈</span>
+              <span class="cn">Litecoin</span>
+              <span class="net">LTC</span>
+            </button>
+            <button class="coin-btn" id="coin-USDT-BSC" onclick="pickCoin('USDT','BSC')">
+              <span class="ci" style="color:#f0b90b;">₮</span>
+              <span class="cn">USDT</span>
+              <span class="net">BEP-20</span>
+            </button>
+          </div>
         </div>
-        <div class="how-step">
-          <div class="step-num">3</div>
-          <div class="step-text"><strong>Send &amp; done</strong>Send the exact crypto — balance credits automatically.</div>
+
+        <!-- CTA -->
+        <div class="af-footer">
+          <button class="gen-btn" id="gen-btn" onclick="generateAddress()">
+            <span>🔑</span> Generate Payment Address
+          </button>
         </div>
-      </div>
+
+        <!-- Steps -->
+        <div class="how-row">
+          <div class="how-step">
+            <div class="step-num">1</div>
+            <div class="step-text"><strong>Pick amount &amp; coin</strong>Choose your USD amount and crypto.</div>
+          </div>
+          <div class="how-step">
+            <div class="step-num">2</div>
+            <div class="step-text"><strong>Get address</strong>Unique address valid for 30 min.</div>
+          </div>
+          <div class="how-step">
+            <div class="step-num">3</div>
+            <div class="step-text"><strong>Send &amp; done</strong>Balance credited automatically.</div>
+          </div>
+        </div>
+
+      </div><!-- /af-card -->
     </div>
   </main>
 
@@ -206,18 +307,18 @@
     async function generateAddress() {
       const token = localStorage.getItem('token');
       if (!token) return toast('Please log in first.', 'warning');
-      if (!selectedCoin) return toast('Please select a cryptocurrency first.', 'warning');
+      if (!selectedCoin) return toast('Select a cryptocurrency first.', 'warning');
       const amount = parseFloat(document.getElementById('dep-amount').value);
       if (!amount || amount < 5) return toast('Minimum deposit is $5.00.', 'warning');
 
       const btn = document.getElementById('gen-btn');
       btn.disabled = true;
-      btn.innerHTML = '<span>⏳</span> Generating address…';
+      btn.innerHTML = '<span style="animation:spin 1s linear infinite;display:inline-block">⏳</span> Generating…';
 
       try {
         const res  = await fetch(`${API_BASE}/deposits/oxapay/whitelabel`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({ amount, pay_currency: selectedCoin, network: selectedNetwork || undefined }),
         });
         const data = await res.json();
@@ -227,13 +328,15 @@
         } else {
           toast(data.message || 'Failed to generate address.', 'error');
         }
-      } catch (err) {
-        toast('Connection error. Try again.', 'error');
-      } finally {
+      } catch { toast('Connection error. Try again.', 'error'); }
+      finally {
         btn.disabled = false;
-        btn.innerHTML = '<span>🔑</span> Get Payment Address';
+        btn.innerHTML = '<span>🔑</span> Generate Payment Address';
       }
     }
   </script>
+  <style>
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
 </body>
 </html>
