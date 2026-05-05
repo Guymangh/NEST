@@ -294,7 +294,8 @@
 
     /* ── Approve / Reject ── */
     async function approveDeposit(id) {
-      if (!confirm('Approve this deposit and credit the user?')) return;
+      const ok = await adminConfirm('Approve Deposit', 'Approve this deposit and credit the user?', '✓ Approve & Credit');
+      if (!ok) return;
       try {
         const res  = await fetch(`${API_BASE}/deposits/admin/approve/${id}`, { method:'POST', headers:{Authorization:`Bearer ${token}`} });
         const data = await res.json();
@@ -304,7 +305,11 @@
     }
 
     async function rejectDeposit(id) {
-      const reason = prompt('Reason for rejection (optional):') || 'Rejected by admin';
+      const result = await adminForm('Reject Deposit', [
+        { id: 'reason', label: 'Reason for rejection (optional)', type: 'text', value: 'Rejected by admin' }
+      ]);
+      if (!result) return;
+      const reason = result.reason || 'Rejected by admin';
       try {
         const res  = await fetch(`${API_BASE}/deposits/admin/reject/${id}`, {
           method:'POST',
