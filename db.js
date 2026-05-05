@@ -7,6 +7,9 @@ const isSupabase = (process.env.DATABASE_URL || '').includes('supabase');
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: isSupabase ? { rejectUnauthorized: false } : false,
+  max: 2, // Limit pool size for Vercel Serverless
+  idleTimeoutMillis: 3000,
+  connectionTimeoutMillis: 5000,
 });
 
 pool.on('connect', () => {
