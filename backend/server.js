@@ -19,10 +19,14 @@ const devOrigins = [
   'http://127.0.0.1:5000',
 ];
 
-const prodOrigins = (process.env.ALLOWED_ORIGINS || '')
-  .split(',')
-  .map(o => o.trim())
-  .filter(Boolean);
+const prodOrigins = [
+  'https://lognest.store',
+  'https://www.lognest.store',
+  ...(process.env.ALLOWED_ORIGINS || '')
+    .split(',')
+    .map(o => o.trim())
+    .filter(Boolean),
+];
 
 const allowedOrigins = isProd ? prodOrigins : devOrigins;
 
@@ -87,19 +91,21 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, message });
 });
 
-// ─── Start Server ─────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`\n🚀 LogNest API running on http://localhost:${PORT}`);
-  console.log(`🌍 Environment : ${isProd ? 'PRODUCTION' : 'development'}`);
-  console.log(`🔒 CORS origins: ${allowedOrigins.join(', ') || '(none set!)'}`);
-  console.log(`📋 Health check: http://localhost:${PORT}/api/health\n`);
+// ─── Start Server (local only — Vercel handles this in production) ────────────
+if (process.env.VERCEL !== '1') {
+  app.listen(PORT, () => {
+    console.log(`\n🚀 LogNest API running on http://localhost:${PORT}`);
+    console.log(`🌍 Environment : ${isProd ? 'PRODUCTION' : 'development'}`);
+    console.log(`🔒 CORS origins: ${allowedOrigins.join(', ') || '(none set!)'}`);
+    console.log(`📋 Health check: http://localhost:${PORT}/api/health\n`);
 
-  if (isProd && !process.env.ALLOWED_ORIGINS) {
-    console.warn('⚠️  WARNING: NODE_ENV=production but ALLOWED_ORIGINS is not set in .env!');
-  }
-  if (process.env.JWT_SECRET === 'your_super_secret_jwt_key_change_this_in_production') {
-    console.warn('⚠️  WARNING: JWT_SECRET is still the default placeholder — change it before going live!');
-  }
-});
+    if (isProd && !process.env.ALLOWED_ORIGINS) {
+      console.warn('⚠️  WARNING: NODE_ENV=production but ALLOWED_ORIGINS is not set in .env!');
+    }
+    if (process.env.JWT_SECRET === 'your_super_secret_jwt_key_change_this_in_production') {
+      console.warn('⚠️  WARNING: JWT_SECRET is still the default placeholder — change it before going live!');
+    }
+  });
+}
 
 module.exports = app;
