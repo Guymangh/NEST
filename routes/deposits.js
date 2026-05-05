@@ -487,7 +487,7 @@ router.post('/nowpayments/webhook', express.json(), async (req, res) => {
 });
 
 // ─── OxaPay Helper ────────────────────────────────────────────────────────────
-function oxapayRequest(endpoint, body) {
+function oxapayRequest(endpoint, merchantKey, body) {
   return new Promise((resolve, reject) => {
     const payload = JSON.stringify(body);
     const options = {
@@ -498,6 +498,7 @@ function oxapayRequest(endpoint, body) {
       headers: {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(payload),
+        'merchant_api_key': merchantKey,
       },
     };
     const req = https.request(options, (res) => {
@@ -543,8 +544,7 @@ router.post('/oxapay/create', authMiddleware, async (req, res) => {
     const depositId = depositRecord.rows[0].id;
 
     // Create OxaPay invoice
-    const invoice = await oxapayRequest('/v1/payment/invoice', {
-      merchant_api_key: merchantKey,
+    const invoice = await oxapayRequest('/v1/payment/invoice', merchantKey, {
       amount: parseFloat(amount),
       currency: 'USD',
       lifetime: 60,
@@ -554,22 +554,25 @@ router.post('/oxapay/create', authMiddleware, async (req, res) => {
       return_url: process.env.OXAPAY_RETURN_URL,
     });
 
-    if (!invoice || invoice.result !== 100) {
+    // OxaPay v1 returns: { status: 200, data: { payment_url, track_id, ... } }
+    if (!invoice || invoice.status !== 200) {
       await pool.query('DELETE FROM deposits WHERE id = $1', [depositId]);
       console.error('OxaPay invoice error:', invoice);
       return res.status(502).json({ success: false, message: invoice?.message || 'Payment gateway error.' });
     }
 
-    // Store OxaPay trackId for reference
+    const trackId = String(invoice.data.track_id);
+
+    // Store OxaPay track_id for reference
     await pool.query(
       'UPDATE deposits SET transaction_hash = $1 WHERE id = $2',
-      [String(invoice.trackId), depositId]
+      [trackId, depositId]
     );
 
     return res.status(201).json({
       success: true,
-      payment_url: invoice.payLink,
-      track_id: invoice.trackId,
+      payment_url: invoice.data.payment_url,
+      track_id: trackId,
       deposit_id: depositId,
     });
   } catch (error) {
