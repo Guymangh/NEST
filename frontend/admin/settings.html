@@ -48,23 +48,7 @@
       </header>
 
       <div class="a-content">
-        <!-- Wallet Settings -->
-        <div class="a-card">
-          <h2 style="font-size:1rem; font-weight:700; margin-bottom: 1.25rem;">💳 Crypto Wallet Addresses</h2>
-          <form id="admin-settings-form">
-            <div class="a-form-grid">
-              <div class="a-form-group">
-                <label for="btc_wallet">Bitcoin (BTC) Wallet Address</label>
-                <input type="text" id="btc_wallet" name="btc_wallet" class="a-input" placeholder="bc1q..." />
-              </div>
-              <div class="a-form-group">
-                <label for="usdt_wallet">USDT (TRC20) Wallet Address</label>
-                <input type="text" id="usdt_wallet" name="usdt_wallet" class="a-input" placeholder="T..." />
-              </div>
-            </div>
-            <button type="submit" class="a-btn a-btn-primary">Save Settings</button>
-          </form>
-        </div>
+
 
         <!-- Change Password -->
         <div class="a-card">
@@ -88,48 +72,7 @@
           </form>
         </div>
 
-        <script>
-          (function() {
-            const API_BASE = window.__API_BASE__ || window.API_BASE || 'http://localhost:5000/api';
-            const token    = localStorage.getItem('token');
 
-            document.getElementById('change-password-form').addEventListener('submit', async (e) => {
-              e.preventDefault();
-              const btn     = document.getElementById('change-pw-btn');
-              const current = document.getElementById('current_password').value;
-              const next    = document.getElementById('new_password').value;
-              const confirm = document.getElementById('confirm_password').value;
-
-              if (next !== confirm) {
-                adminToast('New passwords do not match.', 'error'); return;
-              }
-              if (next.length < 8) {
-                adminToast('New password must be at least 8 characters.', 'error'); return;
-              }
-
-              btn.textContent = 'Updating...'; btn.disabled = true;
-              try {
-                const res  = await fetch(API_BASE + '/auth/change-password', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                  body: JSON.stringify({ current_password: current, new_password: next })
-                });
-                const data = await res.json();
-                if (data.success) {
-                  adminToast('Password updated successfully!', 'success');
-                  e.target.reset();
-                } else {
-                  adminToast(data.message || 'Failed to update password.', 'error');
-                }
-              } catch (err) {
-                adminToast('Connection error. Try again.', 'error');
-              } finally {
-                btn.textContent = 'Update Password'; btn.disabled = false;
-              }
-            });
-          })();
-        </script>
-      </div>
     </main>
   </div>
 </body>

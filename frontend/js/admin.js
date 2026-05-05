@@ -574,31 +574,38 @@ window.processDeposit = async function(id, action) {
 }
 
 // ─── Settings ─────────────────────────────────────────────────────────────────
-async function loadSettings() {
-  const form = document.getElementById('admin-settings-form');
-  if (!form) return;
+function loadSettings() {
+  const pwForm = document.getElementById('change-password-form');
+  if (pwForm) {
+    pwForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn     = document.getElementById('change-pw-btn');
+      const current = document.getElementById('current_password').value;
+      const next    = document.getElementById('new_password').value;
+      const confirm = document.getElementById('confirm_password').value;
 
-  const data = await fetchAdminData('/admin/settings');
-  if (data && data.success) {
-    if (data.settings.btc_wallet)  document.getElementById('btc_wallet').value  = data.settings.btc_wallet;
-    if (data.settings.usdt_wallet) document.getElementById('usdt_wallet').value = data.settings.usdt_wallet;
-  }
+      if (next !== confirm) {
+        adminToast('New passwords do not match.', 'error'); return;
+      }
+      if (next.length < 8) {
+        adminToast('New password must be at least 8 characters.', 'error'); return;
+      }
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = form.querySelector('button[type="submit"]');
-    btn.textContent = 'Saving...'; btn.disabled = true;
-    const res = await fetchAdminData('/admin/settings', {
-      method: 'PUT',
-      body: JSON.stringify({
-        btc_wallet: document.getElementById('btc_wallet').value,
-        usdt_wallet: document.getElementById('usdt_wallet').value
-      })
+      btn.textContent = 'Updating...'; btn.disabled = true;
+      const res = await fetchAdminData('/auth/change-password', {
+        method: 'POST',
+        body: JSON.stringify({ current_password: current, new_password: next })
+      });
+      btn.textContent = 'Update Password'; btn.disabled = false;
+      
+      if (res && res.success) {
+        adminToast('Password updated successfully!', 'success');
+        pwForm.reset();
+      } else {
+        adminToast(res?.message || 'Failed to update password.', 'error');
+      }
     });
-    btn.textContent = 'Save Settings'; btn.disabled = false;
-    if (res && res.success) adminToast('Settings saved successfully!');
-    else adminToast('Failed to save settings.', 'error');
-  });
+  }
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
