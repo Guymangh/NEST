@@ -618,6 +618,21 @@ document.addEventListener('DOMContentLoaded', () => {
   if (path.endsWith('existing-products.html'))                   loadProducts();
   if (path.endsWith('settings.html'))                            loadSettings();
 
+  // Mobile sidebar toggle
+  const avatar = document.querySelector('.a-avatar');
+  const sidebar = document.querySelector('.a-sidebar');
+  if (avatar && sidebar) {
+    avatar.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sidebar.classList.toggle('mobile-open');
+    });
+    document.addEventListener('click', (e) => {
+      if (!sidebar.contains(e.target) && !avatar.contains(e.target)) {
+        sidebar.classList.remove('mobile-open');
+      }
+    });
+  }
+
   // Add Product form
   const productForm = document.getElementById('product-form');
   if (productForm) {
