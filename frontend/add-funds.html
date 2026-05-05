@@ -14,55 +14,63 @@
     :root { --radius-xl: 24px; --radius-lg: 16px; --radius-md: 12px; }
 
     .af-page {
-      min-height: 80vh;
-      display: flex;
-      flex-direction: column;
+      padding: 4rem 1rem 6rem;
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+    .af-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
       align-items: center;
-      padding: 3rem 1rem 4rem;
+    }
+    @media(max-width: 800px) {
+      .af-split { grid-template-columns: 1fr; gap: 3rem; }
+      .af-left { text-align: center; }
+      .how-step-row { flex-direction: column; align-items: center; text-align: center; }
     }
 
-    /* ── Hero ── */
-    .af-hero {
-      text-align: center;
-      margin-bottom: 2.5rem;
-      max-width: 520px;
-    }
-    .af-hero-badge {
-      display: inline-flex; align-items: center; gap: 0.4rem;
-      background: var(--bg-accent); border: 1px solid var(--border-soft);
-      border-radius: 20px; padding: 0.35rem 1rem;
-      font-size: 0.75rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: .08em;
-      color: var(--primary-deep); margin-bottom: 1rem;
-    }
-    .af-hero h1 {
-      font-size: 2.5rem; font-weight: 900;
-      line-height: 1.1; margin-bottom: 0.6rem;
+    /* ── Left Side ── */
+    .af-left h1 {
+      font-size: 3rem; font-weight: 900;
+      line-height: 1.1; margin-bottom: 1rem;
       background: linear-gradient(135deg, var(--text-main) 40%, var(--primary-deep));
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-    .af-hero p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; }
+    .af-left > p { color: var(--text-muted); font-size: 1.1rem; line-height: 1.6; margin-bottom: 3rem; }
+    
+    .how-col { display: flex; flex-direction: column; gap: 2rem; }
+    .how-step-row { display: flex; gap: 1.25rem; align-items: flex-start; }
+    .step-num {
+      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--primary-deep), #0a6e6e);
+      color: #fff; font-size: 1rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 6px 16px rgba(13,79,79,0.25);
+    }
+    .step-text { font-size: 0.95rem; color: var(--text-muted); line-height: 1.5; margin-top: 0.2rem; text-align: left; }
+    .step-text strong { color: var(--text-main); font-size: 1.05rem; display: block; margin-bottom: 0.3rem; }
+    @media(max-width: 800px) { .step-text { text-align: center; } }
 
-    /* ── Main card ── */
+    /* ── Right Side (Card) ── */
     .af-card {
-      width: 100%; max-width: 540px;
       background: var(--bg-card);
       border: 1px solid var(--border-soft);
       border-radius: var(--radius-xl);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.18), 0 1px 0 rgba(255,255,255,0.04) inset;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.12), 0 1px 0 rgba(255,255,255,0.04) inset;
       overflow: hidden;
     }
+    body.dark-mode .af-card { box-shadow: 0 24px 80px rgba(0,0,0,0.4); }
 
-    /* ── Card section dividers ── */
     .af-section {
-      padding: 1.75rem 2rem;
+      padding: 2rem;
       border-bottom: 1px solid var(--border-soft);
     }
     .af-section:last-of-type { border-bottom: none; }
     .af-section-label {
-      font-size: 0.72rem; text-transform: uppercase; letter-spacing: .1em;
-      font-weight: 700; color: var(--text-muted); margin-bottom: 1rem;
-      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.75rem; text-transform: uppercase; letter-spacing: .1em;
+      font-weight: 700; color: var(--text-muted); margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.75rem;
     }
     .af-section-label::after {
       content:''; flex:1; height:1px; background: var(--border-soft);
@@ -75,8 +83,8 @@
     }
     @media(max-width:420px){ .chip-grid{ grid-template-columns: repeat(3,1fr); } }
     .chip {
-      padding: 0.65rem 0.5rem; border: 1.5px solid var(--border-soft);
-      border-radius: var(--radius-md); font-size: 0.9rem; font-weight: 700;
+      padding: 0.75rem 0.5rem; border: 1.5px solid var(--border-soft);
+      border-radius: var(--radius-md); font-size: 0.95rem; font-weight: 700;
       cursor: pointer; background: var(--bg-main); color: var(--text-main);
       transition: all 0.18s; text-align: center;
     }
@@ -86,17 +94,15 @@
       background: var(--primary-deep); color: #fff;
       box-shadow: 0 4px 14px rgba(13,79,79,0.35);
     }
-    .custom-input-wrap {
-      position: relative;
-    }
+    .custom-input-wrap { position: relative; }
     .custom-input-wrap .sym {
       position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
-      font-weight: 800; color: var(--text-muted); font-size: 1rem; pointer-events: none;
+      font-weight: 800; color: var(--text-muted); font-size: 1.1rem; pointer-events: none;
     }
     .custom-input-wrap input {
-      width: 100%; padding: 0.85rem 1rem 0.85rem 2.3rem;
+      width: 100%; padding: 1rem 1rem 1rem 2.5rem;
       border: 1.5px solid var(--border-soft); border-radius: var(--radius-md);
-      font-size: 1rem; font-weight: 700; color: var(--text-main);
+      font-size: 1.05rem; font-weight: 700; color: var(--text-main);
       background: var(--bg-main); transition: border-color 0.2s, box-shadow 0.2s;
       box-sizing: border-box;
     }
@@ -105,37 +111,22 @@
       box-shadow: 0 0 0 3px rgba(13,79,79,0.12);
     }
 
-    /* ── Coin grid ── */
-    .coin-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem;
-    }
-    @media(max-width:380px){ .coin-grid{ grid-template-columns: repeat(2,1fr); } }
+    /* ── Coin ── */
     .coin-btn {
-      display: flex; flex-direction: column; align-items: center; gap: 0.35rem;
-      padding: 1rem 0.5rem; border: 1.5px solid var(--border-soft);
-      border-radius: var(--radius-md); background: var(--bg-main);
-      cursor: pointer; transition: all 0.18s; position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+      padding: 1.2rem; border: 2px solid var(--primary-deep);
+      border-radius: var(--radius-md); background: var(--bg-accent);
+      cursor: default; width: 100%; box-shadow: 0 0 0 3px rgba(13,79,79,0.12);
     }
-    .coin-btn::before {
-      content: ''; position: absolute; inset: 0;
-      background: linear-gradient(135deg, transparent, rgba(13,79,79,0.06));
-      opacity: 0; transition: opacity .2s;
-    }
-    .coin-btn:hover { border-color: var(--primary-deep); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(13,79,79,0.14); }
-    .coin-btn:hover::before { opacity: 1; }
-    .coin-btn.on {
-      border-color: var(--primary-deep); background: var(--bg-accent);
-      box-shadow: 0 0 0 3px rgba(13,79,79,0.12);
-    }
-    .coin-btn .ci { font-size: 1.6rem; line-height: 1; }
-    .coin-btn .cn { font-size: 0.8rem; font-weight: 800; color: var(--text-main); }
+    .coin-btn .ci { display: flex; align-items: center; }
+    .coin-btn .ci svg { width: 32px; height: 32px; }
+    .coin-btn .cn { font-size: 1.1rem; font-weight: 800; color: var(--text-main); }
     .coin-btn .net {
-      font-size: 0.63rem; font-weight: 600;
-      color: var(--text-muted); background: var(--bg-main);
-      border: 1px solid var(--border-soft); border-radius: 4px;
-      padding: 0.1rem 0.4rem;
+      font-size: 0.75rem; font-weight: 700;
+      color: var(--text-muted); background: var(--bg-card);
+      border: 1px solid var(--border-soft); border-radius: 6px;
+      padding: 0.2rem 0.6rem; margin-left: auto;
     }
-    .coin-btn.on .net { background: var(--bg-card); }
 
     /* ── Generate button ── */
     .af-footer { padding: 1.5rem 2rem; background: var(--bg-main); }
@@ -143,7 +134,7 @@
       width: 100%; padding: 1.1rem;
       background: linear-gradient(135deg, var(--primary-deep) 0%, #0a6e6e 100%);
       color: #fff; border: none; border-radius: var(--radius-md);
-      font-size: 1rem; font-weight: 800; cursor: pointer; letter-spacing: .02em;
+      font-size: 1.05rem; font-weight: 800; cursor: pointer; letter-spacing: .02em;
       transition: all 0.2s;
       display: flex; align-items: center; justify-content: center; gap: 0.6rem;
       box-shadow: 0 6px 20px rgba(13,79,79,0.3);
@@ -156,28 +147,6 @@
     .gen-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(13,79,79,0.4); }
     .gen-btn:active { transform: translateY(0); }
     .gen-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
-
-    /* ── How it works ── */
-    .how-row {
-      display: flex; gap: 0; background: var(--bg-main);
-      border-top: 1px solid var(--border-soft);
-    }
-    .how-step {
-      flex: 1; display: flex; flex-direction: column;
-      align-items: center; text-align: center; gap: 0.5rem;
-      padding: 1.4rem 0.75rem;
-      border-right: 1px solid var(--border-soft);
-    }
-    .how-step:last-child { border-right: none; }
-    .step-num {
-      width: 28px; height: 28px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary-deep), #0a6e6e);
-      color: #fff; font-size: 0.75rem; font-weight: 800;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 3px 10px rgba(13,79,79,0.3);
-    }
-    .step-text { font-size: 0.75rem; color: var(--text-muted); line-height: 1.45; }
-    .step-text strong { color: var(--text-main); font-size: 0.8rem; display: block; margin-bottom: .1rem; }
   </style>
 </head>
 <body data-require-auth="true">
@@ -190,94 +159,76 @@
 
   <main class="main-content container">
     <div class="af-page" data-fm="fadeIn">
+      
+      <div class="af-split">
+        
+        <!-- Left Side: Text and Steps -->
+        <div class="af-left">
+          <h1>Add Funds</h1>
+          <p>Select an amount and coin — a unique payment address is generated instantly. Your balance is credited automatically.</p>
+          
+          <div class="how-col">
+            <div class="how-step-row">
+              <div class="step-num">1</div>
+              <div class="step-text"><strong>Pick amount &amp; coin</strong>Choose your USD amount and crypto.</div>
+            </div>
+            <div class="how-step-row">
+              <div class="step-num">2</div>
+              <div class="step-text"><strong>Get address</strong>Unique address valid for 30 min.</div>
+            </div>
+            <div class="how-step-row">
+              <div class="step-num">3</div>
+              <div class="step-text"><strong>Send &amp; done</strong>Balance credited automatically.</div>
+            </div>
+          </div>
+        </div>
 
-      <!-- Hero -->
-      <div class="af-hero">
-        <div class="af-hero-badge">💳 Crypto Deposit</div>
-        <h1>Add Funds</h1>
-        <p>Select an amount and coin — a unique payment address is generated instantly. Your balance is credited automatically.</p>
+        <!-- Right Side: Card -->
+        <div class="af-right">
+          <div class="af-card">
+            
+            <!-- Amount -->
+            <div class="af-section">
+              <div class="af-section-label">Amount (USD)</div>
+              <div class="chip-grid">
+                <button class="chip" onclick="pickAmt(10,this)">$10</button>
+                <button class="chip" onclick="pickAmt(25,this)">$25</button>
+                <button class="chip" onclick="pickAmt(50,this)">$50</button>
+                <button class="chip" onclick="pickAmt(100,this)">$100</button>
+                <button class="chip" onclick="pickAmt(250,this)">$250</button>
+              </div>
+              <div class="custom-input-wrap">
+                <span class="sym">$</span>
+                <input type="number" id="dep-amount" min="5" step="1" placeholder="Enter custom amount…" oninput="clearChips()" />
+              </div>
+            </div>
+
+            <!-- Coin -->
+            <div class="af-section">
+              <div class="af-section-label">Cryptocurrency</div>
+              <div class="coin-btn on">
+                <span class="ci">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="12" fill="#F7931A"/>
+                    <path d="M16.6 10.95C16.8 9.53 15.68 8.87 14.18 8.35L14.68 6.35L13.43 6.04L12.95 7.96C12.63 7.88 12.3 7.8 11.97 7.72L12.46 5.8L11.22 5.49L10.72 7.48C10.42 7.41 10.13 7.34 9.85 7.27L9.85 7.27L8.43 6.92L8.15 8.04C8.15 8.04 8.92 8.21 8.89 8.23C9.3 8.34 9.38 8.6 9.4 8.78L8.98 10.46C9.02 10.47 9.06 10.48 9.1 10.5L8.93 11.19L8.35 13.52C8.3 13.62 8.16 13.88 7.78 13.78C7.81 13.81 7.03 13.62 7.03 13.62L6.5 14.88L7.86 15.22C8.18 15.3 8.49 15.39 8.8 15.47L8.3 17.5L9.54 17.81L10.03 15.84C10.37 15.93 10.69 16 11.01 16.08L10.51 18.06L11.75 18.37L12.26 16.35C14.28 16.66 15.82 16.49 16.47 14.65C16.99 13.16 16.34 12.32 15.19 11.75C16.01 11.56 16.6 11.08 16.79 10.02M13.64 14.39C13.23 16.03 10.54 15.28 9.53 15.03L10.15 12.56C11.16 12.82 14.07 13.06 13.64 14.39ZM13.98 10.87C13.63 12.28 11.4 11.66 10.56 11.45L11.1 9.28C11.95 9.49 14.35 9.77 13.98 10.87" fill="white"/>
+                  </svg>
+                </span>
+                <span class="cn">Bitcoin</span>
+                <span class="net">BTC</span>
+              </div>
+            </div>
+
+            <!-- CTA -->
+            <div class="af-footer">
+              <button class="gen-btn" id="gen-btn" onclick="generateAddress()">
+                <span>🔑</span> Generate Payment Address
+              </button>
+            </div>
+            
+          </div>
+        </div>
+
       </div>
-
-      <!-- Card -->
-      <div class="af-card">
-
-        <!-- Amount -->
-        <div class="af-section">
-          <div class="af-section-label">Amount (USD)</div>
-          <div class="chip-grid">
-            <button class="chip" onclick="pickAmt(10,this)">$10</button>
-            <button class="chip" onclick="pickAmt(25,this)">$25</button>
-            <button class="chip" onclick="pickAmt(50,this)">$50</button>
-            <button class="chip" onclick="pickAmt(100,this)">$100</button>
-            <button class="chip" onclick="pickAmt(250,this)">$250</button>
-          </div>
-          <div class="custom-input-wrap">
-            <span class="sym">$</span>
-            <input type="number" id="dep-amount" min="5" step="1" placeholder="Enter custom amount…" oninput="clearChips()" />
-          </div>
-        </div>
-
-        <!-- Coin -->
-        <div class="af-section">
-          <div class="af-section-label">Cryptocurrency</div>
-          <div class="coin-grid">
-            <button class="coin-btn" id="coin-BTC" onclick="pickCoin('BTC','')">
-              <span class="ci">₿</span>
-              <span class="cn">Bitcoin</span>
-              <span class="net">BTC</span>
-            </button>
-            <button class="coin-btn" id="coin-USDT-TRC20" onclick="pickCoin('USDT','TRC20')">
-              <span class="ci">₮</span>
-              <span class="cn">USDT</span>
-              <span class="net">TRC-20</span>
-            </button>
-            <button class="coin-btn" id="coin-USDT-ERC20" onclick="pickCoin('USDT','ERC20')">
-              <span class="ci" style="color:#627eea;">₮</span>
-              <span class="cn">USDT</span>
-              <span class="net">ERC-20</span>
-            </button>
-            <button class="coin-btn" id="coin-TRX" onclick="pickCoin('TRX','')">
-              <span class="ci">🔴</span>
-              <span class="cn">Tron</span>
-              <span class="net">TRX</span>
-            </button>
-            <button class="coin-btn" id="coin-LTC" onclick="pickCoin('LTC','')">
-              <span class="ci">🥈</span>
-              <span class="cn">Litecoin</span>
-              <span class="net">LTC</span>
-            </button>
-            <button class="coin-btn" id="coin-USDT-BSC" onclick="pickCoin('USDT','BSC')">
-              <span class="ci" style="color:#f0b90b;">₮</span>
-              <span class="cn">USDT</span>
-              <span class="net">BEP-20</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- CTA -->
-        <div class="af-footer">
-          <button class="gen-btn" id="gen-btn" onclick="generateAddress()">
-            <span>🔑</span> Generate Payment Address
-          </button>
-        </div>
-
-        <!-- Steps -->
-        <div class="how-row">
-          <div class="how-step">
-            <div class="step-num">1</div>
-            <div class="step-text"><strong>Pick amount &amp; coin</strong>Choose your USD amount and crypto.</div>
-          </div>
-          <div class="how-step">
-            <div class="step-num">2</div>
-            <div class="step-text"><strong>Get address</strong>Unique address valid for 30 min.</div>
-          </div>
-          <div class="how-step">
-            <div class="step-num">3</div>
-            <div class="step-text"><strong>Send &amp; done</strong>Balance credited automatically.</div>
-          </div>
-        </div>
-
-      </div><!-- /af-card -->
     </div>
   </main>
 
@@ -287,7 +238,7 @@
 
   <script>
     const API_BASE = window.__API_BASE__ || window.API_BASE || 'http://localhost:5000/api';
-    let selectedCoin = null, selectedNetwork = null;
+    let selectedCoin = 'BTC', selectedNetwork = '';
 
     function pickAmt(v, el) {
       document.getElementById('dep-amount').value = v;
@@ -296,12 +247,6 @@
     }
     function clearChips() {
       document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
-    }
-    function pickCoin(coin, network) {
-      selectedCoin = coin; selectedNetwork = network;
-      document.querySelectorAll('.coin-btn').forEach(b => b.classList.remove('on'));
-      const id = network ? `coin-${coin}-${network}` : `coin-${coin}`;
-      document.getElementById(id)?.classList.add('on');
     }
 
     async function generateAddress() {
