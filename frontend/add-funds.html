@@ -70,23 +70,7 @@
       content:''; flex:1; height:1px; background: var(--border-soft);
     }
 
-    /* ── Amount chips ── */
-    .chip-grid {
-      display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem;
-      margin-bottom: 1rem;
-    }
-    .chip {
-      padding: 0.75rem 0.5rem; border: 1.5px solid var(--border-soft);
-      border-radius: var(--radius-md); font-size: 0.95rem; font-weight: 700;
-      cursor: pointer; background: var(--bg-main); color: var(--text-main);
-      transition: all 0.18s; text-align: center;
-    }
-    .chip:hover { border-color: var(--primary-deep); color: var(--primary-deep); transform: translateY(-1px); }
-    .chip.on {
-      border-color: var(--primary-deep);
-      background: var(--primary-deep); color: #fff;
-      box-shadow: 0 4px 14px rgba(13,79,79,0.35);
-    }
+
     .custom-input-wrap { position: relative; }
     .custom-input-wrap .sym {
       position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
@@ -156,8 +140,7 @@
       .af-section { padding: 1.25rem; }
       .af-footer { padding: 1.25rem; }
       .af-left h1 { font-size: 2rem; }
-      .chip-grid { grid-template-columns: repeat(3, 1fr); gap: 0.4rem; }
-      .chip { padding: 0.6rem 0.4rem; font-size: 0.9rem; }
+
       .custom-input-wrap input { padding: 0.85rem 0.85rem 0.85rem 2.25rem; font-size: 1rem; }
       .custom-input-wrap .sym { font-size: 1rem; left: 0.85rem; }
       .how-step-row { gap: 1rem; }
@@ -210,16 +193,9 @@
             <!-- Amount -->
             <div class="af-section">
               <div class="af-section-label">Amount (USD)</div>
-              <div class="chip-grid">
-                <button class="chip" onclick="pickAmt(10,this)">$10</button>
-                <button class="chip" onclick="pickAmt(25,this)">$25</button>
-                <button class="chip" onclick="pickAmt(50,this)">$50</button>
-                <button class="chip" onclick="pickAmt(100,this)">$100</button>
-                <button class="chip" onclick="pickAmt(250,this)">$250</button>
-              </div>
               <div class="custom-input-wrap">
                 <span class="sym">$</span>
-                <input type="number" id="dep-amount" min="5" step="1" placeholder="Enter custom amount…" oninput="clearChips()" />
+                <input type="number" id="dep-amount" min="5" step="1" placeholder="Enter amount…" />
               </div>
             </div>
 
@@ -260,14 +236,7 @@
     const API_BASE = window.__API_BASE__ || window.API_BASE || 'http://localhost:5000/api';
     let selectedCoin = 'BTC', selectedNetwork = '';
 
-    function pickAmt(v, el) {
-      document.getElementById('dep-amount').value = v;
-      document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
-      el.classList.add('on');
-    }
-    function clearChips() {
-      document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
-    }
+
 
     async function generateAddress() {
       const token = localStorage.getItem('token');
