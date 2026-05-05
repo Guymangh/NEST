@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/images/logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Funds – LogNest</title>
+  <meta name="description" content="Deposit cryptocurrency and get your balance credited automatically." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="js/toast.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/nav.js"></script>
+  <style>
+    .dep-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: 20px;
+      padding: 2.25rem;
+      box-shadow: var(--shadow-soft);
+      max-width: 640px;
+    }
+    .sec-label {
+      font-size: 0.78rem; text-transform: uppercase; letter-spacing: .08em;
+      font-weight: 700; color: var(--text-muted); margin-bottom: 0.85rem;
+    }
+    /* Amount chips */
+    .amount-chips { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .chip {
+      padding: 0.55rem 1.2rem; border: 2px solid var(--border-soft);
+      border-radius: 10px; font-size: 0.9rem; font-weight: 700;
+      cursor: pointer; background: var(--bg-card); color: var(--text-main);
+      transition: all 0.18s;
+    }
+    .chip:hover, .chip.on { border-color: var(--primary-deep); background: var(--bg-accent); color: var(--primary-deep); }
+    .amt-wrap { position: relative; margin-bottom: 2rem; }
+    .amt-wrap .sym {
+      position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
+      font-weight: 700; color: var(--text-muted); font-size: 1.05rem; pointer-events: none;
+    }
+    .amt-wrap input {
+      width: 100%; padding: 0.9rem 1rem 0.9rem 2.5rem;
+      border: 2px solid var(--border-soft); border-radius: 12px;
+      font-size: 1.15rem; font-weight: 700; color: var(--text-main);
+      background: var(--bg-main); transition: border-color 0.2s; box-sizing: border-box;
+    }
+    .amt-wrap input:focus { outline: none; border-color: var(--primary-deep); }
+    /* Coin grid */
+    .coin-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.65rem; margin-bottom: 2rem;
+    }
+    @media(max-width:500px) { .coin-grid { grid-template-columns: repeat(2, 1fr); } }
+    .coin-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+      padding: 0.9rem 0.5rem; border: 2px solid var(--border-soft);
+      border-radius: 12px; background: var(--bg-card); cursor: pointer; transition: all 0.18s;
+    }
+    .coin-btn:hover, .coin-btn.on { border-color: var(--primary-deep); background: var(--bg-accent); }
+    .coin-btn .ci { font-size: 1.5rem; }
+    .coin-btn .cn { font-size: 0.8rem; font-weight: 700; color: var(--text-main); }
+    .coin-btn .net { font-size: 0.68rem; color: var(--text-muted); }
+    /* Generate btn */
+    .gen-btn {
+      width: 100%; padding: 1rem;
+      background: linear-gradient(135deg, var(--primary-deep), #0a6e6e);
+      color: #fff; border: none; border-radius: 12px;
+      font-size: 1rem; font-weight: 700; cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    }
+    .gen-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .gen-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    /* How it works */
+    .how-steps { display: flex; gap: 1.5rem; margin-top: 1.75rem; flex-wrap: wrap; }
+    .how-step { display: flex; gap: 0.75rem; align-items: flex-start; flex: 1; min-width: 150px; }
+    .step-num {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--primary-deep); color: #fff;
+      font-size: 0.75rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .step-text { font-size: 0.84rem; color: var(--text-muted); line-height: 1.5; }
+    .step-text strong { color: var(--text-main); display: block; margin-bottom: .1rem; }
+  </style>
+</head>
+<body data-require-auth="true">
+  <header class="header">
+    <div class="container nav-container">
+      <a href="index.html" class="logo"><img src="images/logo.png" alt="Logo" class="nav-logo" onerror="this.style.display='none'" /></a>
+      <nav><ul class="nav-list" id="main-nav"></ul></nav>
+    </div>
+  </header>
+
+  <main class="main-content container">
+    <!-- Breadcrumb -->
+    <div style="margin-bottom:1.5rem;">
+      <a href="deposit.html" style="font-size:0.85rem;color:var(--text-muted);text-decoration:none;font-weight:600;">
+        ← Wallet
+      </a>
+    </div>
+
+    <div style="margin-bottom:2rem;" data-fm="fadeIn">
+      <h1 style="font-size:2rem;font-weight:800;margin-bottom:0.4rem;">Add Funds</h1>
+      <p style="color:var(--text-muted);">Choose an amount and a cryptocurrency. Your balance is credited automatically.</p>
+    </div>
+
+    <div class="dep-card" data-fm="fadeIn">
+      <p class="sec-label">Select Amount (USD)</p>
+      <div class="amount-chips">
+        <button class="chip" onclick="pickAmt(10,this)">$10</button>
+        <button class="chip" onclick="pickAmt(25,this)">$25</button>
+        <button class="chip" onclick="pickAmt(50,this)">$50</button>
+        <button class="chip" onclick="pickAmt(100,this)">$100</button>
+        <button class="chip" onclick="pickAmt(250,this)">$250</button>
+      </div>
+      <div class="amt-wrap">
+        <span class="sym">$</span>
+        <input type="number" id="dep-amount" min="5" step="1" placeholder="Custom amount…" oninput="clearChips()" />
+      </div>
+
+      <p class="sec-label">Select Cryptocurrency</p>
+      <div class="coin-grid">
+        <button class="coin-btn" id="coin-BTC" onclick="pickCoin('BTC','')">
+          <span class="ci">₿</span><span class="cn">Bitcoin</span><span class="net">BTC</span>
+        </button>
+        <button class="coin-btn" id="coin-USDT-TRC20" onclick="pickCoin('USDT','TRC20')">
+          <span class="ci">₮</span><span class="cn">USDT</span><span class="net">TRC-20</span>
+        </button>
+        <button class="coin-btn" id="coin-USDT-ERC20" onclick="pickCoin('USDT','ERC20')">
+          <span class="ci" style="color:#627eea;">₮</span><span class="cn">USDT</span><span class="net">ERC-20</span>
+        </button>
+        <button class="coin-btn" id="coin-TRX" onclick="pickCoin('TRX','')">
+          <span class="ci">🔴</span><span class="cn">Tron</span><span class="net">TRX</span>
+        </button>
+        <button class="coin-btn" id="coin-LTC" onclick="pickCoin('LTC','')">
+          <span class="ci">🥈</span><span class="cn">Litecoin</span><span class="net">LTC</span>
+        </button>
+        <button class="coin-btn" id="coin-USDT-BSC" onclick="pickCoin('USDT','BSC')">
+          <span class="ci" style="color:#f0b90b;">₮</span><span class="cn">USDT</span><span class="net">BEP-20</span>
+        </button>
+      </div>
+
+      <button class="gen-btn" id="gen-btn" onclick="generateAddress()">
+        <span>🔑</span> Get Payment Address
+      </button>
+
+      <div class="how-steps">
+        <div class="how-step">
+          <div class="step-num">1</div>
+          <div class="step-text"><strong>Pick amount &amp; coin</strong>Choose your USD amount and a cryptocurrency.</div>
+        </div>
+        <div class="how-step">
+          <div class="step-num">2</div>
+          <div class="step-text"><strong>Get your address</strong>A unique address is generated, valid 30 min.</div>
+        </div>
+        <div class="how-step">
+          <div class="step-num">3</div>
+          <div class="step-text"><strong>Send &amp; done</strong>Send the exact crypto — your balance credits automatically.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container"><p>&copy; 2026 LogNest. All rights reserved.</p></div>
+  </footer>
+
+  <script>
+    const API_BASE = window.__API_BASE__ || window.API_BASE || 'http://localhost:5000/api';
+    let selectedCoin = null, selectedNetwork = null;
+
+    function pickAmt(v, el) {
+      document.getElementById('dep-amount').value = v;
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+      el.classList.add('on');
+    }
+    function clearChips() {
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+    }
+    function pickCoin(coin, network) {
+      selectedCoin = coin; selectedNetwork = network;
+      document.querySelectorAll('.coin-btn').forEach(b => b.classList.remove('on'));
+      const id = network ? `coin-${coin}-${network}` : `coin-${coin}`;
+      document.getElementById(id)?.classList.add('on');
+    }
+
+    async function generateAddress() {
+      const token = localStorage.getItem('token');
+      if (!token) return toast('Please log in first.', 'warning');
+      if (!selectedCoin) return toast('Please select a cryptocurrency first.', 'warning');
+      const amount = parseFloat(document.getElementById('dep-amount').value);
+      if (!amount || amount < 5) return toast('Minimum deposit is $5.00.', 'warning');
+
+      const btn = document.getElementById('gen-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳</span> Generating address…';
+
+      try {
+        const res  = await fetch(`${API_BASE}/deposits/oxapay/whitelabel`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ amount, pay_currency: selectedCoin, network: selectedNetwork || undefined }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          sessionStorage.setItem('pending_payment', JSON.stringify({ ...data, usd_amount: amount }));
+          window.location.href = 'payment.html';
+        } else {
+          toast(data.message || 'Failed to generate address.', 'error');
+        }
+      } catch (err) {
+        toast('Connection error. Try again.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>🔑</span> Get Payment Address';
+      }
+    }
+  </script>
+</body>
+</html>

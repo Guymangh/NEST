@@ -4,174 +4,73 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/png" href="/images/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Deposit – LogNest</title>
-  <meta name="description" content="Add funds to your LogNest account or view your deposit history." />
+  <title>Wallet – LogNest</title>
+  <meta name="description" content="Add funds or view your deposit history." />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <script src="js/toast.js"></script>
   <script src="js/config.js"></script>
   <script src="js/nav.js"></script>
   <style>
-    /* ── KPI Tab Bar ── */
-    .kpi-bar {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 2.5rem;
+    .wallet-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+      max-width: 600px;
+      margin-top: 2.5rem;
     }
-    .kpi-tab {
-      flex: 1;
-      max-width: 220px;
+    @media (max-width: 500px) { .wallet-grid { grid-template-columns: 1fr; } }
+
+    .wallet-nav-card {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      gap: 0.3rem;
-      padding: 1.1rem 1.4rem;
-      border-radius: 14px;
+      gap: 1rem;
+      padding: 2rem 1.75rem;
+      background: var(--bg-card);
       border: 2px solid var(--border-soft);
-      background: var(--bg-card);
+      border-radius: 18px;
+      text-decoration: none;
       cursor: pointer;
-      transition: all 0.2s;
-      text-align: left;
-    }
-    .kpi-tab:hover { border-color: var(--primary-deep); background: var(--bg-accent); }
-    .kpi-tab.on {
-      border-color: var(--primary-deep);
-      background: var(--primary-deep);
-    }
-    .kpi-tab .kt-icon { font-size: 1.4rem; }
-    .kpi-tab .kt-label {
-      font-size: 0.78rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: .07em;
-      color: var(--text-muted);
-    }
-    .kpi-tab.on .kt-label { color: rgba(255,255,255,0.75); }
-    .kpi-tab .kt-title {
-      font-size: 1.05rem; font-weight: 800; color: var(--text-main);
-    }
-    .kpi-tab.on .kt-title { color: #fff; }
-
-    /* ── Content Panels ── */
-    .dep-section { display: none; max-width: 720px; }
-    .dep-section.show { display: block; animation: fadeUp .3s ease; }
-    @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-
-    /* ── Add Funds Card ── */
-    .dep-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-soft);
-      border-radius: 20px;
-      padding: 2.25rem;
+      transition: all 0.22s;
       box-shadow: var(--shadow-soft);
     }
-
-    /* ── Amount chips ── */
-    .amount-chips {
-      display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1rem;
+    .wallet-nav-card:hover {
+      border-color: var(--primary-deep);
+      background: var(--bg-accent);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 28px rgba(13,79,79,0.14);
     }
-    .chip {
-      padding: 0.55rem 1.2rem; border: 2px solid var(--border-soft);
-      border-radius: 10px; font-size: 0.9rem; font-weight: 700;
-      cursor: pointer; background: var(--bg-card); color: var(--text-main);
-      transition: all 0.18s;
-    }
-    .chip:hover, .chip.on { border-color: var(--primary-deep); background: var(--bg-accent); color: var(--primary-deep); }
-    .amt-wrap { position: relative; margin-bottom: 2rem; }
-    .amt-wrap .sym {
-      position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
-      font-weight: 700; color: var(--text-muted); font-size: 1.05rem; pointer-events: none;
-    }
-    .amt-wrap input {
-      width: 100%; padding: 0.9rem 1rem 0.9rem 2.5rem;
-      border: 2px solid var(--border-soft); border-radius: 12px;
-      font-size: 1.15rem; font-weight: 700; color: var(--text-main);
-      background: var(--bg-main); transition: border-color 0.2s; box-sizing: border-box;
-    }
-    .amt-wrap input:focus { outline: none; border-color: var(--primary-deep); }
-
-    /* ── Coin Grid ── */
-    .sec-label {
-      font-size: 0.78rem; text-transform: uppercase; letter-spacing: .08em;
-      font-weight: 700; color: var(--text-muted); margin-bottom: 0.85rem;
-    }
-    .coin-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.65rem; margin-bottom: 2rem;
-    }
-    @media(max-width:540px) { .coin-grid { grid-template-columns: repeat(2, 1fr); } }
-    .coin-btn {
-      display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
-      padding: 0.9rem 0.5rem; border: 2px solid var(--border-soft);
-      border-radius: 12px; background: var(--bg-card); cursor: pointer; transition: all 0.18s;
-    }
-    .coin-btn:hover, .coin-btn.on { border-color: var(--primary-deep); background: var(--bg-accent); }
-    .coin-btn .ci { font-size: 1.5rem; }
-    .coin-btn .cn { font-size: 0.8rem; font-weight: 700; color: var(--text-main); }
-    .coin-btn .net { font-size: 0.68rem; color: var(--text-muted); }
-
-    /* ── Generate Button ── */
-    .gen-btn {
-      width: 100%; padding: 1rem;
-      background: linear-gradient(135deg, var(--primary-deep), #0a6e6e);
-      color: #fff; border: none; border-radius: 12px;
-      font-size: 1rem; font-weight: 700; cursor: pointer;
-      transition: opacity 0.2s, transform 0.15s;
-      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-    }
-    .gen-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-    .gen-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-    /* ── How it works ── */
-    .how-steps {
-      display: flex; gap: 1.5rem; margin-top: 1.75rem; flex-wrap: wrap;
-    }
-    .how-step {
-      display: flex; gap: 0.75rem; align-items: flex-start; flex: 1; min-width: 160px;
-    }
-    .step-num {
-      width: 26px; height: 26px; border-radius: 50%;
-      background: var(--primary-deep); color: #fff;
-      font-size: 0.75rem; font-weight: 800; display: flex; align-items: center;
-      justify-content: center; flex-shrink: 0;
-    }
-    .step-text { font-size: 0.84rem; color: var(--text-muted); line-height: 1.5; }
-    .step-text strong { color: var(--text-main); display: block; margin-bottom: .15rem; }
-
-    /* ── History Table ── */
-    .hist-card {
-      background: var(--bg-card); border: 1px solid var(--border-soft);
-      border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-soft);
-    }
-    .hist-table { width: 100%; border-collapse: collapse; }
-    .hist-table th {
-      text-align: left; padding: 0.85rem 1.25rem;
-      font-size: 0.75rem; text-transform: uppercase;
-      letter-spacing: .07em; color: var(--text-muted); font-weight: 700;
-      border-bottom: 1px solid var(--border-soft); background: var(--bg-main);
-    }
-    .hist-table td {
-      padding: 0.9rem 1.25rem; font-size: 0.875rem;
-      border-bottom: 1px solid var(--border-soft); vertical-align: middle;
-    }
-    .hist-table tr:last-child td { border-bottom: none; }
-    .hist-table tr:hover td { background: var(--bg-accent); }
-    .dep-badge {
-      display: inline-block; padding: 0.25rem 0.7rem; border-radius: 20px;
-      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
-    }
-    .dep-badge.pending  { background: #fef3c7; color: #b45309; }
-    .dep-badge.approved { background: #dcfce7; color: #15803d; }
-    .dep-badge.rejected { background: #fee2e2; color: #b91c1c; }
-    .hist-pagination {
+    .wnc-icon {
+      width: 52px; height: 52px; border-radius: 14px;
       display: flex; align-items: center; justify-content: center;
-      gap: 0.75rem; padding: 1.25rem; border-top: 1px solid var(--border-soft);
+      font-size: 1.6rem;
+      background: var(--bg-accent);
+      border: 1px solid var(--border-soft);
+      transition: background 0.22s;
     }
-    .hist-pag-btn {
-      padding: 0.45rem 1rem; border: 1px solid var(--border-soft);
-      border-radius: 8px; background: var(--bg-card); color: var(--text-main);
-      font-size: 0.83rem; font-weight: 600; cursor: pointer; transition: all .18s;
+    .wallet-nav-card:hover .wnc-icon {
+      background: rgba(13,79,79,0.12);
     }
-    .hist-pag-btn:hover:not(:disabled) { border-color: var(--primary-deep); color: var(--primary-deep); }
-    .hist-pag-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .hist-pag-info { font-size: 0.82rem; color: var(--text-muted); }
+    .wnc-body { display: flex; flex-direction: column; gap: 0.2rem; }
+    .wnc-label {
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em;
+      color: var(--text-muted);
+    }
+    .wnc-title {
+      font-size: 1.15rem; font-weight: 800; color: var(--text-main);
+    }
+    .wnc-desc {
+      font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; margin-top: 0.25rem;
+    }
+    .wnc-arrow {
+      margin-top: auto;
+      font-size: 0.85rem; font-weight: 700;
+      color: var(--primary-deep); opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .wallet-nav-card:hover .wnc-arrow { opacity: 1; transform: translateX(4px); }
   </style>
 </head>
 <body data-require-auth="true">
@@ -183,107 +82,32 @@
   </header>
 
   <main class="main-content container">
-    <div style="margin-bottom:2rem;" data-fm="fadeIn">
-      <h1 style="font-size:2.25rem;margin-bottom:0.5rem;">Wallet</h1>
+    <div data-fm="fadeIn">
+      <h1 style="font-size:2.25rem;font-weight:800;margin-bottom:0.5rem;">Wallet</h1>
       <p style="color:var(--text-muted);">Add funds or view your deposit history.</p>
-    </div>
 
-    <!-- ── KPI Tab Bar ── -->
-    <div class="kpi-bar">
-      <button class="kpi-tab on" id="tab-add" onclick="switchTab('add')">
-        <span class="kt-icon">💳</span>
-        <span class="kt-label">Action</span>
-        <span class="kt-title">Add Funds</span>
-      </button>
-      <button class="kpi-tab" id="tab-hist" onclick="switchTab('hist')">
-        <span class="kt-icon">📋</span>
-        <span class="kt-label">History</span>
-        <span class="kt-title">Deposit Logs</span>
-      </button>
-    </div>
+      <div class="wallet-grid">
 
-    <!-- ── Add Funds Panel ── -->
-    <div class="dep-section show" id="section-add">
-      <div class="dep-card">
-        <p class="sec-label">Select Amount (USD)</p>
-        <div class="amount-chips">
-          <button class="chip" onclick="pickAmt(10,this)">$10</button>
-          <button class="chip" onclick="pickAmt(25,this)">$25</button>
-          <button class="chip" onclick="pickAmt(50,this)">$50</button>
-          <button class="chip" onclick="pickAmt(100,this)">$100</button>
-          <button class="chip" onclick="pickAmt(250,this)">$250</button>
-        </div>
-        <div class="amt-wrap">
-          <span class="sym">$</span>
-          <input type="number" id="dep-amount" min="5" step="1" placeholder="Custom amount…" oninput="clearChips()" />
-        </div>
-
-        <p class="sec-label">Select Cryptocurrency</p>
-        <div class="coin-grid">
-          <button class="coin-btn" id="coin-BTC" onclick="pickCoin('BTC','')">
-            <span class="ci">₿</span><span class="cn">Bitcoin</span><span class="net">BTC</span>
-          </button>
-          <button class="coin-btn" id="coin-USDT-TRC20" onclick="pickCoin('USDT','TRC20')">
-            <span class="ci">₮</span><span class="cn">USDT</span><span class="net">TRC-20</span>
-          </button>
-          <button class="coin-btn" id="coin-USDT-ERC20" onclick="pickCoin('USDT','ERC20')">
-            <span class="ci" style="color:#627eea;">₮</span><span class="cn">USDT</span><span class="net">ERC-20</span>
-          </button>
-          <button class="coin-btn" id="coin-TRX" onclick="pickCoin('TRX','')">
-            <span class="ci">🔴</span><span class="cn">Tron</span><span class="net">TRX</span>
-          </button>
-          <button class="coin-btn" id="coin-LTC" onclick="pickCoin('LTC','')">
-            <span class="ci">🥈</span><span class="cn">Litecoin</span><span class="net">LTC</span>
-          </button>
-          <button class="coin-btn" id="coin-USDT-BSC" onclick="pickCoin('USDT','BSC')">
-            <span class="ci" style="color:#f0b90b;">₮</span><span class="cn">USDT</span><span class="net">BEP-20</span>
-          </button>
-        </div>
-
-        <button class="gen-btn" id="gen-btn" onclick="generateAddress()">
-          <span>🔑</span> Get Payment Address
-        </button>
-
-        <!-- How it works -->
-        <div class="how-steps">
-          <div class="how-step">
-            <div class="step-num">1</div>
-            <div class="step-text"><strong>Pick amount &amp; coin</strong>Choose your USD amount and a cryptocurrency.</div>
+        <a href="add-funds.html" class="wallet-nav-card">
+          <div class="wnc-icon">💳</div>
+          <div class="wnc-body">
+            <span class="wnc-label">Action</span>
+            <span class="wnc-title">Add Funds</span>
+            <span class="wnc-desc">Deposit cryptocurrency and get your balance credited automatically.</span>
           </div>
-          <div class="how-step">
-            <div class="step-num">2</div>
-            <div class="step-text"><strong>Get your address</strong>A unique payment address is generated, valid 30 min.</div>
-          </div>
-          <div class="how-step">
-            <div class="step-num">3</div>
-            <div class="step-text"><strong>Send &amp; done</strong>Send the exact crypto — your balance credits automatically.</div>
-          </div>
-        </div>
-      </div>
-    </div>
+          <span class="wnc-arrow">Go →</span>
+        </a>
 
-    <!-- ── Deposit History Panel ── -->
-    <div class="dep-section" id="section-hist">
-      <div class="hist-card">
-        <table class="hist-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Amount (USD)</th>
-              <th>Coin</th>
-              <th>Notes</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="hist-body">
-            <tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted);">Loading…</td></tr>
-          </tbody>
-        </table>
-        <div class="hist-pagination" id="hist-pag" style="display:none;">
-          <button class="hist-pag-btn" id="pag-prev" onclick="loadHistory(histPage-1)">← Prev</button>
-          <span class="hist-pag-info" id="pag-info"></span>
-          <button class="hist-pag-btn" id="pag-next" onclick="loadHistory(histPage+1)">Next →</button>
-        </div>
+        <a href="deposit-history.html" class="wallet-nav-card">
+          <div class="wnc-icon">📋</div>
+          <div class="wnc-body">
+            <span class="wnc-label">History</span>
+            <span class="wnc-title">Deposit Logs</span>
+            <span class="wnc-desc">View all your past deposits and their current status.</span>
+          </div>
+          <span class="wnc-arrow">Go →</span>
+        </a>
+
       </div>
     </div>
   </main>
@@ -291,148 +115,5 @@
   <footer class="footer">
     <div class="container"><p>&copy; 2026 LogNest. All rights reserved.</p></div>
   </footer>
-
-  <script>
-    const API_BASE = window.__API_BASE__ || window.API_BASE || 'http://localhost:5000/api';
-    let selectedCoin = null, selectedNetwork = null;
-    let histPage = 1, histTotal = 0;
-    const HIST_PAGE_SIZE = 8;
-
-    /* ── Tab switching ── */
-    function switchTab(tab) {
-      document.querySelectorAll('.kpi-tab').forEach(t => t.classList.remove('on'));
-      document.getElementById('tab-' + tab).classList.add('on');
-      document.querySelectorAll('.dep-section').forEach(s => s.classList.remove('show'));
-      document.getElementById('section-' + tab).classList.add('show');
-      if (tab === 'hist') loadHistory(1);
-    }
-
-    // Check if returned from payment page to auto-open history
-    if (sessionStorage.getItem('dep_show_history')) {
-      sessionStorage.removeItem('dep_show_history');
-      window.addEventListener('DOMContentLoaded', () => switchTab('hist'));
-    }
-
-    /* ── Amount chips ── */
-    function pickAmt(v, el) {
-      document.getElementById('dep-amount').value = v;
-      document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
-      el.classList.add('on');
-    }
-    function clearChips() {
-      document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
-    }
-
-    /* ── Coin selection ── */
-    function pickCoin(coin, network) {
-      selectedCoin = coin; selectedNetwork = network;
-      document.querySelectorAll('.coin-btn').forEach(b => b.classList.remove('on'));
-      const id = network ? `coin-${coin}-${network}` : `coin-${coin}`;
-      document.getElementById(id)?.classList.add('on');
-    }
-
-    /* ── Generate address → redirect to payment page ── */
-    async function generateAddress() {
-      const token = localStorage.getItem('token');
-      if (!token) return toast('Please log in first.', 'warning');
-      if (!selectedCoin) return toast('Please select a cryptocurrency first.', 'warning');
-
-      const amount = parseFloat(document.getElementById('dep-amount').value);
-      if (!amount || amount < 5) return toast('Minimum deposit is $5.00.', 'warning');
-
-      const btn = document.getElementById('gen-btn');
-      btn.disabled = true;
-      btn.innerHTML = '<span>⏳</span> Generating address…';
-
-      try {
-        const res  = await fetch(`${API_BASE}/deposits/oxapay/whitelabel`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({
-            amount,
-            pay_currency: selectedCoin,
-            network: selectedNetwork || undefined,
-          }),
-        });
-        const data = await res.json();
-
-        if (data.success) {
-          // Store payment data and redirect to dedicated payment page
-          sessionStorage.setItem('pending_payment', JSON.stringify({
-            ...data,
-            usd_amount: amount,
-          }));
-          window.location.href = 'payment.html';
-        } else {
-          toast(data.message || 'Failed to generate address.', 'error');
-        }
-      } catch (err) {
-        console.error(err);
-        toast('Connection error. Try again.', 'error');
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<span>🔑</span> Get Payment Address';
-      }
-    }
-
-    /* ── Deposit History with Pagination ── */
-    async function loadHistory(page = 1) {
-      histPage = page;
-      const tbody = document.getElementById('hist-body');
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted);">Loading…</td></tr>';
-
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
-      try {
-        const res  = await fetch(`${API_BASE}/deposits/my-deposits?page=${page}&limit=${HIST_PAGE_SIZE}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-
-        if (!data.success || !data.deposits.length) {
-          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted);">No deposits yet.</td></tr>';
-          document.getElementById('hist-pag').style.display = 'none';
-          return;
-        }
-
-        histTotal = data.total || data.deposits.length;
-
-        tbody.innerHTML = data.deposits.map(d => {
-          const date = new Date(d.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
-          const methodLabel = d.method === 'oxapay' ? '⚡ Crypto (auto)' : d.method;
-          // Extract coin from notes if available
-          const coinMatch = d.notes ? d.notes.match(/Crypto deposit - (\w+)/) : null;
-          const coinLabel = coinMatch ? coinMatch[1] : (d.method === 'manual' ? '—' : d.method.toUpperCase());
-          return `
-            <tr>
-              <td style="color:var(--text-muted);font-size:.82rem;white-space:nowrap;">${date}</td>
-              <td style="font-weight:700;color:var(--primary-deep);">$${parseFloat(d.amount).toFixed(2)}</td>
-              <td style="font-size:.82rem;">${coinLabel}</td>
-              <td style="font-size:.78rem;color:var(--text-muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${d.notes||''}">${d.notes ? d.notes.split(' - ').slice(-1)[0] : '—'}</td>
-              <td><span class="dep-badge ${d.status}">${d.status}</span></td>
-            </tr>`;
-        }).join('');
-
-        // Pagination
-        const pages = Math.ceil(histTotal / HIST_PAGE_SIZE);
-        const pagEl = document.getElementById('hist-pag');
-        const infoEl = document.getElementById('pag-info');
-        const prevBtn = document.getElementById('pag-prev');
-        const nextBtn = document.getElementById('pag-next');
-
-        if (pages > 1) {
-          pagEl.style.display = 'flex';
-          infoEl.textContent = `Page ${page} of ${pages}`;
-          prevBtn.disabled = page <= 1;
-          nextBtn.disabled = page >= pages;
-        } else {
-          pagEl.style.display = 'none';
-        }
-      } catch (err) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--text-muted);">Error loading history.</td></tr>';
-      }
-    }
-  </script>
 </body>
 </html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/images/logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deposit History – LogNest</title>
+  <meta name="description" content="View all your past deposits and their current status." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="js/toast.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/nav.js"></script>
+  <style>
+    .hist-wrap { max-width: 760px; }
+    .hist-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow-soft);
+    }
+    .hist-table { width: 100%; border-collapse: collapse; }
+    .hist-table th {
+      text-align: left; padding: 0.9rem 1.4rem;
+      font-size: 0.73rem; text-transform: uppercase;
+      letter-spacing: .07em; color: var(--text-muted);
+      font-weight: 700; border-bottom: 1px solid var(--border-soft);
+      background: var(--bg-main);
+    }
+    .hist-table td {
+      padding: 1rem 1.4rem; font-size: 0.875rem;
+      border-bottom: 1px solid var(--border-soft); vertical-align: middle;
+    }
+    .hist-table tbody tr:last-child td { border-bottom: none; }
+    .hist-table tbody tr { transition: background 0.15s; }
+    .hist-table tbody tr:hover td { background: var(--bg-accent); }
+
+    .dep-badge {
+      display: inline-block; padding: 0.28rem 0.75rem; border-radius: 20px;
+      font-size: 0.73rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    }
+    .dep-badge.pending  { background: #fef3c7; color: #b45309; }
+    .dep-badge.approved { background: #dcfce7; color: #15803d; }
+    .dep-badge.rejected { background: #fee2e2; color: #b91c1c; }
+
+    .coin-pill {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      background: var(--bg-accent); border: 1px solid var(--border-soft);
+      border-radius: 6px; padding: 0.2rem 0.6rem;
+      font-size: 0.78rem; font-weight: 700; color: var(--text-main);
+    }
+
+    /* Pagination */
+    .pag-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.1rem 1.4rem; border-top: 1px solid var(--border-soft);
+      flex-wrap: wrap; gap: 0.75rem;
+    }
+    .pag-info { font-size: 0.82rem; color: var(--text-muted); }
+    .pag-btns { display: flex; gap: 0.5rem; }
+    .pag-btn {
+      padding: 0.45rem 1.1rem;
+      border: 1px solid var(--border-soft); border-radius: 8px;
+      background: var(--bg-card); color: var(--text-main);
+      font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all .18s;
+    }
+    .pag-btn:hover:not(:disabled) { border-color: var(--primary-deep); color: var(--primary-deep); }
+    .pag-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    /* Empty state */
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 4rem 2rem; text-align: center; gap: 0.75rem;
+    }
+    .empty-state .icon { font-size: 3rem; opacity: 0.4; }
+    .empty-state p { color: var(--text-muted); font-size: 0.9rem; }
+    .empty-state a {
+      margin-top: 0.5rem;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: var(--primary-deep); color: #fff;
+      padding: 0.65rem 1.5rem; border-radius: 10px;
+      font-size: 0.88rem; font-weight: 700; text-decoration: none;
+      transition: opacity .2s;
+    }
+    .empty-state a:hover { opacity: 0.88; }
+  </style>
+</head>
+<body data-require-auth="true">
+  <header class="header">
+    <div class="container nav-container">
+      <a href="index.html" class="logo"><img src="images/logo.png" alt="Logo" class="nav-logo" onerror="this.style.display='none'" /></a>
+      <nav><ul class="nav-list" id="main-nav"></ul></nav>
+    </div>
+  </header>
+
+  <main class="main-content container">
+    <!-- Breadcrumb -->
+    <div style="margin-bottom:1.5rem;">
+      <a href="deposit.html" style="font-size:0.85rem;color:var(--text-muted);text-decoration:none;font-weight:600;">
+        ← Wallet
+      </a>
+    </div>
+
+    <div style="margin-bottom:2rem;" data-fm="fadeIn">
+      <h1 style="font-size:2rem;font-weight:800;margin-bottom:0.4rem;">Deposit History</h1>
+      <p style="color:var(--text-muted);">All your past deposits and their current status.</p>
+    </div>
+
+    <div class="hist-wrap" data-fm="fadeIn">
+      <div class="hist-card">
+        <table class="hist-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Amount</th>
+              <th>Coin</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="hist-body">
+            <tr>
+              <td colspan="4">
+                <div class="empty-state">
+                  <span class="icon">⏳</span>
+                  <p>Loading your deposit history…</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pag-bar" id="pag-bar" style="display:none;">
+          <span class="pag-info" id="pag-info">—</span>
+          <div class="pag-btns">
+            <button class="pag-btn" id="pag-prev" onclick="loadHistory(currentPage - 1)">← Prev</button>
+            <button class="pag-btn" id="pag-next" onclick="loadHistory(currentPage + 1)">Next →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container"><p>&copy; 2026 LogNest. All rights reserved.</p></div>
+  </footer>
+
+  <script>
+    const API_BASE = window.__API_BASE__ || window.API_BASE || 'http://localhost:5000/api';
+    const PAGE_SIZE = 8;
+    let currentPage = 1, totalDeposits = 0;
+
+    const COIN_ICONS = { BTC:'₿', USDT:'₮', TRX:'🔴', LTC:'🥈', ETH:'Ξ' };
+
+    function coinPill(notes, method) {
+      const m = (notes || '').match(/Crypto deposit - (\w+)/);
+      const coin = m ? m[1] : (method === 'manual' ? 'Manual' : method.toUpperCase());
+      const icon = COIN_ICONS[coin] || '💰';
+      return `<span class="coin-pill">${icon} ${coin}</span>`;
+    }
+
+    async function loadHistory(page = 1) {
+      currentPage = page;
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const tbody = document.getElementById('hist-body');
+      tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><span class="icon">⏳</span><p>Loading…</p></div></td></tr>`;
+
+      try {
+        const res  = await fetch(`${API_BASE}/deposits/my-deposits?page=${page}&limit=${PAGE_SIZE}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+
+        if (!data.success || !data.deposits.length) {
+          tbody.innerHTML = `
+            <tr><td colspan="4">
+              <div class="empty-state">
+                <span class="icon">📭</span>
+                <p>No deposits yet.</p>
+                <a href="add-funds.html">💳 Make your first deposit</a>
+              </div>
+            </td></tr>`;
+          document.getElementById('pag-bar').style.display = 'none';
+          return;
+        }
+
+        totalDeposits = data.total || data.deposits.length;
+        const pages   = Math.ceil(totalDeposits / PAGE_SIZE);
+
+        tbody.innerHTML = data.deposits.map(d => {
+          const date = new Date(d.created_at).toLocaleDateString('en-US', {
+            month: 'short', day: 'numeric', year: 'numeric',
+          });
+          return `
+            <tr>
+              <td style="color:var(--text-muted);font-size:.82rem;white-space:nowrap;">${date}</td>
+              <td><strong style="color:var(--primary-deep);">$${parseFloat(d.amount).toFixed(2)}</strong></td>
+              <td>${coinPill(d.notes, d.method)}</td>
+              <td><span class="dep-badge ${d.status}">${d.status}</span></td>
+            </tr>`;
+        }).join('');
+
+        // Pagination bar
+        const pagBar  = document.getElementById('pag-bar');
+        const pagInfo = document.getElementById('pag-info');
+        const prevBtn = document.getElementById('pag-prev');
+        const nextBtn = document.getElementById('pag-next');
+
+        if (pages > 1) {
+          pagBar.style.display  = 'flex';
+          pagInfo.textContent   = `Page ${page} of ${pages}  ·  ${totalDeposits} total`;
+          prevBtn.disabled      = page <= 1;
+          nextBtn.disabled      = page >= pages;
+        } else {
+          pagInfo.textContent   = `${totalDeposits} deposit${totalDeposits !== 1 ? 's' : ''}`;
+          pagBar.style.display  = 'flex';
+          prevBtn.style.display = 'none';
+          nextBtn.style.display = 'none';
+        }
+
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><span class="icon">⚠️</span><p>Error loading history.</p></div></td></tr>`;
+      }
+    }
+
+    loadHistory(1);
+  </script>
+</body>
+</html>
