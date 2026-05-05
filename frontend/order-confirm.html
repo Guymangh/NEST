@@ -1,0 +1,87 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Confirmed – LogNest</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="js/toast.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/nav.js"></script>
+</head>
+<body data-require-auth="true" style="min-height:100vh; display:flex; flex-direction:column; background: var(--bg-main);">
+  <header class="header">
+    <div class="container nav-container">
+      <a href="index.html" class="logo">
+        <img src="images/logo.png" alt="Logo" class="nav-logo" onerror="this.style.display='none'" />
+        
+      </a>
+    </div>
+  </header>
+
+  <main style="flex:1; display:flex; align-items:center; justify-content:center; padding: 1.5rem;">
+    <div style="max-width: 420px; width:100%; text-align: center;">
+
+      <!-- Success icon -->
+      <div style="width:64px; height:64px; background: linear-gradient(135deg, #16a34a, #22c55e); border-radius:50%; display:flex; align-items:center; justify-content:center; margin: 0 auto 1.25rem; font-size: 1.75rem; box-shadow: 0 6px 20px rgba(22,163,74,0.25);">
+        ✓
+      </div>
+
+      <h1 style="font-size:1.35rem; color:var(--primary-deep); margin-bottom:0.3rem;">Order Confirmed!</h1>
+      <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom: 1.5rem;">Your purchase was successful. Digital assets are ready to view.</p>
+
+      <!-- Order summary card -->
+      <div id="confirm-details" class="card" style="text-align:left; margin-bottom:1.25rem; padding:1.1rem 1.25rem;"></div>
+
+      <!-- Actions -->
+      <div style="display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap;">
+        <a href="orders.html" class="btn btn-primary" style="padding:0.6rem 1.35rem; font-size:0.875rem;">View My Orders</a>
+        <a href="store.html" class="btn btn-outline" style="padding:0.6rem 1.35rem; font-size:0.875rem;">Continue Shopping</a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const items = params.get('items');
+    const total = params.get('total');
+    const count = params.get('count');
+
+    const detailsEl = document.getElementById('confirm-details');
+    
+    if (!items) {
+      detailsEl.innerHTML = '<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">No order details found.</p>';
+    } else {
+      const names = decodeURIComponent(items).split('|').filter(Boolean);
+      let html = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.9rem;">
+          <span style="font-size:0.8rem; font-weight:700; color:var(--text-main); text-transform:uppercase; letter-spacing:0.04em;">Purchase Summary</span>
+          <span style="background:#16a34a; color:#fff; border-radius:20px; padding:0.15rem 0.6rem; font-size:0.7rem; font-weight:700;">✓ Paid</span>
+        </div>
+      `;
+
+      names.forEach((name, i) => {
+        // Truncate long names
+        const displayName = name.length > 55 ? name.substring(0, 52) + '…' : name;
+        html += `
+          <div style="display:flex; align-items:center; gap:0.6rem; padding:0.55rem 0; ${i < names.length - 1 ? 'border-bottom:1px solid var(--border-soft);' : ''}">
+            <div style="width:28px;height:28px;border-radius:6px;background:var(--bg-accent);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--primary-deep);font-size:0.8rem;flex-shrink:0;">
+              ${name.charAt(0)}
+            </div>
+            <span style="font-size:0.8rem; color:var(--text-main); line-height:1.3;" title="${name}">${displayName}</span>
+          </div>
+        `;
+      });
+
+      html += `
+        <div style="margin-top:0.9rem; padding-top:0.75rem; border-top:1.5px solid var(--border-soft); display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:0.78rem; color:var(--text-muted);">${count} item(s)</span>
+          <strong style="color:#16a34a; font-size:1.05rem;">$${parseFloat(total || 0).toFixed(2)}</strong>
+        </div>
+      `;
+      detailsEl.innerHTML = html;
+    }
+  </script>
+</body>
+</html>

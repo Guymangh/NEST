@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login – LogNest</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/admin.css" />
+  <script defer src="../js/auth.js"></script>
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      background: #0a1a1a;
+      background-image: radial-gradient(ellipse at 60% 0%, rgba(13,79,79,0.35) 0%, transparent 65%),
+                        radial-gradient(ellipse at 10% 100%, rgba(26,122,122,0.15) 0%, transparent 55%);
+    }
+
+    .login-box {
+      width: 100%; max-width: 420px;
+      background: #0f2020;
+      border: 1px solid #0d2e2e;
+      border-top: 3px solid #1A7A7A;
+      border-radius: 18px;
+      padding: 2.5rem 2rem;
+      box-shadow: 0 24px 70px rgba(0,0,0,.5), 0 0 0 1px rgba(26,122,122,0.08);
+    }
+
+    /* Logo area */
+    .login-logo {
+      display: flex; align-items: center; justify-content: center; gap: 0.9rem;
+      margin-bottom: 2rem; padding-bottom: 1.75rem;
+      border-bottom: 1px solid #0d2e2e;
+    }
+    .login-logo img { height: 44px; width: auto; object-fit: contain; }
+    .login-logo-tag {
+      font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+      background: rgba(26,122,122,0.2); color: #5bb8b8;
+      border: 1px solid rgba(26,122,122,0.3);
+      padding: 0.2rem 0.6rem; border-radius: 99px; white-space: nowrap;
+    }
+
+    .login-title  { font-size: 1.2rem; font-weight: 700; color: #e0f0f0; text-align: center; margin-bottom: 0.4rem; }
+    .login-sub    { font-size: 0.84rem; color: #3d6060; text-align: center; margin-bottom: 1.75rem; }
+
+    /* Labels */
+    .l-label { display: block; font-size: 0.78rem; font-weight: 600; color: #94b8b8; margin-bottom: 0.4rem; }
+
+    /* Inputs */
+    .l-input {
+      width: 100%; padding: 0.75rem 1rem;
+      background: #0a1a1a; border: 1px solid #0d2e2e;
+      border-radius: 9px; color: #e0f0f0;
+      font-size: 0.875rem; font-family: 'Inter', sans-serif;
+      margin-bottom: 1.1rem; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .l-input:focus {
+      outline: none;
+      border-color: #1A7A7A;
+      box-shadow: 0 0 0 3px rgba(26,122,122,0.18);
+    }
+    .l-input::placeholder { color: #1e4040; }
+
+    /* Password wrap */
+    .l-pw-wrap { position: relative; margin-bottom: 1.1rem; }
+    .l-pw-wrap .l-input { margin-bottom: 0; padding-right: 3rem; }
+    .l-pw-toggle {
+      position: absolute; right: 0.9rem; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; font-size: 1rem; color: #3d6060;
+      transition: color 0.2s;
+    }
+    .l-pw-toggle:hover { color: #5bb8b8; }
+
+    /* Submit button */
+    .l-btn {
+      width: 100%; padding: 0.875rem;
+      background: linear-gradient(135deg, #0D4F4F, #1A7A7A);
+      color: #e0f0f0; border: none; border-radius: 9px;
+      font-size: 0.95rem; font-weight: 700; cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+      margin-top: 0.75rem; letter-spacing: 0.01em;
+      box-shadow: 0 4px 16px rgba(13,79,79,0.35);
+    }
+    .l-btn:hover {
+      opacity: 0.92; transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(13,79,79,0.45);
+    }
+
+    /* Error */
+    #login-error {
+      display: none; margin-bottom: 1rem; padding: 0.75rem 1rem;
+      background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.25);
+      border-radius: 8px; color: #f87171; font-size: 0.85rem;
+    }
+
+    /* Back link */
+    .l-back {
+      display: block; text-align: center; margin-top: 1.5rem;
+      font-size: 0.82rem; color: #2a4a4a; text-decoration: none;
+      transition: color 0.2s;
+    }
+    .l-back:hover { color: #5bb8b8; }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+
+    <!-- Logo -->
+    <div class="login-logo">
+      <img src="../images/logo.png" alt="LogNest" />
+      <span class="login-logo-tag">Admin Panel</span>
+    </div>
+
+    <h1 class="login-title">Secure Access</h1>
+    <p class="login-sub">Sign in to the control panel</p>
+
+    <div id="login-error"></div>
+
+    <form id="login-form">
+      <label class="l-label" for="username">Username</label>
+      <input type="text" id="username" name="username" class="l-input" placeholder="admin" required autocomplete="username" />
+
+      <label class="l-label" for="password">Password</label>
+      <div class="l-pw-wrap">
+        <input type="password" id="password" name="password" class="l-input" placeholder="••••••••" required autocomplete="current-password" />
+        <button type="button" class="l-pw-toggle" onclick="const p=document.getElementById('password');p.type=p.type==='password'?'text':'password';this.textContent=p.type==='password'?'👁':'🙈';">👁</button>
+      </div>
+
+      <button type="submit" class="l-btn">Authenticate →</button>
+    </form>
+
+    <a href="../index.html" class="l-back">← Return to Storefront</a>
+  </div>
+</body>
+</html>

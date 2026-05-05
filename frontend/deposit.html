@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Top Up Balance – LogNest</title>
+  <meta name="description" content="Add funds to your LogNest account using cryptocurrency via NowPayments." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="js/toast.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/nav.js"></script>
+  <style>
+    /* ── Tab Switcher ── */
+    .deposit-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: 12px;
+      padding: 0.4rem;
+      width: fit-content;
+    }
+    .dep-tab {
+      padding: 0.6rem 1.4rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+    .dep-tab.active {
+      background: var(--primary-deep);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(13,79,79,0.18);
+    }
+
+    /* ── NowPayments Panel ── */
+    .np-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: 16px;
+      padding: 2.5rem;
+      box-shadow: var(--shadow-soft);
+      max-width: 540px;
+    }
+    .np-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg,#e8f9f2,#f0fffe);
+      border: 1px solid #26a17b44;
+      border-radius: 8px;
+      padding: 0.35rem 0.9rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #26a17b;
+      margin-bottom: 1.25rem;
+    }
+    .np-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 0.4rem;
+    }
+    .np-sub {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      line-height: 1.5;
+    }
+    .amount-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .amount-chip {
+      padding: 0.5rem 1.1rem;
+      border: 2px solid var(--border-soft);
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--bg-card);
+      color: var(--text-main);
+      transition: all 0.18s;
+    }
+    .amount-chip:hover, .amount-chip.selected {
+      border-color: var(--primary-deep);
+      background: var(--bg-accent);
+      color: var(--primary-deep);
+    }
+    .np-input-wrap {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+    .np-input-wrap .currency-label {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-weight: 700;
+      color: var(--text-muted);
+      font-size: 1rem;
+      pointer-events: none;
+    }
+    .np-input-wrap input {
+      width: 100%;
+      padding: 0.85rem 1rem 0.85rem 2.8rem;
+      border: 2px solid var(--border-soft);
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      background: var(--bg-main);
+      transition: border-color 0.2s;
+      box-sizing: border-box;
+    }
+    .np-input-wrap input:focus {
+      outline: none;
+      border-color: var(--primary-deep);
+    }
+    .np-pay-btn {
+      width: 100%;
+      padding: 0.95rem;
+      background: linear-gradient(135deg, var(--primary-deep), #0a6e6e);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .np-pay-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .np-pay-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .np-coins {
+      margin-top: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .np-coins span { font-size: 1rem; }
+
+    /* Status card shown after invoice creation */
+    .np-status-card {
+      display: none;
+      background: var(--bg-accent);
+      border: 1px solid var(--border-soft);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+    .np-status-card.visible { display: block; }
+    .np-status-card .status-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .np-status-card h3 { font-size: 1.05rem; color: var(--text-main); margin-bottom: 0.4rem; }
+    .np-status-card p { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem; }
+    .np-open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--primary-deep);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.65rem 1.4rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .np-open-btn:hover { opacity: 0.85; }
+
+    /* ── Manual Crypto Panel (legacy) ── */
+    .deposit-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+    .network-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .network-btn {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1rem 1.25rem;
+      border: 2px solid var(--border-soft); border-radius: 12px;
+      background: var(--bg-card); cursor: pointer;
+      transition: all 0.2s; text-align: left; width: 100%;
+    }
+    .network-btn:hover { border-color: var(--primary); background: var(--bg-accent); }
+    .network-btn.active { border-color: var(--primary-deep); background: var(--bg-accent); box-shadow: 0 0 0 3px rgba(13,79,79,0.08); }
+    .network-icon { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 800; flex-shrink: 0; }
+    .network-icon.usdt { background:#e8f9f2; color:#26a17b; }
+    .network-icon.btc  { background:#fff5e6; color:#f7931a; }
+    .network-label { display:flex; flex-direction:column; gap:0.1rem; }
+    .network-label strong { font-size:0.95rem; color:var(--text-main); font-weight:700; }
+    .network-label span   { font-size:0.8rem; color:var(--text-muted); }
+    .address-panel { background:var(--bg-card); border:1px solid var(--border-soft); border-radius:16px; padding:2.5rem; box-shadow:var(--shadow-soft); }
+    .address-placeholder { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:220px; color:var(--text-muted); text-align:center; gap:1rem; }
+    .address-placeholder .icon { font-size:3rem; opacity:0.4; }
+    .address-box { display:none; flex-direction:column; gap:1.5rem; }
+    .address-box.visible { display:flex; }
+    .address-tag { display:inline-flex; align-items:center; gap:0.5rem; background:var(--bg-accent); border:1px solid var(--border-soft); border-radius:8px; padding:0.4rem 0.9rem; font-size:0.8rem; font-weight:700; color:var(--primary-deep); width:fit-content; }
+    .wallet-address-wrap { background:#fff; border:1px solid var(--border-soft); border-radius:10px; padding:1rem 1.25rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+    .wallet-address-wrap code { font-family:monospace; font-size:0.9rem; color:var(--text-main); word-break:break-all; line-height:1.5; }
+    .copy-btn { flex-shrink:0; background:var(--primary-deep); color:#fff; border:none; border-radius:8px; padding:0.5rem 1rem; font-size:0.82rem; font-weight:600; cursor:pointer; transition:background 0.2s; }
+    .copy-btn:hover { background:var(--primary); }
+    .copy-btn.copied { background:#16a34a; }
+    .notice-box { background:rgba(212,168,83,0.08); border:1px solid rgba(212,168,83,0.3); border-radius:10px; padding:1rem 1.25rem; font-size:0.875rem; color:var(--text-muted); line-height:1.6; }
+    .notice-box strong { color:var(--accent-terra); }
+
+    @media (max-width: 768px) {
+      .deposit-layout { grid-template-columns:1fr; }
+      .network-list { flex-direction:row; flex-wrap:wrap; }
+      .network-btn { flex:1; min-width:140px; }
+    }
+  </style>
+</head>
+<body data-require-auth="true">
+  <header class="header">
+    <div class="container nav-container">
+      <a href="index.html" class="logo"><img src="images/logo.png" alt="Logo" class="nav-logo" onerror="this.style.display='none'" /></a>
+      <nav><ul class="nav-list" id="main-nav"></ul></nav>
+    </div>
+  </header>
+
+  <main class="main-content container">
+    <!-- Page Header -->
+    <div style="margin-bottom:2rem;" data-fm="fadeIn">
+      <h1 style="font-size:2.25rem;margin-bottom:0.5rem;">Top Up Balance</h1>
+      <p style="color:var(--text-muted);max-width:560px;">
+        Add funds to your LogNest account using cryptocurrency. Balances are credited in USD equivalent automatically.
+      </p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="deposit-tabs">
+      <button class="dep-tab active" id="tab-np" onclick="switchTab('np')">⚡ Pay with NowPayments</button>
+      <button class="dep-tab" id="tab-manual" onclick="switchTab('manual')">🔑 Manual Crypto</button>
+    </div>
+
+    <!-- ════ NowPayments Tab ════ -->
+    <div id="section-np">
+      <div class="np-panel">
+        <div class="np-badge">⚡ Instant · Automatic · 100+ Coins</div>
+        <p class="np-title">Choose an Amount</p>
+        <p class="np-sub">Select a preset or enter a custom USD amount. You'll be redirected to NowPayments to choose your coin and complete the payment.</p>
+
+        <!-- Quick amount chips -->
+        <div class="amount-row" id="amount-chips">
+          <button class="amount-chip" onclick="setAmount(10)">$10</button>
+          <button class="amount-chip" onclick="setAmount(25)">$25</button>
+          <button class="amount-chip" onclick="setAmount(50)">$50</button>
+          <button class="amount-chip" onclick="setAmount(100)">$100</button>
+          <button class="amount-chip" onclick="setAmount(250)">$250</button>
+        </div>
+
+        <!-- Custom amount input -->
+        <div class="np-input-wrap">
+          <span class="currency-label">$</span>
+          <input type="number" id="np-amount" min="5" step="1" placeholder="Custom amount…" oninput="clearChips()" />
+        </div>
+
+        <button class="np-pay-btn" id="np-pay-btn" onclick="createNowPayment()">
+          ⚡ Pay Now with Crypto
+        </button>
+
+        <!-- Status card (shown after invoice created) -->
+        <div class="np-status-card" id="np-status-card">
+          <div class="status-icon">🔗</div>
+          <h3>Invoice Created!</h3>
+          <p>Click the button below to open the NowPayments checkout page. Your balance will be credited <strong>automatically</strong> once payment is confirmed.</p>
+          <a href="#" id="np-invoice-link" class="np-open-btn" target="_blank" rel="noopener">
+            Open Payment Page ↗
+          </a>
+          <p style="margin-top:1rem;font-size:0.78rem;color:var(--text-muted);">You can safely close this tab — the payment will be detected automatically.</p>
+        </div>
+
+        <div class="np-coins">
+          <span>₿</span><span>₮</span><span>Ξ</span>
+          Accepts BTC, ETH, USDT, LTC, and 100+ more coins
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ Manual Crypto Tab ════ -->
+    <div id="section-manual" style="display:none;">
+      <div class="deposit-layout">
+        <!-- Left: Network Selector -->
+        <div>
+          <p style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);font-weight:700;margin-bottom:1rem;">Select Network</p>
+          <div class="network-list">
+            <button class="network-btn" id="btn-usdt" onclick="selectNetwork('usdt')">
+              <div class="network-icon usdt">₮</div>
+              <div class="network-label"><strong>Tether TRC20</strong><span>USDT</span></div>
+            </button>
+            <button class="network-btn" id="btn-btc" onclick="selectNetwork('btc')">
+              <div class="network-icon btc">₿</div>
+              <div class="network-label"><strong>Bitcoin</strong><span>BTC</span></div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Address Panel -->
+        <div class="address-panel">
+          <div class="address-placeholder" id="deposit-placeholder">
+            <div class="icon">💳</div>
+            <p style="font-size:1rem;font-weight:600;color:var(--text-main);">No network selected</p>
+            <p style="font-size:0.875rem;">Select a cryptocurrency network to view your deposit address.</p>
+          </div>
+
+          <!-- USDT Address -->
+          <div class="address-box" id="box-usdt">
+            <div class="address-tag"><span style="font-size:1rem;">₮</span> Tether (USDT) · TRC20 Network</div>
+            <div>
+              <p style="font-size:0.85rem;font-weight:600;color:var(--text-muted);margin-bottom:0.5rem;">Deposit Address</p>
+              <div class="wallet-address-wrap">
+                <code id="usdt-address">Loading…</code>
+                <button class="copy-btn" onclick="copyAddress('usdt-address',this)">Copy</button>
+              </div>
+            </div>
+            <div class="notice-box"><strong>⚠ Important:</strong> Only send <strong>USDT via TRC20 (Tron)</strong> to this address. Minimum deposit: <strong>$5.00</strong>.</div>
+            <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border-soft);">
+              <h3 style="font-size:1rem;margin-bottom:1rem;">Confirm Your Payment</h3>
+              <form onsubmit="submitCryptoDeposit(event,'usdt')">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                  <div>
+                    <label style="font-size:0.85rem;font-weight:600;color:var(--text-muted);margin-bottom:0.4rem;display:block;">Amount Sent (USDT)</label>
+                    <input type="number" step="0.01" class="form-control" id="usdt-amount" required placeholder="0.00" />
+                  </div>
+                  <div>
+                    <label style="font-size:0.85rem;font-weight:600;color:var(--text-muted);margin-bottom:0.4rem;display:block;">Transaction Hash</label>
+                    <input type="text" class="form-control" id="usdt-hash" required placeholder="Enter TXID" />
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Submit Payment Proof</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- BTC Address -->
+          <div class="address-box" id="box-btc">
+            <div class="address-tag"><span style="font-size:1rem;">₿</span> Bitcoin (BTC) · Native SegWit</div>
+            <div>
+              <p style="font-size:0.85rem;font-weight:600;color:var(--text-muted);margin-bottom:0.5rem;">Deposit Address</p>
+              <div class="wallet-address-wrap">
+                <code id="btc-address">Loading…</code>
+                <button class="copy-btn" onclick="copyAddress('btc-address',this)">Copy</button>
+              </div>
+            </div>
+            <div class="notice-box"><strong>⚠ Important:</strong> Only send <strong>Bitcoin (BTC)</strong> to this address. Minimum deposit: <strong>$5.00</strong>. Allow up to 3 confirmations.</div>
+            <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border-soft);">
+              <h3 style="font-size:1rem;margin-bottom:1rem;">Confirm Your Payment</h3>
+              <form onsubmit="submitCryptoDeposit(event,'bitcoin')">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                  <div>
+                    <label style="font-size:0.85rem;font-weight:600;color:var(--text-muted);margin-bottom:0.4rem;display:block;">Amount Sent (USD Equivalent)</label>
+                    <input type="number" step="0.01" class="form-control" id="btc-amount" required placeholder="0.00" />
+                  </div>
+                  <div>
+                    <label style="font-size:0.85rem;font-weight:600;color:var(--text-muted);margin-bottom:0.4rem;display:block;">Transaction Hash</label>
+                    <input type="text" class="form-control" id="btc-hash" required placeholder="Enter TXID" />
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Submit Payment Proof</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container"><p>&copy; 2026 LogNest. All rights reserved.</p></div>
+  </footer>
+
+  <script>
+    const API_BASE = window.__API_BASE__ || window.API_BASE || 'http://localhost:5000/api';
+    let settings = {};
+
+    /* ── Tab switching ── */
+    function switchTab(tab) {
+      document.getElementById('tab-np').classList.toggle('active', tab === 'np');
+      document.getElementById('tab-manual').classList.toggle('active', tab === 'manual');
+      document.getElementById('section-np').style.display     = tab === 'np'     ? '' : 'none';
+      document.getElementById('section-manual').style.display = tab === 'manual' ? '' : 'none';
+    }
+
+    /* ── Quick-amount chips ── */
+    function setAmount(val) {
+      document.getElementById('np-amount').value = val;
+      document.querySelectorAll('.amount-chip').forEach(c => c.classList.remove('selected'));
+      event.target.classList.add('selected');
+    }
+    function clearChips() {
+      document.querySelectorAll('.amount-chip').forEach(c => c.classList.remove('selected'));
+    }
+
+    /* ── NowPayments: Create Invoice ── */
+    async function createNowPayment() {
+      const token = localStorage.getItem('token');
+      if (!token) return toast('Please log in to make a deposit.', 'warning');
+
+      const amount = parseFloat(document.getElementById('np-amount').value);
+      if (!amount || amount < 5) return toast('Minimum deposit is $5.00.', 'warning');
+
+      const btn = document.getElementById('np-pay-btn');
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Creating invoice…';
+
+      try {
+        const res  = await fetch(`${API_BASE}/deposits/nowpayments/create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ amount, currency: 'usd' }),
+        });
+        const data = await res.json();
+
+        if (data.success && data.invoice_url) {
+          // Show status card with link
+          const card = document.getElementById('np-status-card');
+          document.getElementById('np-invoice-link').href = data.invoice_url;
+          card.classList.add('visible');
+          // Open in new tab automatically
+          window.open(data.invoice_url, '_blank', 'noopener');
+          toast('Invoice created! Redirecting to payment page…', 'success');
+        } else {
+          toast(data.message || 'Failed to create invoice.', 'error');
+        }
+      } catch (err) {
+        console.error(err);
+        toast('Server error. Please try again.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '⚡ Pay Now with Crypto';
+      }
+    }
+
+    /* ── Manual Crypto ── */
+    async function loadSettings() {
+      try {
+        const res  = await fetch(`${API_BASE}/admin/settings/public`);
+        const data = await res.json();
+        if (data.success && data.settings) settings = data.settings;
+      } catch {}
+    }
+
+    function selectNetwork(type) {
+      document.querySelectorAll('.network-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('btn-' + type).classList.add('active');
+      document.getElementById('deposit-placeholder').style.display = 'none';
+      document.querySelectorAll('.address-box').forEach(b => b.classList.remove('visible'));
+      document.getElementById('box-' + type).classList.add('visible');
+      if (type === 'usdt') {
+        document.getElementById('usdt-address').textContent = settings.usdt_wallet || 'Address not configured — contact admin.';
+      } else {
+        document.getElementById('btc-address').textContent = settings.btc_wallet || 'Address not configured — contact admin.';
+      }
+    }
+
+    function copyAddress(elId, btn) {
+      const text = document.getElementById(elId).textContent;
+      if (text.includes('not configured')) return;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+      });
+    }
+
+    async function submitCryptoDeposit(e, method) {
+      e.preventDefault();
+      const token = localStorage.getItem('token');
+      if (!token) return toast('Please login to submit a deposit.', 'warning');
+
+      const prefix = method === 'bitcoin' ? 'btc' : 'usdt';
+      const amount = document.getElementById(`${prefix}-amount`).value;
+      const transaction_hash = document.getElementById(`${prefix}-hash`).value;
+
+      const btn = e.target.querySelector('button[type="submit"]');
+      btn.textContent = 'Submitting...';
+      btn.disabled = true;
+
+      try {
+        const res  = await fetch(`${API_BASE}/deposits/crypto`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ amount, method, transaction_hash }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          toast('Deposit submitted! Please wait for admin approval.', 'success');
+          document.getElementById(`${prefix}-amount`).value = '';
+          document.getElementById(`${prefix}-hash`).value = '';
+        } else {
+          toast(data.message || 'Error submitting deposit.', 'error');
+        }
+      } catch (err) {
+        toast('Server error connecting to API.', 'error');
+      } finally {
+        btn.textContent = 'Submit Payment Proof';
+        btn.disabled = false;
+      }
+    }
+
+    loadSettings();
+  </script>
+</body>
+</html>

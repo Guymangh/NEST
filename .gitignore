@@ -1,0 +1,24 @@
+# ── Dependencies ──────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# ── Environment / Secrets (NEVER commit these) ────────────────────
+.env
+.env.local
+.env.production
+.env.*.local
+
+# ── Uploads (user-generated content) ──────────────────────────────
+backend/uploads/
+
+# ── OS & Editor junk ──────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# ── Logs ──────────────────────────────────────────────────────────
+*.log
+logs/

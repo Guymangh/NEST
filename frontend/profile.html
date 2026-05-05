@@ -1,0 +1,384 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile – LogNest</title>
+  <meta name="description" content="Manage your LogNest profile, update account details, and change your password." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="js/config.js"></script>
+  <script src="js/nav.js"></script>
+  <style>
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    /* ── Sidebar Card ── */
+    .profile-sidebar {
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: 16px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+    .profile-avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-deep), var(--primary));
+      color: #fff; display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; font-weight: 800; margin: 0 auto 1rem;
+      box-shadow: 0 6px 20px rgba(13,79,79,0.2);
+      border: 3px solid var(--bg-main);
+    }
+    .profile-name { font-size: 1.15rem; font-weight: 800; color: var(--text-main); }
+    .profile-email { font-size: 0.82rem; color: var(--text-muted); margin: 0.2rem 0 1rem; }
+    .profile-role-badge {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      background: #dbeafe; color: #1d4ed8;
+      border-radius: 20px; padding: 0.25rem 0.8rem;
+      font-size: 0.75rem; font-weight: 700; text-transform: capitalize;
+    }
+    .sidebar-stats { margin-top: 1.5rem; border-top: 1px solid var(--border-soft); padding-top: 1rem; }
+    .sidebar-stat {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.6rem 0; font-size: 0.85rem;
+    }
+    .sidebar-stat span:first-child { color: var(--text-muted); }
+    .sidebar-stat span:last-child { font-weight: 700; color: var(--text-main); }
+    .sidebar-actions { margin-top: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .sidebar-actions a {
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      padding: 0.65rem; border-radius: 10px; font-size: 0.85rem; font-weight: 600;
+      text-decoration: none; transition: all 0.2s;
+    }
+    .sidebar-actions .btn-dash {
+      background: var(--bg-accent); border: 1px solid var(--border-soft); color: var(--primary-deep);
+    }
+    .sidebar-actions .btn-dash:hover { background: var(--champagne); border-color: var(--primary); }
+
+    /* ── Right Column ── */
+    .profile-main { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    .profile-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: 16px;
+      padding: 1.75rem;
+      transition: box-shadow 0.2s;
+    }
+    .profile-section:hover { box-shadow: 0 4px 16px rgba(44,36,22,0.06); }
+
+    .section-head {
+      display: flex; align-items: center; gap: 0.65rem;
+      margin-bottom: 1.25rem; padding-bottom: 0.85rem;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .section-head-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+      background: var(--bg-accent); border: 1px solid var(--border-soft);
+    }
+    .section-head h3 { font-size: 1rem; font-weight: 700; color: var(--text-main); }
+    .section-head p { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.1rem; }
+
+    .form-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+    }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label {
+      display: block; margin-bottom: 0.4rem;
+      font-size: 0.82rem; font-weight: 600; color: var(--text-main);
+    }
+    .form-group .form-control {
+      padding: 0.75rem 1rem; font-size: 0.9rem;
+    }
+    .form-group .form-hint {
+      font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem;
+    }
+    .form-actions {
+      display: flex; justify-content: flex-end; gap: 0.75rem;
+      margin-top: 0.5rem; padding-top: 1rem;
+      border-top: 1px solid var(--border-soft);
+    }
+    .form-actions .btn { padding: 0.6rem 1.5rem; font-size: 0.88rem; border-radius: 10px; }
+
+    /* Password strength */
+    .pw-strength { height: 4px; border-radius: 4px; background: var(--border-soft); margin-top: 0.4rem; overflow: hidden; }
+    .pw-strength-bar { height: 100%; width: 0; border-radius: 4px; transition: width 0.3s, background 0.3s; }
+
+    /* Session info */
+    .session-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.75rem 0; border-bottom: 1px solid var(--border-soft);
+      font-size: 0.85rem;
+    }
+    .session-row:last-child { border-bottom: none; }
+    .session-label { color: var(--text-muted); }
+    .session-value { font-weight: 600; color: var(--text-main); }
+    .session-value.active { color: #16a34a; }
+
+    /* Danger zone */
+    .danger-zone {
+      background: #fef2f2; border-color: #fecaca;
+    }
+    .danger-zone .section-head { border-color: #fecaca; }
+    .danger-zone p { font-size: 0.85rem; color: #991b1b; line-height: 1.5; }
+
+    @media (max-width: 900px) {
+      .profile-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body data-require-auth="true">
+  <header class="header">
+    <div class="container nav-container">
+      <a href="index.html" class="logo">
+        <img src="images/logo.png" alt="LogNest" class="nav-logo" onerror="this.style.display='none'" />
+      </a>
+      <nav><ul class="nav-list" id="main-nav"></ul></nav>
+    </div>
+  </header>
+
+  <main class="main-content container" style="padding-top:1.25rem;">
+    <div class="profile-grid">
+
+      <!-- ── Sidebar ── -->
+      <div class="profile-sidebar">
+        <div class="profile-avatar" id="pf-avatar">U</div>
+        <div class="profile-name" id="pf-name">—</div>
+        <div class="profile-email" id="pf-email">—</div>
+        <span class="profile-role-badge" id="pf-role">user</span>
+        <div class="sidebar-stats">
+          <div class="sidebar-stat"><span>Balance</span><span id="pf-balance">$0.00</span></div>
+          <div class="sidebar-stat"><span>Member Since</span><span id="pf-since">—</span></div>
+          <div class="sidebar-stat"><span>Status</span><span style="color:#16a34a;font-weight:700;">● Active</span></div>
+        </div>
+        <div class="sidebar-actions">
+          <a href="dashboard.html" class="btn-dash">📊 Go to Dashboard</a>
+          <a href="deposit.html" class="btn-dash">💰 Add Funds</a>
+        </div>
+      </div>
+
+      <!-- ── Main Column ── -->
+      <div class="profile-main">
+
+        <!-- Account Info Section -->
+        <div class="profile-section" id="section-profile">
+          <div class="section-head">
+            <div class="section-head-icon">👤</div>
+            <div>
+              <h3>Account Information</h3>
+              <p>Update your username and email address</p>
+            </div>
+          </div>
+          <form id="profile-form" autocomplete="off">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="input-username">Username</label>
+                <input type="text" id="input-username" class="form-control" placeholder="Your username" disabled style="opacity:0.6;cursor:not-allowed;" />
+                <div class="form-hint">Username cannot be changed</div>
+              </div>
+              <div class="form-group">
+                <label for="input-email">Email Address</label>
+                <input type="email" id="input-email" class="form-control" placeholder="you@example.com" required />
+                <div class="form-hint">Used for account recovery</div>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-outline" id="btn-reset-profile">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="btn-save-profile">Save Email</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Change Password Section -->
+        <div class="profile-section" id="section-password">
+          <div class="section-head">
+            <div class="section-head-icon">🔒</div>
+            <div>
+              <h3>Change Password</h3>
+              <p>Keep your account secure with a strong password</p>
+            </div>
+          </div>
+          <form id="password-form" autocomplete="off">
+            <div class="form-group">
+              <label for="input-current-pw">Current Password</label>
+              <input type="password" id="input-current-pw" class="form-control" placeholder="Enter current password" required />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="input-new-pw">New Password</label>
+                <input type="password" id="input-new-pw" class="form-control" placeholder="Min. 8 characters" minlength="8" required />
+                <div class="pw-strength"><div class="pw-strength-bar" id="pw-bar"></div></div>
+                <div class="form-hint" id="pw-hint">Use 8+ characters with letters, numbers & symbols</div>
+              </div>
+              <div class="form-group">
+                <label for="input-confirm-pw">Confirm New Password</label>
+                <input type="password" id="input-confirm-pw" class="form-control" placeholder="Re-enter new password" minlength="8" required />
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-outline" id="btn-reset-pw">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="btn-save-pw">Update Password</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Session Info -->
+        <div class="profile-section">
+          <div class="section-head">
+            <div class="section-head-icon">🛡</div>
+            <div>
+              <h3>Session & Security</h3>
+              <p>Current session details</p>
+            </div>
+          </div>
+          <div class="session-row"><span class="session-label">Login Status</span><span class="session-value active">● Logged In</span></div>
+          <div class="session-row"><span class="session-label">Token Expires</span><span class="session-value" id="pf-token-exp">—</span></div>
+          <div class="session-row"><span class="session-label">Account Role</span><span class="session-value" id="pf-session-role">user</span></div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="profile-section danger-zone">
+          <div class="section-head">
+            <div class="section-head-icon" style="background:#fee2e2;border-color:#fecaca;">⚠️</div>
+            <div>
+              <h3 style="color:#991b1b;">Danger Zone</h3>
+              <p style="color:#b91c1c;">Irreversible actions</p>
+            </div>
+          </div>
+          <p>If you wish to delete your account or require assistance, please contact the administrator. Account deletion is permanent and cannot be undone.</p>
+        </div>
+
+      </div><!-- /.profile-main -->
+    </div><!-- /.profile-grid -->
+  </main>
+
+  <footer class="footer">
+    <div class="container"><p>&copy; 2026 LogNest. All rights reserved.</p></div>
+  </footer>
+
+  <script src="js/toast.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('token');
+      const user  = JSON.parse(localStorage.getItem('user') || 'null');
+      if (!user) return;
+
+      const API = window.API_BASE || 'http://localhost:5000/api';
+
+      // ── Populate sidebar
+      document.getElementById('pf-avatar').textContent  = (user.username || 'U').charAt(0).toUpperCase();
+      document.getElementById('pf-name').textContent     = user.username || '—';
+      document.getElementById('pf-email').textContent    = user.email || '—';
+      document.getElementById('pf-role').textContent     = user.role || 'user';
+      document.getElementById('pf-balance').textContent  = `$${parseFloat(user.balance || 0).toFixed(2)}`;
+      const since = user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '—';
+      document.getElementById('pf-since').textContent = since;
+
+      // ── Token expiry
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.exp) {
+          document.getElementById('pf-token-exp').textContent = new Date(payload.exp * 1000).toLocaleString();
+        }
+      } catch {}
+      document.getElementById('pf-session-role').textContent = user.role || 'user';
+
+      // ── Populate form fields
+      const usernameInput = document.getElementById('input-username');
+      const emailInput    = document.getElementById('input-email');
+      usernameInput.value = user.username || '';
+      emailInput.value    = user.email || '';
+
+      // Reset button
+      document.getElementById('btn-reset-profile').addEventListener('click', () => {
+        emailInput.value = user.email || '';
+      });
+
+      // ── Save Profile
+      document.getElementById('profile-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btn-save-profile');
+        btn.disabled = true; btn.textContent = 'Saving…';
+        try {
+          const res = await fetch(`${API}/auth/profile`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ email: emailInput.value.trim() })
+          });
+          const data = await res.json();
+          if (res.status === 401) { toast('Session expired. Redirecting to login…', 'error'); setTimeout(() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = 'login.html'; }, 1500); return; }
+          if (data.success) {
+            localStorage.setItem('user', JSON.stringify({ ...user, ...data.user }));
+            toast('Profile updated successfully!', 'success');
+            setTimeout(() => location.reload(), 800);
+          } else {
+            toast(data.message || 'Failed to update profile.', 'error');
+          }
+        } catch { toast('Network error. Please try again.', 'error'); }
+        btn.disabled = false; btn.textContent = 'Save Email';
+      });
+
+      // ── Password Strength
+      const pwBar  = document.getElementById('pw-bar');
+      const pwHint = document.getElementById('pw-hint');
+      document.getElementById('input-new-pw').addEventListener('input', (e) => {
+        const val = e.target.value;
+        let score = 0;
+        if (val.length >= 8) score++;
+        if (/[A-Z]/.test(val)) score++;
+        if (/[0-9]/.test(val)) score++;
+        if (/[^A-Za-z0-9]/.test(val)) score++;
+        const colors = ['#b91c1c', '#d97706', '#ca8a04', '#16a34a'];
+        const labels = ['Weak', 'Fair', 'Good', 'Strong'];
+        pwBar.style.width = (score * 25) + '%';
+        pwBar.style.background = colors[score - 1] || 'transparent';
+        pwHint.textContent = score > 0 ? `Strength: ${labels[score - 1]}` : 'Use 8+ characters with letters, numbers & symbols';
+      });
+
+      // Reset password form
+      document.getElementById('btn-reset-pw').addEventListener('click', () => {
+        document.getElementById('password-form').reset();
+        pwBar.style.width = '0';
+        pwHint.textContent = 'Use 8+ characters with letters, numbers & symbols';
+      });
+
+      // ── Change Password
+      document.getElementById('password-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const curr    = document.getElementById('input-current-pw').value;
+        const newPw   = document.getElementById('input-new-pw').value;
+        const confirm = document.getElementById('input-confirm-pw').value;
+
+        if (newPw !== confirm) { toast('New passwords do not match.', 'error'); return; }
+
+        const btn = document.getElementById('btn-save-pw');
+        btn.disabled = true; btn.textContent = 'Updating…';
+        try {
+          const res = await fetch(`${API}/auth/change-password`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ currentPassword: curr, newPassword: newPw })
+          });
+          const data = await res.json();
+          if (res.status === 401) { toast('Session expired. Redirecting to login…', 'error'); setTimeout(() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = 'login.html'; }, 1500); return; }
+          if (data.success) {
+            toast('Password changed successfully!', 'success');
+            document.getElementById('password-form').reset();
+            pwBar.style.width = '0';
+          } else {
+            toast(data.message || 'Failed to change password.', 'error');
+          }
+        } catch { toast('Network error. Please try again.', 'error'); }
+        btn.disabled = false; btn.textContent = 'Update Password';
+      });
+    });
+  </script>
+</body>
+</html>
