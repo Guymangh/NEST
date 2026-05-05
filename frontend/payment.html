@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/images/logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Complete Payment – LogNest</title>
+  <meta name="description" content="Send crypto to the address below to complete your deposit." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="js/toast.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/nav.js"></script>
+  <style>
+    .pay-wrap {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .pay-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: 20px;
+      padding: 2.5rem;
+      box-shadow: var(--shadow-soft);
+    }
+
+    /* ── Top status bar ── */
+    .pay-status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-soft);
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .pay-coin-tag {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--bg-accent); border: 1px solid var(--border-soft);
+      border-radius: 10px; padding: 0.5rem 1rem;
+      font-size: 0.9rem; font-weight: 700; color: var(--primary-deep);
+    }
+    .pay-timer {
+      display: flex; align-items: center; gap: 0.5rem;
+      background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
+      border-radius: 10px; padding: 0.5rem 1rem;
+      font-size: 0.9rem; font-weight: 700; color: #ef4444;
+    }
+    .pay-timer.warn { background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.4); }
+
+    /* ── QR + Address ── */
+    .pay-body {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 1.75rem;
+      align-items: start;
+      margin-bottom: 1.75rem;
+    }
+    @media(max-width:480px) { .pay-body { grid-template-columns: 1fr; } .qr-wrap { text-align:center; } }
+    .qr-wrap img {
+      width: 150px; height: 150px;
+      border-radius: 12px; border: 1px solid var(--border-soft);
+    }
+    .addr-section { min-width: 0; }
+    .addr-lbl {
+      font-size: 0.75rem; text-transform: uppercase; letter-spacing: .08em;
+      font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem;
+    }
+    .addr-box {
+      background: var(--bg-main); border: 1px solid var(--border-soft);
+      border-radius: 12px; padding: 1rem 1.1rem;
+      display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;
+    }
+    .addr-box code {
+      font-family: 'Courier New', monospace; font-size: 0.82rem;
+      color: var(--text-main); word-break: break-all; line-height: 1.55; flex: 1;
+    }
+    .copy-btn {
+      flex-shrink: 0; background: var(--primary-deep); color: #fff;
+      border: none; border-radius: 8px; padding: 0.5rem 1rem;
+      font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: background 0.2s;
+    }
+    .copy-btn:hover { background: var(--primary); }
+    .copy-btn.done { background: #16a34a; }
+
+    /* ── Amount pill ── */
+    .amount-pill {
+      display: flex; align-items: center; justify-content: space-between;
+      background: linear-gradient(135deg, var(--primary-deep), #0a6e6e);
+      border-radius: 12px; padding: 1.1rem 1.4rem; color: #fff;
+    }
+    .amount-pill .left { display: flex; flex-direction: column; gap: 0.2rem; }
+    .amount-pill .lbl { font-size: 0.75rem; opacity: 0.75; font-weight: 600; letter-spacing: .04em; }
+    .amount-pill .val { font-size: 1.4rem; font-weight: 800; }
+    .amount-pill .usd { font-size: 0.85rem; opacity: 0.8; margin-top: 0.15rem; }
+    .copy-amount-btn {
+      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+      color: #fff; border-radius: 8px; padding: 0.5rem 1rem;
+      font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: background .2s;
+    }
+    .copy-amount-btn:hover { background: rgba(255,255,255,0.25); }
+
+    /* ── Warning box ── */
+    .warn-box {
+      background: rgba(212,168,83,0.08); border: 1px solid rgba(212,168,83,0.28);
+      border-radius: 12px; padding: 1rem 1.25rem;
+      font-size: 0.84rem; color: var(--text-muted); line-height: 1.65; margin-top: 1.25rem;
+    }
+    .warn-box strong { color: #b45309; }
+
+    /* ── Divider ── */
+    .pay-divider { border: none; border-top: 1px solid var(--border-soft); margin: 1.75rem 0; }
+
+    /* ── Steps ── */
+    .pay-steps { display: flex; flex-direction: column; gap: 0.9rem; margin-bottom: 1.5rem; }
+    .pay-step { display: flex; gap: 0.9rem; align-items: flex-start; }
+    .ps-num {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--primary-deep); color: #fff;
+      font-size: 0.72rem; font-weight: 800; display: flex;
+      align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+    }
+    .ps-text { font-size: 0.84rem; color: var(--text-muted); line-height: 1.5; }
+    .ps-text strong { color: var(--text-main); }
+
+    /* ── Expired overlay ── */
+    .expired-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(10,26,26,0.8); backdrop-filter: blur(6px);
+      z-index: 9999; align-items: center; justify-content: center;
+    }
+    .expired-overlay.show { display: flex; }
+    .expired-box {
+      background: var(--bg-card); border: 1px solid var(--border-soft);
+      border-radius: 20px; padding: 2.5rem; text-align: center; max-width: 400px;
+    }
+    .expired-box .icon { font-size: 3rem; margin-bottom: 1rem; }
+    .expired-box h3 { font-size: 1.15rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .expired-box p { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+
+    /* ── Back / action links ── */
+    .pay-actions {
+      display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem;
+    }
+    .pay-back-btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.7rem 1.4rem; border-radius: 10px;
+      font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all .2s;
+      border: 1px solid var(--border-soft); background: var(--bg-card); color: var(--text-main);
+      text-decoration: none;
+    }
+    .pay-back-btn:hover { border-color: var(--primary-deep); color: var(--primary-deep); }
+    .pay-hist-btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.7rem 1.4rem; border-radius: 10px;
+      font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all .2s;
+      background: var(--primary-deep); color: #fff; border: none; text-decoration: none;
+    }
+    .pay-hist-btn:hover { opacity: 0.88; }
+  </style>
+</head>
+<body data-require-auth="true">
+  <header class="header">
+    <div class="container nav-container">
+      <a href="index.html" class="logo"><img src="images/logo.png" alt="Logo" class="nav-logo" onerror="this.style.display='none'" /></a>
+      <nav><ul class="nav-list" id="main-nav"></ul></nav>
+    </div>
+  </header>
+
+  <main class="main-content container">
+
+    <div style="margin-bottom:1.75rem;">
+      <a href="deposit.html" style="display:inline-flex;align-items:center;gap:0.4rem;font-size:0.85rem;color:var(--text-muted);text-decoration:none;font-weight:600;">
+        ← Back to Wallet
+      </a>
+    </div>
+
+    <div class="pay-wrap" data-fm="fadeIn">
+      <div style="margin-bottom:1.25rem;">
+        <h1 style="font-size:1.75rem;font-weight:800;margin-bottom:0.35rem;">Complete Your Payment</h1>
+        <p style="color:var(--text-muted);font-size:0.9rem;">Send the exact crypto amount to the address below. Your balance is credited automatically.</p>
+      </div>
+
+      <div class="pay-card" id="pay-card">
+        <!-- ── Status bar ── -->
+        <div class="pay-status-bar">
+          <span class="pay-coin-tag" id="coin-tag">—</span>
+          <span class="pay-timer" id="timer-display">⏱ —</span>
+        </div>
+
+        <!-- ── QR + Address ── -->
+        <div class="pay-body">
+          <div class="qr-wrap">
+            <img id="qr-img" src="" alt="Payment QR Code" />
+          </div>
+          <div class="addr-section">
+            <p class="addr-lbl">Send exactly to this address</p>
+            <div class="addr-box">
+              <code id="addr-val">—</code>
+              <button class="copy-btn" id="copy-addr" onclick="copyField('addr-val','copy-addr','Address copied!')">Copy</button>
+            </div>
+            <p class="addr-lbl" style="margin-top:0.75rem;">Deposit ID</p>
+            <div style="font-size:0.78rem;color:var(--text-muted);font-family:monospace;" id="dep-id-val">—</div>
+          </div>
+        </div>
+
+        <!-- ── Amount pill ── -->
+        <div class="amount-pill">
+          <div class="left">
+            <span class="lbl">AMOUNT TO SEND</span>
+            <span class="val" id="pay-amount-crypto">—</span>
+            <span class="usd" id="pay-amount-usd">≈ — USD</span>
+          </div>
+          <button class="copy-amount-btn" id="copy-amt" onclick="copyField('pay-amount-crypto','copy-amt','Amount copied!')">Copy</button>
+        </div>
+
+        <!-- ── Warning ── -->
+        <div class="warn-box">
+          <strong>⚠ Important:</strong>
+          Send <strong id="warn-amt">the exact amount</strong> shown above.
+          <br>• Do <strong>not</strong> send from an exchange — use a personal wallet.
+          <br>• The address is valid for <strong>30 minutes</strong>. A new address is generated for each deposit.
+          <br>• Your USD balance is credited <strong>automatically</strong> within 1–2 network confirmations.
+        </div>
+
+        <hr class="pay-divider" />
+
+        <!-- ── Instruction steps ── -->
+        <div class="pay-steps">
+          <div class="pay-step">
+            <div class="ps-num">1</div>
+            <div class="ps-text"><strong>Open your crypto wallet</strong> — any self-custody wallet that supports the coin shown above.</div>
+          </div>
+          <div class="pay-step">
+            <div class="ps-num">2</div>
+            <div class="ps-text"><strong>Scan the QR or paste the address</strong> into your wallet's send field.</div>
+          </div>
+          <div class="pay-step">
+            <div class="ps-num">3</div>
+            <div class="ps-text"><strong>Enter the exact amount</strong> shown above and confirm the transaction.</div>
+          </div>
+          <div class="pay-step">
+            <div class="ps-num">4</div>
+            <div class="ps-text"><strong>Done!</strong> Once the network confirms, your LogNest balance is credited automatically — no further action needed.</div>
+          </div>
+        </div>
+
+        <!-- ── Actions ── -->
+        <div class="pay-actions">
+          <a href="deposit.html" class="pay-back-btn">← New Deposit</a>
+          <a href="deposit.html?tab=hist" class="pay-hist-btn" onclick="markHistoryTab()">📋 View Deposit History</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Expired overlay -->
+  <div class="expired-overlay" id="expired-overlay">
+    <div class="expired-box">
+      <div class="icon">⏰</div>
+      <h3>Address Expired</h3>
+      <p>This payment address has expired. Please generate a new one to continue your deposit.</p>
+      <a href="deposit.html" style="display:inline-block;background:var(--primary-deep);color:#fff;padding:.8rem 2rem;border-radius:10px;font-weight:700;text-decoration:none;">Generate New Address</a>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container"><p>&copy; 2026 LogNest. All rights reserved.</p></div>
+  </footer>
+
+  <script>
+    let timerInterval = null;
+
+    function markHistoryTab() {
+      sessionStorage.setItem('dep_show_history', '1');
+    }
+
+    function copyField(sourceId, btnId, msg) {
+      const text = document.getElementById(sourceId).textContent.trim();
+      const btn  = document.getElementById(btnId);
+      navigator.clipboard.writeText(text).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = '✓ Copied';
+        btn.classList.add('done');
+        toast(msg, 'success');
+        setTimeout(() => { btn.textContent = orig; btn.classList.remove('done'); }, 2500);
+      });
+    }
+
+    function startTimer(expiredAt) {
+      const timerEl = document.getElementById('timer-display');
+      function tick() {
+        const secsLeft = Math.floor((expiredAt * 1000 - Date.now()) / 1000);
+        if (secsLeft <= 0) {
+          clearInterval(timerInterval);
+          timerEl.textContent = '⏱ Expired';
+          timerEl.style.color = '#ef4444';
+          document.getElementById('expired-overlay').classList.add('show');
+          sessionStorage.removeItem('pending_payment');
+          return;
+        }
+        const m = String(Math.floor(secsLeft / 60)).padStart(2, '0');
+        const s = String(secsLeft % 60).padStart(2, '0');
+        timerEl.textContent = `⏱ ${m}:${s}`;
+        if (secsLeft < 300) timerEl.classList.add('warn'); // last 5 min warning
+      }
+      tick();
+      timerInterval = setInterval(tick, 1000);
+    }
+
+    // Load payment data from sessionStorage
+    (function init() {
+      const raw = sessionStorage.getItem('pending_payment');
+      if (!raw) {
+        // No payment data — redirect back
+        window.location.href = 'deposit.html';
+        return;
+      }
+
+      try {
+        const p = JSON.parse(raw);
+
+        document.getElementById('coin-tag').textContent    = `${p.pay_currency} · ${p.network}`;
+        document.getElementById('qr-img').src             = p.qr_code;
+        document.getElementById('addr-val').textContent   = p.address;
+        document.getElementById('pay-amount-crypto').textContent = `${p.pay_amount} ${p.pay_currency}`;
+        document.getElementById('pay-amount-usd').textContent    = `≈ $${parseFloat(p.usd_amount || 0).toFixed(2)} USD`;
+        document.getElementById('warn-amt').textContent   = `${p.pay_amount} ${p.pay_currency}`;
+        document.getElementById('dep-id-val').textContent = p.deposit_id;
+
+        startTimer(p.expired_at);
+      } catch (e) {
+        console.error('Failed to parse payment data', e);
+        window.location.href = 'deposit.html';
+      }
+    })();
+  </script>
+</body>
+</html>

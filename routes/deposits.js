@@ -169,16 +169,27 @@ router.post('/crypto', authMiddleware, async (req, res) => {
   }
 });
 
-// ─── Get User's Deposits ──────────────────────────────────────────────────────
+// ─── Get User's Deposits (paginated) ─────────────────────────────────────────
 router.get('/my-deposits', authMiddleware, async (req, res) => {
   try {
-    const result = await pool.query(
-      `SELECT * FROM deposits WHERE user_id = $1 ORDER BY created_at DESC LIMIT 20`,
-      [req.user.id]
-    );
+    const { page = 1, limit = 8 } = req.query;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+
+    const [countResult, result] = await Promise.all([
+      pool.query('SELECT COUNT(*) FROM deposits WHERE user_id = $1', [req.user.id]),
+      pool.query(
+        'SELECT * FROM deposits WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3',
+        [req.user.id, parseInt(limit), offset]
+      ),
+    ]);
 
     const deposits = result.rows.map(d => ({ ...d, amount: parseFloat(d.amount) }));
-    return res.json({ success: true, deposits });
+    return res.json({
+      success: true,
+      deposits,
+      total: parseInt(countResult.rows[0].count),
+      page: parseInt(page),
+    });
   } catch (error) {
     console.error('Get deposits error:', error);
     return res.status(500).json({ success: false, message: 'Server error.' });
