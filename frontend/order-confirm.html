@@ -1,9 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/images/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Order Confirmed – LogNest</title>
+  <title>Order Confirmed � LogNest</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <script src="js/toast.js"></script>
@@ -25,7 +26,7 @@
 
       <!-- Success icon -->
       <div style="width:64px; height:64px; background: linear-gradient(135deg, #16a34a, #22c55e); border-radius:50%; display:flex; align-items:center; justify-content:center; margin: 0 auto 1.25rem; font-size: 1.75rem; box-shadow: 0 6px 20px rgba(22,163,74,0.25);">
-        ✓
+        ?
       </div>
 
       <h1 style="font-size:1.35rem; color:var(--primary-deep); margin-bottom:0.3rem;">Order Confirmed!</h1>
@@ -57,13 +58,13 @@
       let html = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.9rem;">
           <span style="font-size:0.8rem; font-weight:700; color:var(--text-main); text-transform:uppercase; letter-spacing:0.04em;">Purchase Summary</span>
-          <span style="background:#16a34a; color:#fff; border-radius:20px; padding:0.15rem 0.6rem; font-size:0.7rem; font-weight:700;">✓ Paid</span>
+          <span style="background:#16a34a; color:#fff; border-radius:20px; padding:0.15rem 0.6rem; font-size:0.7rem; font-weight:700;">? Paid</span>
         </div>
       `;
 
       names.forEach((name, i) => {
         // Truncate long names
-        const displayName = name.length > 55 ? name.substring(0, 52) + '…' : name;
+        const displayName = name.length > 55 ? name.substring(0, 52) + '�' : name;
         html += `
           <div style="display:flex; align-items:center; gap:0.6rem; padding:0.55rem 0; ${i < names.length - 1 ? 'border-bottom:1px solid var(--border-soft);' : ''}">
             <div style="width:28px;height:28px;border-radius:6px;background:var(--bg-accent);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--primary-deep);font-size:0.8rem;flex-shrink:0;">

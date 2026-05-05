@@ -1,9 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/images/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Premium Bank Logs – LogNest</title>
+  <title>Premium Bank Logs � LogNest</title>
   <meta name="description" content="Browse premium US Bank logs and accounts." />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
@@ -180,14 +181,14 @@
     <div style="margin-bottom: 0.4rem;" data-fm="fadeIn">
       <h1 style="font-size: 1.2rem; color: var(--primary-deep); letter-spacing: -0.5px; margin-bottom: 0.1rem;">Premium Bank Logs</h1>
       <p style="color: var(--text-muted); font-size: 0.78rem;">
-        Filter by institution · Balances &amp; details guaranteed.
+        Filter by institution � Balances &amp; details guaranteed.
       </p>
     </div>
 
     <div class="store-wrapper">
       <!-- Left Sidebar: Banks -->
       <aside class="bank-sidebar" data-fm="slideRight">
-        <h3>🏦 Select Institution</h3>
+        <h3>?? Select Institution</h3>
         <input type="text" id="bank-search" class="form-control" placeholder="Search banks..." style="padding: 0.45rem 0.75rem; font-size: 0.82rem;" />
         
         <div class="bank-list-wrapper" id="bank-list">
@@ -238,10 +239,10 @@
     </div>
   </footer>
 
-  <!-- ─── Product Details Modal ─────────────────────────────────────── -->
+  <!-- --- Product Details Modal --------------------------------------- -->
   <div id="product-modal" style="display:none; position:fixed; inset:0; background:rgba(44,36,22,0.5); z-index:1000; align-items:center; justify-content:center; padding:1rem;">
     <div style="background:var(--bg-card); border-radius:16px; max-width:460px; width:100%; padding:1.5rem; box-shadow:0 20px 60px rgba(0,0,0,0.2); position:relative;">
-      <button onclick="closeModal()" style="position:absolute; top:0.75rem; right:0.75rem; background:var(--bg-accent); border:1px solid var(--border-soft); border-radius:50%; width:28px; height:28px; cursor:pointer; font-size:0.9rem; display:flex; align-items:center; justify-content:center; color:var(--text-muted);">✕</button>
+      <button onclick="closeModal()" style="position:absolute; top:0.75rem; right:0.75rem; background:var(--bg-accent); border:1px solid var(--border-soft); border-radius:50%; width:28px; height:28px; cursor:pointer; font-size:0.9rem; display:flex; align-items:center; justify-content:center; color:var(--text-muted);">?</button>
 
       <span id="modal-bank" style="font-size:0.7rem; text-transform:uppercase; font-weight:700; color:var(--accent-terra); letter-spacing:0.06em;"></span>
       <h2 id="modal-name" style="font-size:1.05rem; color:var(--text-main); margin:0.25rem 0 0.5rem; line-height:1.3; padding-right:2rem;"></h2>
@@ -260,12 +261,12 @@
       </div>
 
       <div style="background:rgba(26,122,122,0.06); border:1px solid rgba(26,122,122,0.15); border-radius:8px; padding:0.5rem 0.75rem; margin-bottom:0.75rem; font-size:0.78rem; color:var(--text-muted); line-height:1.4;">
-        <strong style="color:var(--accent-terra);">⚠</strong> All sales are final. Ensure sufficient balance before purchasing.
+        <strong style="color:var(--accent-terra);">?</strong> All sales are final. Ensure sufficient balance before purchasing.
       </div>
 
       <div style="display:flex; gap:0.75rem;">
         <button onclick="closeModal()" class="btn btn-outline" style="flex:1; padding:0.55rem;">Cancel</button>
-        <button id="modal-buy-btn" class="btn btn-primary" style="flex:2; padding:0.55rem;">🛒 Add to Cart</button>
+        <button id="modal-buy-btn" class="btn btn-primary" style="flex:2; padding:0.55rem;">?? Add to Cart</button>
       </div>
     </div>
   </div>

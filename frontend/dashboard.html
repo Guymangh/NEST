@@ -1,16 +1,17 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/images/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard – LogNest</title>
-  <meta name="description" content="Your LogNest account dashboard — balance, orders, and quick actions." />
+  <title>Dashboard � LogNest</title>
+  <meta name="description" content="Your LogNest account dashboard � balance, orders, and quick actions." />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <script src="js/config.js"></script>
   <script src="js/nav.js"></script>
   <style>
-    /* ── Layout ── */
+    /* -- Layout -- */
     .dash-grid {
       display: grid;
       grid-template-columns: 1fr 300px;
@@ -20,7 +21,7 @@
     .dash-left  { display: flex; flex-direction: column; gap: 1.25rem; }
     .dash-right { display: flex; flex-direction: column; gap: 1.25rem; }
 
-    /* ── Welcome Banner ── */
+    /* -- Welcome Banner -- */
     .welcome-banner {
       background: linear-gradient(135deg, var(--primary-deep) 0%, var(--primary) 100%);
       border-radius: 16px;
@@ -44,7 +45,7 @@
       font-size: 0.78rem; font-weight: 700; color: #fff; white-space: nowrap;
     }
 
-    /* ── Stats Row ── */
+    /* -- Stats Row -- */
     .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
     .stat-card {
       background: var(--bg-card); border: 1px solid var(--border-soft);
@@ -65,7 +66,7 @@
     .stat-label { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); letter-spacing: 0.05em; margin-bottom: 0.2rem; }
     .stat-value { font-size: 1.4rem; font-weight: 800; color: var(--text-main); white-space: nowrap; }
 
-    /* ── Quick Actions ── */
+    /* -- Quick Actions -- */
     .section-title { font-size: 0.78rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); letter-spacing: 0.06em; margin-bottom: 0.75rem; }
     .actions-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
     .action-card {
@@ -84,7 +85,7 @@
     .action-label { font-size: 0.88rem; font-weight: 700; color: var(--text-main); }
     .action-sub   { font-size: 0.76rem; color: var(--text-muted); margin-top: 0.1rem; }
 
-    /* ── Account Info ── */
+    /* -- Account Info -- */
     .info-card {
       background: var(--bg-card); border: 1px solid var(--border-soft);
       border-radius: 14px; padding: 1.25rem;
@@ -107,7 +108,7 @@
       font-size: 0.72rem; font-weight: 800; text-transform: capitalize;
     }
 
-    /* ── Security Tips ── */
+    /* -- Security Tips -- */
     .security-card {
       background: var(--bg-card); border: 1px solid var(--border-soft);
       border-radius: 14px; padding: 1.25rem;
@@ -125,7 +126,7 @@
     .security-text strong { font-size: 0.82rem; color: var(--text-main); display: block; }
     .security-text span   { font-size: 0.76rem; color: var(--text-muted); }
 
-    /* ── Low Balance Alert ── */
+    /* -- Low Balance Alert -- */
     .balance-alert {
       background: #fff7ed; border: 1px solid #fed7aa;
       border-radius: 12px; padding: 0.85rem 1rem;
@@ -155,11 +156,11 @@
 
   <main class="main-content container" style="padding-top:1.25rem;">
 
-    <!-- ── 1. Welcome Banner ────────────────────────────────── -->
+    <!-- -- 1. Welcome Banner ---------------------------------- -->
     <div class="welcome-banner" style="margin-bottom:1.25rem;">
       <div class="welcome-text">
-        <h2 id="welcome-name">Welcome back 👋</h2>
-        <p id="welcome-sub">Member since — · Account in good standing</p>
+        <h2 id="welcome-name">Welcome back ??</h2>
+        <p id="welcome-sub">Member since � � Account in good standing</p>
       </div>
       <span class="welcome-badge" id="welcome-role">User</span>
     </div>
@@ -167,63 +168,63 @@
     <div class="dash-grid">
       <div class="dash-left">
 
-        <!-- ── 2. Stats Row ──────────────────────────────────── -->
+        <!-- -- 2. Stats Row ------------------------------------ -->
         <div class="stats-row">
           <div class="stat-card">
-            <div class="stat-icon green">💰</div>
+            <div class="stat-icon green">??</div>
             <div class="stat-info">
               <div class="stat-label">Balance</div>
-              <div class="stat-value" id="stat-balance">—</div>
+              <div class="stat-value" id="stat-balance">�</div>
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon blue">📦</div>
+            <div class="stat-icon blue">??</div>
             <div class="stat-info">
               <div class="stat-label">Orders</div>
-              <div class="stat-value" id="stat-orders">—</div>
+              <div class="stat-value" id="stat-orders">�</div>
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon amber">💸</div>
+            <div class="stat-icon amber">??</div>
             <div class="stat-info">
               <div class="stat-label">Total Spent</div>
-              <div class="stat-value" id="stat-spent">—</div>
+              <div class="stat-value" id="stat-spent">�</div>
             </div>
           </div>
         </div>
 
         <!-- Low balance alert (shown dynamically) -->
         <div class="balance-alert" id="low-balance-alert" style="display:none;">
-          ⚠️ <span>Your balance is low. <a href="deposit.html" style="font-weight:700; color:#b45309;">Add funds</a> to continue purchasing.</span>
+          ?? <span>Your balance is low. <a href="deposit.html" style="font-weight:700; color:#b45309;">Add funds</a> to continue purchasing.</span>
         </div>
 
-        <!-- ── 3. Quick Actions ──────────────────────────────── -->
+        <!-- -- 3. Quick Actions -------------------------------- -->
         <div>
           <div class="section-title">Quick Actions</div>
           <div class="actions-grid">
             <a href="store.html" class="action-card">
-              <div class="action-icon">🏪</div>
+              <div class="action-icon">??</div>
               <div>
                 <div class="action-label">Browse Store</div>
                 <div class="action-sub">View available logs</div>
               </div>
             </a>
             <a href="orders.html" class="action-card">
-              <div class="action-icon">📦</div>
+              <div class="action-icon">??</div>
               <div>
                 <div class="action-label">My Orders</div>
                 <div class="action-sub">View purchase history</div>
               </div>
             </a>
             <a href="deposit.html" class="action-card">
-              <div class="action-icon">💰</div>
+              <div class="action-icon">??</div>
               <div>
                 <div class="action-label">Add Funds</div>
                 <div class="action-sub">Top up via crypto</div>
               </div>
             </a>
             <a href="cart.html" class="action-card">
-              <div class="action-icon">🛒</div>
+              <div class="action-icon">??</div>
               <div>
                 <div class="action-label">Your Cart</div>
                 <div class="action-sub">Review &amp; checkout</div>
@@ -236,52 +237,52 @@
 
       <div class="dash-right">
 
-        <!-- ── 4. Account Info ───────────────────────────────── -->
+        <!-- -- 4. Account Info --------------------------------- -->
         <div class="info-card">
           <div class="section-title">Account</div>
           <div class="info-avatar" id="account-avatar">U</div>
-          <div class="info-name"  id="account-name">—</div>
-          <div class="info-email" id="account-email">—</div>
+          <div class="info-name"  id="account-name">�</div>
+          <div class="info-email" id="account-email">�</div>
           <div class="info-row">
             <span>Role</span>
             <span><span class="role-badge" id="account-role">user</span></span>
           </div>
           <div class="info-row">
             <span>Status</span>
-            <span style="color:#16a34a; font-weight:700;">● Active</span>
+            <span style="color:#16a34a; font-weight:700;">? Active</span>
           </div>
           <div class="info-row">
             <span>Member Since</span>
-            <span id="account-since">—</span>
+            <span id="account-since">�</span>
           </div>
         </div>
 
-        <!-- ── 7. Security Tips ──────────────────────────────── -->
+        <!-- -- 7. Security Tips -------------------------------- -->
         <div class="security-card">
           <div class="section-title">Security Tips</div>
           <div class="security-item">
-            <div class="security-dot">🔒</div>
+            <div class="security-dot">??</div>
             <div class="security-text">
               <strong>Never share your credentials</strong>
               <span>Keep login details private at all times.</span>
             </div>
           </div>
           <div class="security-item">
-            <div class="security-dot">📧</div>
+            <div class="security-dot">??</div>
             <div class="security-text">
               <strong>Use a dedicated email</strong>
               <span>Don't use your main personal inbox.</span>
             </div>
           </div>
           <div class="security-item">
-            <div class="security-dot">🚪</div>
+            <div class="security-dot">??</div>
             <div class="security-text">
               <strong>Log out after each session</strong>
               <span>Especially on shared devices.</span>
             </div>
           </div>
           <div class="security-item">
-            <div class="security-dot">💾</div>
+            <div class="security-dot">??</div>
             <div class="security-text">
               <strong>Back up purchased logs</strong>
               <span>Save copies in a secure, offline location.</span>
@@ -303,25 +304,25 @@
       const user  = JSON.parse(localStorage.getItem('user') || 'null');
       if (!user) return;
 
-      // ── Welcome banner
-      document.getElementById('welcome-name').textContent = `Welcome back, ${user.username} 👋`;
-      document.getElementById('welcome-role').textContent = user.role === 'admin' ? '🛡 Admin' : '✓ Member';
-      const since = user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '—';
-      document.getElementById('welcome-sub').textContent = `Member since ${since} · Account in good standing`;
+      // -- Welcome banner
+      document.getElementById('welcome-name').textContent = `Welcome back, ${user.username} ??`;
+      document.getElementById('welcome-role').textContent = user.role === 'admin' ? '?? Admin' : '? Member';
+      const since = user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '�';
+      document.getElementById('welcome-sub').textContent = `Member since ${since} � Account in good standing`;
 
-      // ── Account info
+      // -- Account info
       document.getElementById('account-avatar').textContent = (user.username || 'U').charAt(0).toUpperCase();
-      document.getElementById('account-name').textContent   = user.username || '—';
-      document.getElementById('account-email').textContent  = user.email    || '—';
+      document.getElementById('account-name').textContent   = user.username || '�';
+      document.getElementById('account-email').textContent  = user.email    || '�';
       document.getElementById('account-role').textContent   = user.role     || 'user';
       document.getElementById('account-since').textContent  = since;
 
-      // ── Balance stat
+      // -- Balance stat
       const bal = parseFloat(user.balance || 0);
       document.getElementById('stat-balance').textContent = `$${bal.toFixed(2)}`;
       if (bal < 20) document.getElementById('low-balance-alert').style.display = 'flex';
 
-      // ── Orders stats from API
+      // -- Orders stats from API
       try {
         const res  = await fetch(`${window.API_BASE || 'http://localhost:5000/api'}/orders/my-orders?limit=100`, {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -334,8 +335,8 @@
           document.getElementById('stat-spent').textContent  = `$${spent.toFixed(2)}`;
         }
       } catch { 
-        document.getElementById('stat-orders').textContent = '—';
-        document.getElementById('stat-spent').textContent  = '—';
+        document.getElementById('stat-orders').textContent = '�';
+        document.getElementById('stat-spent').textContent  = '�';
       }
     });
   </script>
