@@ -349,13 +349,32 @@
         const total = data.total || data.deposits.length;
         const pages = Math.ceil(total / PAGE_SIZE);
 
+        let activePayment = null;
+        try {
+          const p = JSON.parse(sessionStorage.getItem('pending_payment'));
+          if (p && p.expired_at && p.expired_at * 1000 > Date.now()) {
+            activePayment = p;
+          }
+        } catch {}
+
         tbody.innerHTML = data.deposits.map(d => {
           const date = new Date(d.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+          
+          let statusHtml = `<span class="dep-badge ${d.status}">${d.status === 'approved' ? '✓' : d.status === 'pending' ? '⏳' : '✕'} ${d.status}</span>`;
+          
+          if (d.status === 'pending') {
+            if (activePayment && activePayment.deposit_id === d.id) {
+              statusHtml += ` <a href="payment.html" class="dep-badge" style="background:var(--primary-deep);color:#fff;border-color:var(--primary-deep);text-decoration:none;margin-left:0.5rem;box-shadow:0 2px 6px rgba(13,79,79,0.3);">👁 View Address</a>`;
+            } else {
+              statusHtml += ` <a href="add-funds.html" class="dep-badge" style="background:var(--bg-main);color:var(--text-main);text-decoration:none;margin-left:0.5rem;">Pay</a>`;
+            }
+          }
+
           return `<tr>
             <td data-label="Date"   style="color:var(--text-muted);font-size:.82rem;white-space:nowrap;">${date}</td>
             <td data-label="Amount"><strong style="color:var(--primary-deep);font-size:.95rem;">$${parseFloat(d.amount).toFixed(2)}</strong></td>
             <td data-label="Coin"  >${coinPill(d.notes, d.method)}</td>
-            <td data-label="Status"><span class="dep-badge ${d.status}">${d.status === 'approved' ? '✓' : d.status === 'pending' ? '⏳' : '✕'} ${d.status}</span></td>
+            <td data-label="Status">${statusHtml}</td>
           </tr>`;
         }).join('');
 
