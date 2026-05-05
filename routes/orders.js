@@ -14,7 +14,42 @@ const revealRateLimit = new Map(); // key: `${userId}:${orderId}` → [timestamp
 
 const TOKEN_TTL_MS    = 60 * 1000;       // 60 seconds
 const RATE_LIMIT_MAX  = 8;               // max 8 reveal requests per order per hour
-const RATE_WINDOW_MS  = 60 * 60 * 1000; // 1 hour
+const RATE_WINDOW_MS       = 60 * 60 * 1000; // 1 hour
+const ACTIVATION_THRESHOLD = 350;            // USD — total approved deposits needed to unlock logs
+
+// ─── Account Activation Check ──────────────────────────────────────────────────
+// Returns true if user has ≥ ACTIVATION_THRESHOLD in total approved deposits (cumulative, not spendable balance)
+async function isUserActivated(userId) {
+  try {
+    const result = await pool.query(
+      `SELECT COALESCE(SUM(amount), 0) AS total
+       FROM deposits
+       WHERE user_id = $1 AND status = 'approved'`,
+      [userId]
+    );
+    return parseFloat(result.rows[0].total) >= ACTIVATION_THRESHOLD;
+  } catch { return false; }
+}
+
+async function getUserActivationData(userId) {
+  try {
+    const result = await pool.query(
+      `SELECT COALESCE(SUM(amount), 0) AS total
+       FROM deposits
+       WHERE user_id = $1 AND status = 'approved'`,
+      [userId]
+    );
+    const deposited = parseFloat(result.rows[0].total);
+    const remaining = Math.max(0, ACTIVATION_THRESHOLD - deposited);
+    return {
+      is_activated:   deposited >= ACTIVATION_THRESHOLD,
+      total_deposited: deposited,
+      threshold:       ACTIVATION_THRESHOLD,
+      remaining,
+      progress_pct:    Math.min(100, Math.round((deposited / ACTIVATION_THRESHOLD) * 100)),
+    };
+  } catch { return { is_activated: false, total_deposited: 0, threshold: ACTIVATION_THRESHOLD, remaining: ACTIVATION_THRESHOLD, progress_pct: 0 }; }
+}
 
 // Auto-clean expired tokens every 5 minutes
 setInterval(() => {
@@ -320,6 +355,17 @@ router.get('/:id', authMiddleware, async (req, res) => {
 // JWT alone is NOT enough to read credentials — you need this token too.
 router.post('/:id/request-credentials', authMiddleware, async (req, res) => {
   try {
+    // ─ Activation gate: must have deposited ≥ $350 cumulatively ───────────────
+    const activation = await getUserActivationData(req.user.id);
+    if (!activation.is_activated) {
+      return res.status(402).json({
+        success:          false,
+        activation_required: true,
+        message:          `Account not activated. Deposit $${activation.remaining.toFixed(2)} more to unlock your logs.`,
+        ...activation,
+      });
+    }
+
     // ─ Verify order belongs to this user and is completed ──────────────────────
     const result = await pool.query(
       `SELECT id, status, product_data FROM orders
@@ -380,6 +426,17 @@ router.post('/:id/request-credentials', authMiddleware, async (req, res) => {
 // Token is deleted on first use — cannot be replayed.
 router.get('/:id/credentials', authMiddleware, async (req, res) => {
   const { t: token } = req.query;
+
+  // ─ Activation gate ────────────────────────────────────────────────────────
+  const activation = await getUserActivationData(req.user.id);
+  if (!activation.is_activated) {
+    return res.status(402).json({
+      success:             false,
+      activation_required: true,
+      message:             `Account not activated. Deposit $${activation.remaining.toFixed(2)} more to unlock.`,
+      ...activation,
+    });
+  }
 
   if (!token) {
     return res.status(401).json({

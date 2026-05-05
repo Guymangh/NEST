@@ -129,12 +129,18 @@ const authMiddleware = require('../middleware/auth');
 
 router.get('/me', authMiddleware, async (req, res) => {
   try {
-    const result = await pool.query(
-      'SELECT id, username, email, balance, role, avatar, created_at FROM users WHERE id = $1',
-      [req.user.id]
-    );
-    const user = result.rows[0];
+    const [userResult, depositResult] = await Promise.all([
+      pool.query('SELECT id, username, email, balance, role, avatar, created_at FROM users WHERE id = $1', [req.user.id]),
+      pool.query(`SELECT COALESCE(SUM(amount), 0) AS total FROM deposits WHERE user_id = $1 AND status = 'approved'`, [req.user.id]),
+    ]);
+    const user = userResult.rows[0];
     user.balance = parseFloat(user.balance);
+    const totalDeposited = parseFloat(depositResult.rows[0].total);
+    const threshold = 350;
+    user.is_activated    = totalDeposited >= threshold;
+    user.total_deposited = totalDeposited;
+    user.activation_remaining = Math.max(0, threshold - totalDeposited);
+    user.activation_pct  = Math.min(100, Math.round((totalDeposited / threshold) * 100));
     return res.json({ success: true, user });
   } catch (error) {
     console.error('Get me error:', error);
