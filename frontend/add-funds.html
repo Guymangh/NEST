@@ -5,27 +5,44 @@
   <link rel="icon" type="image/png" href="/images/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Add Funds – LogNest</title>
-  <meta name="description" content="Deposit cryptocurrency and get your balance credited automatically." />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <script src="js/toast.js"></script>
   <script src="js/config.js"></script>
   <script src="js/nav.js"></script>
   <style>
+    .page-hero {
+      text-align: center;
+      padding: 2rem 0 1.75rem;
+    }
+    .page-hero .back {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.82rem; color: var(--text-muted);
+      text-decoration: none; font-weight: 600; margin-bottom: 1.25rem;
+      transition: color .18s;
+    }
+    .page-hero .back:hover { color: var(--primary-deep); }
+    .page-hero h1 { font-size: 2rem; font-weight: 800; margin-bottom: 0.35rem; }
+    .page-hero p  { color: var(--text-muted); font-size: 0.92rem; }
+
+    /* centered card */
     .dep-card {
       background: var(--bg-card);
       border: 1px solid var(--border-soft);
       border-radius: 20px;
-      padding: 2.25rem;
+      padding: 2.25rem 2.5rem;
       box-shadow: var(--shadow-soft);
-      max-width: 640px;
+      max-width: 580px;
+      margin: 0 auto;
     }
+
     .sec-label {
-      font-size: 0.78rem; text-transform: uppercase; letter-spacing: .08em;
+      font-size: 0.75rem; text-transform: uppercase; letter-spacing: .08em;
       font-weight: 700; color: var(--text-muted); margin-bottom: 0.85rem;
     }
+
     /* Amount chips */
-    .amount-chips { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .amount-chips { display: flex; gap: 0.55rem; flex-wrap: wrap; margin-bottom: 1rem; justify-content: center; }
     .chip {
       padding: 0.55rem 1.2rem; border: 2px solid var(--border-soft);
       border-radius: 10px; font-size: 0.9rem; font-weight: 700;
@@ -33,23 +50,25 @@
       transition: all 0.18s;
     }
     .chip:hover, .chip.on { border-color: var(--primary-deep); background: var(--bg-accent); color: var(--primary-deep); }
+
     .amt-wrap { position: relative; margin-bottom: 2rem; }
     .amt-wrap .sym {
       position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
       font-weight: 700; color: var(--text-muted); font-size: 1.05rem; pointer-events: none;
     }
     .amt-wrap input {
-      width: 100%; padding: 0.9rem 1rem 0.9rem 2.5rem;
+      width: 100%; padding: 0.9rem 1rem 0.9rem 2.4rem;
       border: 2px solid var(--border-soft); border-radius: 12px;
-      font-size: 1.15rem; font-weight: 700; color: var(--text-main);
+      font-size: 1.1rem; font-weight: 700; color: var(--text-main);
       background: var(--bg-main); transition: border-color 0.2s; box-sizing: border-box;
     }
     .amt-wrap input:focus { outline: none; border-color: var(--primary-deep); }
+
     /* Coin grid */
     .coin-grid {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.65rem; margin-bottom: 2rem;
     }
-    @media(max-width:500px) { .coin-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media(max-width:480px) { .coin-grid { grid-template-columns: repeat(2, 1fr); } }
     .coin-btn {
       display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
       padding: 0.9rem 0.5rem; border: 2px solid var(--border-soft);
@@ -59,7 +78,8 @@
     .coin-btn .ci { font-size: 1.5rem; }
     .coin-btn .cn { font-size: 0.8rem; font-weight: 700; color: var(--text-main); }
     .coin-btn .net { font-size: 0.68rem; color: var(--text-muted); }
-    /* Generate btn */
+
+    /* Generate button */
     .gen-btn {
       width: 100%; padding: 1rem;
       background: linear-gradient(135deg, var(--primary-deep), #0a6e6e);
@@ -70,17 +90,22 @@
     }
     .gen-btn:hover { opacity: 0.9; transform: translateY(-1px); }
     .gen-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    /* How it works */
-    .how-steps { display: flex; gap: 1.5rem; margin-top: 1.75rem; flex-wrap: wrap; }
-    .how-step { display: flex; gap: 0.75rem; align-items: flex-start; flex: 1; min-width: 150px; }
-    .step-num {
-      width: 26px; height: 26px; border-radius: 50%;
-      background: var(--primary-deep); color: #fff;
-      font-size: 0.75rem; font-weight: 800;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+
+    /* Steps */
+    .how-steps {
+      display: flex; gap: 1.25rem; margin-top: 1.75rem;
+      padding-top: 1.75rem; border-top: 1px solid var(--border-soft);
     }
-    .step-text { font-size: 0.84rem; color: var(--text-muted); line-height: 1.5; }
-    .step-text strong { color: var(--text-main); display: block; margin-bottom: .1rem; }
+    @media(max-width:480px){ .how-steps { flex-direction:column; gap:.85rem; } }
+    .how-step { display: flex; gap: 0.75rem; align-items: flex-start; flex: 1; }
+    .step-num {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--primary-deep); color: #fff;
+      font-size: 0.72rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;
+    }
+    .step-text { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+    .step-text strong { color: var(--text-main); display: block; }
   </style>
 </head>
 <body data-require-auth="true">
@@ -92,20 +117,14 @@
   </header>
 
   <main class="main-content container">
-    <!-- Breadcrumb -->
-    <div style="margin-bottom:1.5rem;">
-      <a href="deposit.html" style="font-size:0.85rem;color:var(--text-muted);text-decoration:none;font-weight:600;">
-        ← Wallet
-      </a>
-    </div>
-
-    <div style="margin-bottom:2rem;" data-fm="fadeIn">
-      <h1 style="font-size:2rem;font-weight:800;margin-bottom:0.4rem;">Add Funds</h1>
-      <p style="color:var(--text-muted);">Choose an amount and a cryptocurrency. Your balance is credited automatically.</p>
+    <div class="page-hero" data-fm="fadeIn">
+      <a href="deposit.html" class="back">← Wallet</a>
+      <h1>Add Funds</h1>
+      <p>Pick an amount and a coin — your balance credits automatically.</p>
     </div>
 
     <div class="dep-card" data-fm="fadeIn">
-      <p class="sec-label">Select Amount (USD)</p>
+      <p class="sec-label" style="text-align:center;">Select Amount (USD)</p>
       <div class="amount-chips">
         <button class="chip" onclick="pickAmt(10,this)">$10</button>
         <button class="chip" onclick="pickAmt(25,this)">$25</button>
@@ -118,7 +137,7 @@
         <input type="number" id="dep-amount" min="5" step="1" placeholder="Custom amount…" oninput="clearChips()" />
       </div>
 
-      <p class="sec-label">Select Cryptocurrency</p>
+      <p class="sec-label" style="text-align:center;">Select Cryptocurrency</p>
       <div class="coin-grid">
         <button class="coin-btn" id="coin-BTC" onclick="pickCoin('BTC','')">
           <span class="ci">₿</span><span class="cn">Bitcoin</span><span class="net">BTC</span>
@@ -144,6 +163,7 @@
         <span>🔑</span> Get Payment Address
       </button>
 
+      <!-- How it works -->
       <div class="how-steps">
         <div class="how-step">
           <div class="step-num">1</div>
@@ -155,7 +175,7 @@
         </div>
         <div class="how-step">
           <div class="step-num">3</div>
-          <div class="step-text"><strong>Send &amp; done</strong>Send the exact crypto — your balance credits automatically.</div>
+          <div class="step-text"><strong>Send &amp; done</strong>Send the exact crypto — balance credits automatically.</div>
         </div>
       </div>
     </div>

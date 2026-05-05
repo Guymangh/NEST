@@ -5,72 +5,93 @@
   <link rel="icon" type="image/png" href="/images/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Wallet – LogNest</title>
-  <meta name="description" content="Add funds or view your deposit history." />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <script src="js/toast.js"></script>
   <script src="js/config.js"></script>
   <script src="js/nav.js"></script>
   <style>
+    .wallet-hero {
+      text-align: center;
+      padding: 2.5rem 0 2rem;
+    }
+    .wallet-hero h1 {
+      font-size: 2.4rem; font-weight: 800; margin-bottom: 0.5rem;
+    }
+    .wallet-hero p {
+      color: var(--text-muted); font-size: 1rem;
+    }
+
     .wallet-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 1.25rem;
-      max-width: 600px;
-      margin-top: 2.5rem;
+      max-width: 560px;
+      margin: 0 auto;
     }
-    @media (max-width: 500px) { .wallet-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 480px) { .wallet-grid { grid-template-columns: 1fr; } }
 
-    .wallet-nav-card {
+    .wnc {
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
+      align-items: center;
+      text-align: center;
       gap: 1rem;
-      padding: 2rem 1.75rem;
+      padding: 2.25rem 1.5rem;
       background: var(--bg-card);
       border: 2px solid var(--border-soft);
-      border-radius: 18px;
+      border-radius: 20px;
       text-decoration: none;
       cursor: pointer;
       transition: all 0.22s;
       box-shadow: var(--shadow-soft);
     }
-    .wallet-nav-card:hover {
+    .wnc:hover {
       border-color: var(--primary-deep);
       background: var(--bg-accent);
-      transform: translateY(-3px);
-      box-shadow: 0 8px 28px rgba(13,79,79,0.14);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(13,79,79,0.15);
     }
     .wnc-icon {
-      width: 52px; height: 52px; border-radius: 14px;
+      width: 60px; height: 60px;
+      border-radius: 16px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 1.6rem;
-      background: var(--bg-accent);
+      font-size: 1.8rem;
+      background: var(--bg-main);
       border: 1px solid var(--border-soft);
-      transition: background 0.22s;
+      transition: all 0.22s;
     }
-    .wallet-nav-card:hover .wnc-icon {
-      background: rgba(13,79,79,0.12);
+    .wnc:hover .wnc-icon {
+      background: rgba(13,79,79,0.1);
+      border-color: var(--primary-deep);
     }
-    .wnc-body { display: flex; flex-direction: column; gap: 0.2rem; }
     .wnc-label {
-      font-size: 0.72rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: .08em;
+      font-size: 0.7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .09em;
       color: var(--text-muted);
     }
     .wnc-title {
-      font-size: 1.15rem; font-weight: 800; color: var(--text-main);
+      font-size: 1.1rem; font-weight: 800;
+      color: var(--text-main); margin-top: 0.1rem;
     }
     .wnc-desc {
-      font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; margin-top: 0.25rem;
+      font-size: 0.82rem; color: var(--text-muted);
+      line-height: 1.55;
     }
     .wnc-arrow {
-      margin-top: auto;
-      font-size: 0.85rem; font-weight: 700;
-      color: var(--primary-deep); opacity: 0;
-      transition: opacity 0.2s, transform 0.2s;
+      font-size: 0.82rem; font-weight: 700;
+      color: var(--primary-deep);
+      background: var(--bg-accent);
+      border: 1px solid var(--border-soft);
+      border-radius: 20px;
+      padding: 0.3rem 0.9rem;
+      transition: all 0.22s;
+      margin-top: 0.25rem;
     }
-    .wallet-nav-card:hover .wnc-arrow { opacity: 1; transform: translateX(4px); }
+    .wnc:hover .wnc-arrow {
+      background: var(--primary-deep);
+      color: #fff; border-color: var(--primary-deep);
+    }
   </style>
 </head>
 <body data-require-auth="true">
@@ -82,33 +103,31 @@
   </header>
 
   <main class="main-content container">
-    <div data-fm="fadeIn">
-      <h1 style="font-size:2.25rem;font-weight:800;margin-bottom:0.5rem;">Wallet</h1>
-      <p style="color:var(--text-muted);">Add funds or view your deposit history.</p>
+    <div class="wallet-hero" data-fm="fadeIn">
+      <h1>Wallet</h1>
+      <p>Add funds or view your deposit history.</p>
+    </div>
 
-      <div class="wallet-grid">
+    <div class="wallet-grid" data-fm="fadeIn">
+      <a href="add-funds.html" class="wnc">
+        <div class="wnc-icon">💳</div>
+        <div>
+          <div class="wnc-label">Action</div>
+          <div class="wnc-title">Add Funds</div>
+        </div>
+        <div class="wnc-desc">Deposit crypto and get your balance credited automatically.</div>
+        <span class="wnc-arrow">Go →</span>
+      </a>
 
-        <a href="add-funds.html" class="wallet-nav-card">
-          <div class="wnc-icon">💳</div>
-          <div class="wnc-body">
-            <span class="wnc-label">Action</span>
-            <span class="wnc-title">Add Funds</span>
-            <span class="wnc-desc">Deposit cryptocurrency and get your balance credited automatically.</span>
-          </div>
-          <span class="wnc-arrow">Go →</span>
-        </a>
-
-        <a href="deposit-history.html" class="wallet-nav-card">
-          <div class="wnc-icon">📋</div>
-          <div class="wnc-body">
-            <span class="wnc-label">History</span>
-            <span class="wnc-title">Deposit Logs</span>
-            <span class="wnc-desc">View all your past deposits and their current status.</span>
-          </div>
-          <span class="wnc-arrow">Go →</span>
-        </a>
-
-      </div>
+      <a href="deposit-history.html" class="wnc">
+        <div class="wnc-icon">📋</div>
+        <div>
+          <div class="wnc-label">History</div>
+          <div class="wnc-title">Deposit Logs</div>
+        </div>
+        <div class="wnc-desc">View all your past deposits and their current status.</div>
+        <span class="wnc-arrow">Go →</span>
+      </a>
     </div>
   </main>
 

@@ -5,14 +5,30 @@
   <link rel="icon" type="image/png" href="/images/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Deposit History – LogNest</title>
-  <meta name="description" content="View all your past deposits and their current status." />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <script src="js/toast.js"></script>
   <script src="js/config.js"></script>
   <script src="js/nav.js"></script>
   <style>
-    .hist-wrap { max-width: 760px; }
+    .page-hero {
+      text-align: center;
+      padding: 2rem 0 1.75rem;
+    }
+    .page-hero .back {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.82rem; color: var(--text-muted);
+      text-decoration: none; font-weight: 600; margin-bottom: 1.25rem;
+      transition: color .18s;
+    }
+    .page-hero .back:hover { color: var(--primary-deep); }
+    .page-hero h1 { font-size: 2rem; font-weight: 800; margin-bottom: 0.35rem; }
+    .page-hero p  { color: var(--text-muted); font-size: 0.92rem; }
+
+    .hist-wrap {
+      max-width: 780px;
+      margin: 0 auto;
+    }
     .hist-card {
       background: var(--bg-card);
       border: 1px solid var(--border-soft);
@@ -47,7 +63,7 @@
     .coin-pill {
       display: inline-flex; align-items: center; gap: 0.35rem;
       background: var(--bg-accent); border: 1px solid var(--border-soft);
-      border-radius: 6px; padding: 0.2rem 0.6rem;
+      border-radius: 6px; padding: 0.22rem 0.65rem;
       font-size: 0.78rem; font-weight: 700; color: var(--text-main);
     }
 
@@ -68,14 +84,14 @@
     .pag-btn:hover:not(:disabled) { border-color: var(--primary-deep); color: var(--primary-deep); }
     .pag-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-    /* Empty state */
+    /* Empty / loading */
     .empty-state {
       display: flex; flex-direction: column; align-items: center;
       justify-content: center; padding: 4rem 2rem; text-align: center; gap: 0.75rem;
     }
-    .empty-state .icon { font-size: 3rem; opacity: 0.4; }
+    .empty-state .icon { font-size: 3rem; opacity: 0.35; }
     .empty-state p { color: var(--text-muted); font-size: 0.9rem; }
-    .empty-state a {
+    .empty-cta {
       margin-top: 0.5rem;
       display: inline-flex; align-items: center; gap: 0.4rem;
       background: var(--primary-deep); color: #fff;
@@ -83,7 +99,7 @@
       font-size: 0.88rem; font-weight: 700; text-decoration: none;
       transition: opacity .2s;
     }
-    .empty-state a:hover { opacity: 0.88; }
+    .empty-cta:hover { opacity: 0.88; }
   </style>
 </head>
 <body data-require-auth="true">
@@ -95,16 +111,10 @@
   </header>
 
   <main class="main-content container">
-    <!-- Breadcrumb -->
-    <div style="margin-bottom:1.5rem;">
-      <a href="deposit.html" style="font-size:0.85rem;color:var(--text-muted);text-decoration:none;font-weight:600;">
-        ← Wallet
-      </a>
-    </div>
-
-    <div style="margin-bottom:2rem;" data-fm="fadeIn">
-      <h1 style="font-size:2rem;font-weight:800;margin-bottom:0.4rem;">Deposit History</h1>
-      <p style="color:var(--text-muted);">All your past deposits and their current status.</p>
+    <div class="page-hero" data-fm="fadeIn">
+      <a href="deposit.html" class="back">← Wallet</a>
+      <h1>Deposit History</h1>
+      <p>All your past deposits and their current status.</p>
     </div>
 
     <div class="hist-wrap" data-fm="fadeIn">
@@ -119,21 +129,19 @@
             </tr>
           </thead>
           <tbody id="hist-body">
-            <tr>
-              <td colspan="4">
-                <div class="empty-state">
-                  <span class="icon">⏳</span>
-                  <p>Loading your deposit history…</p>
-                </div>
-              </td>
-            </tr>
+            <tr><td colspan="4">
+              <div class="empty-state">
+                <span class="icon">⏳</span>
+                <p>Loading your deposits…</p>
+              </div>
+            </td></tr>
           </tbody>
         </table>
         <div class="pag-bar" id="pag-bar" style="display:none;">
           <span class="pag-info" id="pag-info">—</span>
           <div class="pag-btns">
-            <button class="pag-btn" id="pag-prev" onclick="loadHistory(currentPage - 1)">← Prev</button>
-            <button class="pag-btn" id="pag-next" onclick="loadHistory(currentPage + 1)">Next →</button>
+            <button class="pag-btn" id="pag-prev" onclick="loadHistory(currentPage-1)">← Prev</button>
+            <button class="pag-btn" id="pag-next" onclick="loadHistory(currentPage+1)">Next →</button>
           </div>
         </div>
       </div>
@@ -148,7 +156,6 @@
     const API_BASE = window.__API_BASE__ || window.API_BASE || 'http://localhost:5000/api';
     const PAGE_SIZE = 8;
     let currentPage = 1, totalDeposits = 0;
-
     const COIN_ICONS = { BTC:'₿', USDT:'₮', TRX:'🔴', LTC:'🥈', ETH:'Ξ' };
 
     function coinPill(notes, method) {
@@ -162,7 +169,6 @@
       currentPage = page;
       const token = localStorage.getItem('token');
       if (!token) return;
-
       const tbody = document.getElementById('hist-body');
       tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><span class="icon">⏳</span><p>Loading…</p></div></td></tr>`;
 
@@ -173,14 +179,12 @@
         const data = await res.json();
 
         if (!data.success || !data.deposits.length) {
-          tbody.innerHTML = `
-            <tr><td colspan="4">
-              <div class="empty-state">
-                <span class="icon">📭</span>
-                <p>No deposits yet.</p>
-                <a href="add-funds.html">💳 Make your first deposit</a>
-              </div>
-            </td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="4">
+            <div class="empty-state">
+              <span class="icon">📭</span>
+              <p>No deposits yet.</p>
+              <a href="add-funds.html" class="empty-cta">💳 Make your first deposit</a>
+            </div></td></tr>`;
           document.getElementById('pag-bar').style.display = 'none';
           return;
         }
@@ -190,36 +194,31 @@
 
         tbody.innerHTML = data.deposits.map(d => {
           const date = new Date(d.created_at).toLocaleDateString('en-US', {
-            month: 'short', day: 'numeric', year: 'numeric',
+            month:'short', day:'numeric', year:'numeric',
           });
-          return `
-            <tr>
-              <td style="color:var(--text-muted);font-size:.82rem;white-space:nowrap;">${date}</td>
-              <td><strong style="color:var(--primary-deep);">$${parseFloat(d.amount).toFixed(2)}</strong></td>
-              <td>${coinPill(d.notes, d.method)}</td>
-              <td><span class="dep-badge ${d.status}">${d.status}</span></td>
-            </tr>`;
+          return `<tr>
+            <td style="color:var(--text-muted);font-size:.82rem;white-space:nowrap;">${date}</td>
+            <td><strong style="color:var(--primary-deep);">$${parseFloat(d.amount).toFixed(2)}</strong></td>
+            <td>${coinPill(d.notes, d.method)}</td>
+            <td><span class="dep-badge ${d.status}">${d.status}</span></td>
+          </tr>`;
         }).join('');
 
-        // Pagination bar
         const pagBar  = document.getElementById('pag-bar');
-        const pagInfo = document.getElementById('pag-info');
         const prevBtn = document.getElementById('pag-prev');
         const nextBtn = document.getElementById('pag-next');
+        const infoEl  = document.getElementById('pag-info');
 
-        if (pages > 1) {
-          pagBar.style.display  = 'flex';
-          pagInfo.textContent   = `Page ${page} of ${pages}  ·  ${totalDeposits} total`;
-          prevBtn.disabled      = page <= 1;
-          nextBtn.disabled      = page >= pages;
-        } else {
-          pagInfo.textContent   = `${totalDeposits} deposit${totalDeposits !== 1 ? 's' : ''}`;
-          pagBar.style.display  = 'flex';
-          prevBtn.style.display = 'none';
-          nextBtn.style.display = 'none';
-        }
+        pagBar.style.display = 'flex';
+        infoEl.textContent   = pages > 1
+          ? `Page ${page} of ${pages}  ·  ${totalDeposits} total`
+          : `${totalDeposits} deposit${totalDeposits !== 1 ? 's' : ''}`;
+        prevBtn.disabled     = page <= 1;
+        nextBtn.disabled     = page >= pages;
+        prevBtn.style.display = pages > 1 ? '' : 'none';
+        nextBtn.style.display = pages > 1 ? '' : 'none';
 
-      } catch (err) {
+      } catch {
         tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><span class="icon">⚠️</span><p>Error loading history.</p></div></td></tr>`;
       }
     }
