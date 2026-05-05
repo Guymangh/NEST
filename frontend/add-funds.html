@@ -24,11 +24,6 @@
       gap: 5rem;
       align-items: center;
     }
-    @media(max-width: 800px) {
-      .af-split { grid-template-columns: 1fr; gap: 3rem; }
-      .af-left { text-align: center; }
-      .how-step-row { flex-direction: column; align-items: center; text-align: center; }
-    }
 
     /* ── Left Side ── */
     .af-left h1 {
@@ -50,7 +45,6 @@
     }
     .step-text { font-size: 0.95rem; color: var(--text-muted); line-height: 1.5; margin-top: 0.2rem; text-align: left; }
     .step-text strong { color: var(--text-main); font-size: 1.05rem; display: block; margin-bottom: 0.3rem; }
-    @media(max-width: 800px) { .step-text { text-align: center; } }
 
     /* ── Right Side (Card) ── */
     .af-card {
@@ -81,7 +75,6 @@
       display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem;
       margin-bottom: 1rem;
     }
-    @media(max-width:420px){ .chip-grid{ grid-template-columns: repeat(3,1fr); } }
     .chip {
       padding: 0.75rem 0.5rem; border: 1.5px solid var(--border-soft);
       border-radius: var(--radius-md); font-size: 0.95rem; font-weight: 700;
@@ -117,6 +110,7 @@
       padding: 1.2rem; border: 2px solid var(--primary-deep);
       border-radius: var(--radius-md); background: var(--bg-accent);
       cursor: default; width: 100%; box-shadow: 0 0 0 3px rgba(13,79,79,0.12);
+      box-sizing: border-box;
     }
     .coin-btn .ci { display: flex; align-items: center; }
     .coin-btn .ci svg { width: 32px; height: 32px; }
@@ -139,6 +133,7 @@
       display: flex; align-items: center; justify-content: center; gap: 0.6rem;
       box-shadow: 0 6px 20px rgba(13,79,79,0.3);
       position: relative; overflow: hidden;
+      box-sizing: border-box;
     }
     .gen-btn::after {
       content: ''; position: absolute; inset: 0;
@@ -147,6 +142,31 @@
     .gen-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(13,79,79,0.4); }
     .gen-btn:active { transform: translateY(0); }
     .gen-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* ── MOBILE RESPONSIVENESS ── */
+    @media(max-width: 800px) {
+      .af-page { padding: 2rem 1rem 4rem; }
+      .af-split { grid-template-columns: 1fr; gap: 2.5rem; }
+      .af-left h1 { font-size: 2.25rem; margin-bottom: 0.75rem; }
+      .af-left > p { margin-bottom: 2rem; font-size: 1rem; }
+      .how-col { gap: 1.25rem; }
+    }
+    
+    @media(max-width: 480px) {
+      .af-section { padding: 1.25rem; }
+      .af-footer { padding: 1.25rem; }
+      .af-left h1 { font-size: 2rem; }
+      .chip-grid { grid-template-columns: repeat(3, 1fr); gap: 0.4rem; }
+      .chip { padding: 0.6rem 0.4rem; font-size: 0.9rem; }
+      .custom-input-wrap input { padding: 0.85rem 0.85rem 0.85rem 2.25rem; font-size: 1rem; }
+      .custom-input-wrap .sym { font-size: 1rem; left: 0.85rem; }
+      .how-step-row { gap: 1rem; }
+      .step-num { width: 32px; height: 32px; font-size: 0.85rem; }
+      .step-text { font-size: 0.9rem; }
+      .step-text strong { font-size: 0.95rem; }
+      .coin-btn { padding: 1rem; }
+      .gen-btn { padding: 1rem; font-size: 1rem; }
+    }
   </style>
 </head>
 <body data-require-auth="true">
