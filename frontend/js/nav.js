@@ -184,7 +184,7 @@ window.API_BASE = window.__API_BASE__ || 'http://localhost:5000/api';
       parent.innerHTML = `
         <div class="nav-actions">
           ${!onStorePage ? `<a href="store.html" class="nav-balance" title="Store">Store</a>` : ''}
-        <a href="deposit.html" class="nav-balance" title="Add funds">
+        <a href="deposit.html" class="nav-balance nav-balance-amount" title="Add funds">
           💰 ${balance}
         </a>
         <a href="cart.html" class="nav-cart" title="Cart">
@@ -215,6 +215,24 @@ window.API_BASE = window.__API_BASE__ || 'http://localhost:5000/api';
         </div>
       </div>
     `;
+
+      // Background fetch to sync balance
+      fetch(`${window.API_BASE || 'http://localhost:5000/api'}/auth/me`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.success && data.user) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+          const newBalance = parseFloat(data.user.balance || 0).toFixed(2);
+          document.querySelectorAll('.nav-balance-amount').forEach(el => {
+            el.innerHTML = `💰 $${newBalance}`;
+          });
+          const statBal = document.getElementById('stat-balance');
+          if(statBal) statBal.textContent = `$${newBalance}`;
+        }
+      })
+      .catch(() => {});
 
       // Attach dropdown handlers (always, not just non-index)
       const btn      = document.getElementById('nav-user-btn');
