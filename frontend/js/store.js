@@ -115,9 +115,9 @@ async function loadProducts() {
                 <strong style="color: var(--text-main); width: 65px; flex-shrink: 0;">Balance:</strong>
                 <span style="color: var(--primary-deep); font-family: monospace; font-weight: 700;">$${balance}</span>
               </div>
-              <div style="display: flex; margin-bottom: 0.3rem;">
+              <div style="display: flex; margin-bottom: 0.3rem; min-width: 0;">
                 <strong style="color: var(--text-main); width: 65px; flex-shrink: 0;">Type:</strong>
-                <span style="color: var(--text-muted);">${type}</span>
+                <span style="color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${type}</span>
               </div>
             </div>
             <div style="margin-top: auto;">

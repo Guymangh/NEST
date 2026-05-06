@@ -153,11 +153,11 @@ a:hover { color: var(--primary-deep); }
   transform: translateY(-4px); border-color: var(--border-soft); box-shadow: var(--shadow-hover);
 }
   .card-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem;
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.5rem;
   }
-  @media (max-width: 1200px) { .card-grid { grid-template-columns: repeat(3, 1fr); } }
-  @media (max-width: 900px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 600px) { .card-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 1200px) { .card-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 900px) { .card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 600px) { .card-grid { grid-template-columns: minmax(0, 1fr); } }
 
 /* Hero Section */
 .hero {
