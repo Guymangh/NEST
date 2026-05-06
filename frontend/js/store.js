@@ -224,35 +224,31 @@ function renderPagination(pg) {
   container.innerHTML = '';
   if (pg.pages <= 1) return;
 
-  // Previous Button
+  // ← Back button
   const prevBtn = document.createElement('button');
   prevBtn.className = 'btn btn-outline';
-  prevBtn.style.padding = '0.4rem 0.8rem';
-  prevBtn.innerHTML = '&laquo; Prev';
+  prevBtn.style.padding = '0.45rem 1.2rem';
+  prevBtn.innerHTML = '&larr; Back';
   prevBtn.disabled = pg.page === 1;
   prevBtn.addEventListener('click', () => { 
-    if (currentPage > 1) { currentPage--; loadProducts(); }
+    if (currentPage > 1) { currentPage--; loadProducts(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
   });
   container.appendChild(prevBtn);
 
-  // Page Numbers
-  for (let i = 1; i <= pg.pages; i++) {
-    const btn = document.createElement('button');
-    btn.className = i === pg.page ? 'btn btn-primary' : 'btn btn-outline';
-    btn.style.padding = '0.4rem 0.8rem';
-    btn.textContent = i;
-    btn.addEventListener('click', () => { currentPage = i; loadProducts(); });
-    container.appendChild(btn);
-  }
+  // Page X of Y label
+  const label = document.createElement('span');
+  label.style.cssText = 'font-size:0.82rem;font-weight:600;color:var(--text-muted);display:flex;align-items:center;padding:0 0.75rem;';
+  label.textContent = `Page ${pg.page} of ${pg.pages}`;
+  container.appendChild(label);
 
-  // Next Button
+  // Next → button
   const nextBtn = document.createElement('button');
   nextBtn.className = 'btn btn-outline';
-  nextBtn.style.padding = '0.4rem 0.8rem';
-  nextBtn.innerHTML = 'Next &raquo;';
+  nextBtn.style.padding = '0.45rem 1.2rem';
+  nextBtn.innerHTML = 'Next &rarr;';
   nextBtn.disabled = pg.page === pg.pages;
   nextBtn.addEventListener('click', () => { 
-    if (currentPage < pg.pages) { currentPage++; loadProducts(); }
+    if (currentPage < pg.pages) { currentPage++; loadProducts(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
   });
   container.appendChild(nextBtn);
 }
