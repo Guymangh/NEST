@@ -9,23 +9,15 @@ const pool = new Pool({
 async function cleanup() {
   const client = await pool.connect();
   try {
-    // IDs to completely remove (with all their products)
-    const removeIds = [
-      143, // M&T Bank duplicate (keep id=8)
-      6,   // Other Tools
-      2,   // RDP Access
-    ];
+    const removeIds = [1, 5]; // SMTP Servers, VPN Accounts
 
     for (const id of removeIds) {
-      // Delete products first
       const pDel = await client.query('DELETE FROM products WHERE category_id = $1', [id]);
-      console.log(`  Deleted ${pDel.rowCount} products from category ${id}`);
-      // Delete category
       const cDel = await client.query('DELETE FROM categories WHERE id = $1', [id]);
-      console.log(`  Deleted category ${id}: ${cDel.rowCount} rows`);
+      console.log(`  ✅ Removed category ${id} + ${pDel.rowCount} products`);
     }
 
-    console.log('\n✅ Cleanup complete!');
+    console.log('\n✅ Done!');
   } catch (err) {
     console.error('Error:', err.message);
   } finally {
