@@ -4,8 +4,10 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const isSupabase = (process.env.DATABASE_URL || '').includes('supabase');
 
+const dbUrl = process.env.DATABASE_URL ? process.env.DATABASE_URL.replace(':5432', ':6543') : '';
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: dbUrl,
   ssl: isSupabase ? { rejectUnauthorized: false } : false,
   max: 2, // Limit pool size for Vercel Serverless
   idleTimeoutMillis: 3000,

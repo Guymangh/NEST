@@ -133,8 +133,9 @@ async function seed() {
       const numProducts = rnd(8, 12);
       for(let i=0; i<numProducts; i++) {
         const balance = rnd(10000, 250000);
-        // If 10k = 350, 20k = 450 -> Price = 350 + (Balance - 10000) * 0.01
-        let basePrice = 350 + (balance - 10000) * 0.01;
+        // Randomly choose a base of 300 or 350
+        const startingBase = rnd(0, 1) === 1 ? 350 : 300;
+        let basePrice = startingBase + (balance - 10000) * 0.01;
         // Add a small random jitter (-$5 to +$5) so prices aren't too perfectly round
         const price = Math.floor(basePrice + rnd(-5, 5));
 

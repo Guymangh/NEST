@@ -126,7 +126,8 @@ async function seedMissing() {
       const numProducts = rnd(10, 12);
       for(let i=0; i<numProducts; i++) {
         const balance = rnd(10000, 250000);
-        let basePrice = 350 + (balance - 10000) * 0.01;
+        const startingBase = rnd(0, 1) === 1 ? 350 : 300;
+        let basePrice = startingBase + (balance - 10000) * 0.01;
         const price = Math.floor(basePrice + rnd(-5, 5));
 
         let name, description, short_desc, product_data;
