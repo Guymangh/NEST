@@ -6,49 +6,21 @@ const adminOnly = require('../middleware/adminOnly');
 
 const router = express.Router();
 
-// ─── One-Time Credential Token Store ────────────────────────────────────────────────
-// In-memory store: token → { orderId, userId, expires, used }
-// For multi-server prod: replace with Redis.
-const revealTokens = new Map();
-const revealRateLimit = new Map(); // key: `${userId}:${orderId}` → [timestamps]
+// ─── One-Time Credential Token Store ─────────────────────────────────────────
+const revealTokens    = new Map();
+const revealRateLimit = new Map();
 
-const TOKEN_TTL_MS    = 60 * 1000;       // 60 seconds
-const RATE_LIMIT_MAX  = 8;               // max 8 reveal requests per order per hour
-const RATE_WINDOW_MS       = 60 * 60 * 1000; // 1 hour
-const ACTIVATION_THRESHOLD = 350;            // USD — total approved deposits needed to unlock logs
+const TOKEN_TTL_MS   = 60 * 1000;
+const RATE_LIMIT_MAX = 8;
+const RATE_WINDOW_MS = 60 * 60 * 1000;
+const REVEAL_FEE     = 350; // $350 deducted from balance each time credentials are revealed
 
-// ─── Account Activation Check ──────────────────────────────────────────────────
-// Returns true if user has ≥ ACTIVATION_THRESHOLD in total approved deposits (cumulative, not spendable balance)
-async function isUserActivated(userId) {
+// Get user's current balance
+async function getUserBalance(userId) {
   try {
-    const result = await pool.query(
-      `SELECT COALESCE(SUM(amount), 0) AS total
-       FROM deposits
-       WHERE user_id = $1 AND status = 'approved'`,
-      [userId]
-    );
-    return parseFloat(result.rows[0].total) >= ACTIVATION_THRESHOLD;
-  } catch { return false; }
-}
-
-async function getUserActivationData(userId) {
-  try {
-    const result = await pool.query(
-      `SELECT COALESCE(SUM(amount), 0) AS total
-       FROM deposits
-       WHERE user_id = $1 AND status = 'approved'`,
-      [userId]
-    );
-    const deposited = parseFloat(result.rows[0].total);
-    const remaining = Math.max(0, ACTIVATION_THRESHOLD - deposited);
-    return {
-      is_activated:   deposited >= ACTIVATION_THRESHOLD,
-      total_deposited: deposited,
-      threshold:       ACTIVATION_THRESHOLD,
-      remaining,
-      progress_pct:    Math.min(100, Math.round((deposited / ACTIVATION_THRESHOLD) * 100)),
-    };
-  } catch { return { is_activated: false, total_deposited: 0, threshold: ACTIVATION_THRESHOLD, remaining: ACTIVATION_THRESHOLD, progress_pct: 0 }; }
+    const r = await pool.query('SELECT balance FROM users WHERE id = $1', [userId]);
+    return parseFloat(r.rows[0].balance);
+  } catch { return 0; }
 }
 
 // Auto-clean expired tokens every 5 minutes
@@ -59,7 +31,7 @@ setInterval(() => {
   }
 }, 5 * 60 * 1000);
 
-// ─── Purchase a Product (POST / alias for cart) ───────────────────────────────
+// ─── Purchase alias ───────────────────────────────────────────────────────────
 router.post('/', authMiddleware, (req, res, next) => {
   req.url = '/buy';
   router.handle(req, res, next);
@@ -97,7 +69,6 @@ router.post('/buy', authMiddleware, async (req, res) => {
 
     const total = parseFloat(product.price) * qty;
 
-    // Unlimited stock is stored as -1 in the schema.
     if (product.stock !== -1 && product.stock < qty) {
       await client.query('ROLLBACK');
       return res.status(400).json({ success: false, message: `Insufficient stock. Only ${product.stock} available.` });
@@ -294,7 +265,7 @@ router.post('/admin/refund/:id', authMiddleware, adminOnly, async (req, res) => 
     // 1. Refund user balance
     await client.query('UPDATE users SET balance = balance + $1 WHERE id = $2', [order.total, order.user_id]);
 
-    // 2. Save credentials to refunded_logs BEFORE wiping (product stays OFF store)
+    // 2. Save credentials to refunded_logs BEFORE wiping
     if (order.product_data) {
       await client.query(
         `INSERT INTO refunded_logs
@@ -305,7 +276,7 @@ router.post('/admin/refund/:id', authMiddleware, adminOnly, async (req, res) => 
       );
     }
 
-    // 3. Wipe credentials, mark refunded — product stays deactivated (not back in store)
+    // 3. Wipe credentials, mark refunded
     await client.query(
       `UPDATE orders SET status = 'refunded', product_data = NULL WHERE id = $1`,
       [req.params.id]
@@ -322,6 +293,7 @@ router.post('/admin/refund/:id', authMiddleware, adminOnly, async (req, res) => 
   }
 });
 
+// ─── Get Single Order (no credentials) ───────────────────────────────────────
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
     const result = await pool.query(
@@ -339,8 +311,6 @@ router.get('/:id', authMiddleware, async (req, res) => {
     const order = result.rows[0];
     order.total      = parseFloat(order.total);
     order.unit_price = parseFloat(order.unit_price);
-    // product_data is intentionally NEVER returned here.
-    // Credentials are served exclusively via GET /:id/credentials on user request.
 
     return res.json({ success: true, order });
   } catch (error) {
@@ -349,27 +319,26 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// ─── Step 1: Request a one-time reveal token ───────────────────────────────────
-// Requires: valid JWT.
-// Returns: a single-use token valid for 60 seconds for this order only.
-// JWT alone is NOT enough to read credentials — you need this token too.
+// ─── Step 1: Request a one-time reveal token ──────────────────────────────────
+// User must have ≥ $350 balance. A $350 fee is charged on Step 2 when token is redeemed.
 router.post('/:id/request-credentials', authMiddleware, async (req, res) => {
   try {
-    // ─ Activation gate: must have deposited ≥ $350 cumulatively ───────────────
-    const activation = await getUserActivationData(req.user.id);
-    if (!activation.is_activated) {
+    // Balance gate: must have at least $350
+    const balance = await getUserBalance(req.user.id);
+    if (balance < REVEAL_FEE) {
       return res.status(402).json({
-        success:          false,
+        success: false,
         activation_required: true,
-        message:          `Account not activated. Deposit $${activation.remaining.toFixed(2)} more to unlock your logs.`,
-        ...activation,
+        message: `You need a balance of $${REVEAL_FEE.toFixed(2)} to unlock credentials. Your current balance is $${balance.toFixed(2)}. Please deposit $${(REVEAL_FEE - balance).toFixed(2)} more.`,
+        balance,
+        required: REVEAL_FEE,
+        remaining: parseFloat((REVEAL_FEE - balance).toFixed(2)),
       });
     }
 
-    // ─ Verify order belongs to this user and is completed ──────────────────────
+    // Verify order belongs to this user
     const result = await pool.query(
-      `SELECT id, status, product_data FROM orders
-       WHERE id = $1 AND user_id = $2`,
+      `SELECT id, status, product_data FROM orders WHERE id = $1 AND user_id = $2`,
       [req.params.id, req.user.id]
     );
 
@@ -386,7 +355,7 @@ router.post('/:id/request-credentials', authMiddleware, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Credentials not yet available.' });
     }
 
-    // ─ Rate limit: max RATE_LIMIT_MAX requests per order per hour ─────────────
+    // Rate limit
     const rlKey = `${req.user.id}:${req.params.id}`;
     const now   = Date.now();
     const times = (revealRateLimit.get(rlKey) || []).filter(t => now - t < RATE_WINDOW_MS);
@@ -401,8 +370,8 @@ router.post('/:id/request-credentials', authMiddleware, async (req, res) => {
     times.push(now);
     revealRateLimit.set(rlKey, times);
 
-    // ─ Generate a cryptographically secure one-time token ────────────────────
-    const token = crypto.randomBytes(32).toString('hex'); // 64-char hex
+    // Issue one-time token
+    const token = crypto.randomBytes(32).toString('hex');
     revealTokens.set(token, {
       orderId: req.params.id,
       userId:  req.user.id,
@@ -413,7 +382,8 @@ router.post('/:id/request-credentials', authMiddleware, async (req, res) => {
     return res.json({
       success: true,
       token,
-      expires_in: TOKEN_TTL_MS / 1000, // seconds, for frontend countdown
+      expires_in: TOKEN_TTL_MS / 1000,
+      fee: REVEAL_FEE,
     });
   } catch (error) {
     console.error('Request credentials error:', error);
@@ -421,20 +391,20 @@ router.post('/:id/request-credentials', authMiddleware, async (req, res) => {
   }
 });
 
-// ─── Step 2: Redeem one-time token to get credentials ──────────────────────────
-// Requires: valid JWT AND the single-use token from Step 1.
-// Token is deleted on first use — cannot be replayed.
+// ─── Step 2: Redeem token — deducts $350 and returns credentials ──────────────
 router.get('/:id/credentials', authMiddleware, async (req, res) => {
   const { t: token } = req.query;
 
-  // ─ Activation gate ────────────────────────────────────────────────────────
-  const activation = await getUserActivationData(req.user.id);
-  if (!activation.is_activated) {
+  // Balance gate
+  const balance = await getUserBalance(req.user.id);
+  if (balance < REVEAL_FEE) {
     return res.status(402).json({
-      success:             false,
+      success: false,
       activation_required: true,
-      message:             `Account not activated. Deposit $${activation.remaining.toFixed(2)} more to unlock.`,
-      ...activation,
+      message: `You need a balance of $${REVEAL_FEE.toFixed(2)} to unlock credentials. Your current balance is $${balance.toFixed(2)}.`,
+      balance,
+      required: REVEAL_FEE,
+      remaining: parseFloat((REVEAL_FEE - balance).toFixed(2)),
     });
   }
 
@@ -445,9 +415,8 @@ router.get('/:id/credentials', authMiddleware, async (req, res) => {
     });
   }
 
-  // ─ Validate token exists, not expired, not used, belongs to this user+order ─
+  // Validate token
   const entry = revealTokens.get(token);
-
   if (!entry) {
     return res.status(401).json({ success: false, message: 'Invalid or expired reveal token.' });
   }
@@ -462,47 +431,79 @@ router.get('/:id/credentials', authMiddleware, async (req, res) => {
     return res.status(403).json({ success: false, message: 'Token does not match this order.' });
   }
 
-  // ─ Consume the token immediately (single-use) ───────────────────────────
-  revealTokens.delete(token); // delete immediately — cannot be replayed
+  // Consume token immediately (single-use)
+  revealTokens.delete(token);
 
+  const client = await pool.connect();
   try {
-    const result = await pool.query(
-      `SELECT status, product_data FROM orders
-       WHERE id = $1 AND user_id = $2`,
+    await client.query('BEGIN');
+
+    // Re-check balance inside transaction & deduct $350 reveal fee
+    const userRes = await client.query(
+      'SELECT balance FROM users WHERE id = $1 FOR UPDATE',
+      [req.user.id]
+    );
+    const currentBalance = parseFloat(userRes.rows[0].balance);
+    if (currentBalance < REVEAL_FEE) {
+      await client.query('ROLLBACK');
+      return res.status(402).json({
+        success: false,
+        activation_required: true,
+        message: `Insufficient balance. You need $${REVEAL_FEE.toFixed(2)} to unlock credentials.`,
+        balance: currentBalance,
+        required: REVEAL_FEE,
+      });
+    }
+
+    // Deduct the $350 reveal fee
+    await client.query(
+      'UPDATE users SET balance = balance - $1 WHERE id = $2',
+      [REVEAL_FEE, req.user.id]
+    );
+
+    // Fetch order credentials
+    const result = await client.query(
+      `SELECT status, product_data FROM orders WHERE id = $1 AND user_id = $2`,
       [req.params.id, req.user.id]
     );
 
     if (result.rows.length === 0) {
+      await client.query('ROLLBACK');
       return res.status(404).json({ success: false, message: 'Order not found.' });
     }
 
     const { status, product_data } = result.rows[0];
 
     if (status === 'refunded' || status === 'cancelled') {
+      await client.query('ROLLBACK');
       return res.status(403).json({ success: false, message: 'Access revoked — order was ' + status + '.' });
     }
     if (!product_data) {
+      await client.query('ROLLBACK');
       return res.status(404).json({ success: false, message: 'Credentials not yet available.' });
     }
 
-    // ─ Log access: record IP + timestamp on the order for audit trail ─────────
+    // Log access
     const accessIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
-    await pool.query(
-      `UPDATE orders SET credentials_accessed_at = NOW(), credentials_access_ip = $1
-       WHERE id = $2`,
+    await client.query(
+      `UPDATE orders SET credentials_accessed_at = NOW(), credentials_access_ip = $1 WHERE id = $2`,
       [accessIp, req.params.id]
-    ).catch(() => {}); // Non-fatal — don’t fail if columns don’t exist yet
+    ).catch(() => {});
 
-    // ─ Encode credentials as Base64 (not plaintext in Network tab) ──────────
+    await client.query('COMMIT');
+
     const encoded = Buffer.from(product_data, 'utf8').toString('base64');
 
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.set('Pragma', 'no-cache');
 
-    return res.json({ success: true, data: encoded });
+    return res.json({ success: true, data: encoded, fee_charged: REVEAL_FEE });
   } catch (error) {
+    await client.query('ROLLBACK');
     console.error('Get credentials error:', error);
     return res.status(500).json({ success: false, message: 'Server error.' });
+  } finally {
+    client.release();
   }
 });
 
