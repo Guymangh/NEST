@@ -79,6 +79,7 @@ router.get('/', async (req, res) => {
       return rest;
     });
 
+    res.setHeader('Cache-Control', 's-maxage=15, stale-while-revalidate=30');
     return res.json({
       success: true,
       products,
@@ -105,6 +106,7 @@ router.get('/categories', async (req, res) => {
       GROUP BY c.id
       ORDER BY c.name
     `);
+    res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=59');
     return res.json({ success: true, categories: result.rows });
   } catch (error) {
     console.error('Get categories error:', error);
