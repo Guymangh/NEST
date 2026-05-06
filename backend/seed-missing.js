@@ -126,9 +126,9 @@ async function seedMissing() {
       const numProducts = rnd(10, 12);
       for(let i=0; i<numProducts; i++) {
         const balance = rnd(10000, 250000);
-        const startingBase = rnd(0, 1) === 1 ? 350 : 300;
-        let basePrice = startingBase + (balance - 10000) * 0.01;
-        const price = Math.floor(basePrice + rnd(-5, 5));
+        // Linear scale: $10k balance -> ~$300 price, $250k balance -> ~$1500 price
+        let basePrice = 300 + (balance - 10000) * 0.005;
+        const price = Math.max(300, Math.min(1500, Math.round(basePrice + rnd(-10, 10))));
 
         let name, description, short_desc, product_data;
         const isTool = /(VPN|SMTP|RDP|SSH|Hosting|Other)/i.test(cat.name);
