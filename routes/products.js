@@ -43,8 +43,11 @@ router.get('/', async (req, res) => {
       case 'newest':
         query += ' ORDER BY p.created_at DESC';
         break;
+      case 'name_asc':
+        query += ' ORDER BY c.name ASC, p.name ASC';
+        break;
       default:
-        query += ' ORDER BY p.featured DESC, p.created_at DESC';
+        query += ' ORDER BY c.name ASC, p.name ASC';
     }
 
     // Count query — build separate clean query without ORDER BY

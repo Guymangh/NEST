@@ -1,7 +1,7 @@
 // API_BASE set globally by nav.js — use window.API_BASE
 let currentCategory = '';
 let currentSearch = '';
-let currentSort = 'newest';
+let currentSort = 'name_asc';
 let currentPage = 1;
 let allCategories = [];
 
@@ -110,7 +110,7 @@ async function loadProducts() {
               </div>
             </div>
             <div style="font-size: 1.25rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem;">$${p.price.toFixed(2)}</div>
-            <div style="background: var(--bg-main); border-radius: 6px; padding: 0.6rem 0.75rem; margin-bottom: 0.6rem; flex-grow: 1; border: 1px solid var(--border-soft); font-size: 0.78rem;">
+            <div style="background: var(--bg-main); border-radius: 6px; padding: 0.6rem 0.75rem; margin-bottom: 0.6rem; flex-grow: 1; border: 1px solid var(--border-soft); font-size: 0.78rem; overflow: hidden; min-width: 0;">
               <div style="display: flex; margin-bottom: 0.3rem;">
                 <strong style="color: var(--text-main); width: 65px; flex-shrink: 0;">Balance:</strong>
                 <span style="color: var(--primary-deep); font-family: monospace; font-weight: 700;">$${balance}</span>

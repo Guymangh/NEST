@@ -219,6 +219,7 @@
           <div style="display: flex; align-items: center; gap: 0.75rem;">
             <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); white-space: nowrap;">Sort By:</label>
             <select id="sort-select" class="form-control" style="width: auto; padding: 0.5rem 2rem 0.5rem 1rem;">
+              <option value="name_asc" selected>A → Z</option>
               <option value="newest">Newest Added</option>
               <option value="price_asc">Price: Low to High</option>
               <option value="price_desc">Price: High to Low</option>
@@ -227,7 +228,7 @@
         </div>
 
         <!-- Grid -->
-        <div class="card-grid" id="product-grid" data-fm="stagger">
+        <div id="product-grid" data-fm="stagger">
           <!-- Products load here -->
         </div>
         
