@@ -68,7 +68,7 @@ async function loadProducts() {
   const grid = document.getElementById('product-grid');
   grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 4rem 2rem; color: var(--text-muted);">Loading secure inventory...</div>';
   try {
-    let url = `${API_BASE}/products?page=${currentPage}&limit=16&sort=${currentSort}`;
+    let url = `${API_BASE}/products?page=${currentPage}&limit=20&sort=${currentSort}`;
     if (currentCategory) url += `&category=${currentCategory}`;
     if (currentSearch) url += `&search=${encodeURIComponent(currentSearch)}`;
 
@@ -118,10 +118,6 @@ async function loadProducts() {
               <div style="display: flex; margin-bottom: 0.3rem;">
                 <strong style="color: var(--text-main); width: 65px; flex-shrink: 0;">Type:</strong>
                 <span style="color: var(--text-muted);">${type}</span>
-              </div>
-              <div style="display: flex;">
-                <strong style="color: var(--text-main); width: 65px; flex-shrink: 0;">Info:</strong>
-                <span style="color: var(--text-muted); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${p.description || 'Premium access details included.'}</span>
               </div>
             </div>
             <div style="margin-top: auto;">
