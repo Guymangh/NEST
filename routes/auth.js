@@ -216,4 +216,111 @@ async function handleChangePassword(req, res) {
 router.put('/change-password',  authMiddleware, handleChangePassword);
 router.post('/change-password', authMiddleware, handleChangePassword);
 
+// ─── Forgot Password ──────────────────────────────────────────────────────────
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ success: false, message: 'Email is required.' });
+
+    // Always return success to prevent email enumeration
+    const result = await pool.query('SELECT id, username FROM users WHERE email = $1', [email.toLowerCase()]);
+    if (result.rows.length === 0) {
+      return res.json({ success: true, message: 'If that email exists, a reset link has been sent.' });
+    }
+
+    const user = result.rows[0];
+    const token = require('crypto').randomBytes(32).toString('hex');
+
+    // Store token in DB (expires in 1 hour)
+    await pool.query(
+      `INSERT INTO password_reset_tokens (token, user_id, expires_at)
+       VALUES ($1, $2, NOW() + INTERVAL '1 hour')
+       ON CONFLICT DO NOTHING`,
+      [token, user.id]
+    );
+
+    const resetUrl = `${process.env.SITE_URL || 'https://www.lognest.store'}/reset-password.html?token=${token}`;
+
+    // Try to send email if SMTP is configured
+    if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+      try {
+        const nodemailer = require('nodemailer');
+        const transporter = nodemailer.createTransport({
+          host: process.env.SMTP_HOST,
+          port: parseInt(process.env.SMTP_PORT || '587'),
+          secure: process.env.SMTP_SECURE === 'true',
+          auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+        });
+        await transporter.sendMail({
+          from: `"LogNest" <${process.env.SMTP_USER}>`,
+          to: email,
+          subject: 'Password Reset Request',
+          html: `<p>Hi ${user.username},</p>
+                 <p>Click below to reset your password (link expires in 1 hour):</p>
+                 <p><a href="${resetUrl}">${resetUrl}</a></p>
+                 <p>If you did not request this, ignore this email.</p>`,
+        });
+        console.log(`📧 Password reset email sent to ${email}`);
+      } catch (emailErr) {
+        console.error('Failed to send reset email:', emailErr.message);
+      }
+    } else {
+      // SMTP not configured — log to console so admin can manually share the link
+      console.log(`🔑 Password reset link for ${email}: ${resetUrl}`);
+    }
+
+    return res.json({ success: true, message: 'If that email exists, a reset link has been sent.' });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    return res.status(500).json({ success: false, message: 'Server error.' });
+  }
+});
+
+// ─── Reset Password ───────────────────────────────────────────────────────────
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    if (!token || !password) {
+      return res.status(400).json({ success: false, message: 'Token and new password are required.' });
+    }
+    if (password.length < 8) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 8 characters.' });
+    }
+
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      const tokenResult = await client.query(
+        `SELECT * FROM password_reset_tokens
+         WHERE token = $1 AND used = FALSE AND expires_at > NOW()
+         FOR UPDATE`,
+        [token]
+      );
+
+      if (tokenResult.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({ success: false, message: 'Invalid or expired reset token. Please request a new one.' });
+      }
+
+      const { user_id } = tokenResult.rows[0];
+      const hashed = await require('bcryptjs').hash(password, 12);
+
+      await client.query('UPDATE users SET password = $1 WHERE id = $2', [hashed, user_id]);
+      await client.query('UPDATE password_reset_tokens SET used = TRUE WHERE token = $1', [token]);
+
+      await client.query('COMMIT');
+      return res.json({ success: true, message: 'Password reset successfully! You can now log in.' });
+    } catch (innerErr) {
+      await client.query('ROLLBACK');
+      throw innerErr;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Reset password error:', error);
+    return res.status(500).json({ success: false, message: 'Server error.' });
+  }
+});
+
 module.exports = router;

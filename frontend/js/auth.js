@@ -131,30 +131,38 @@ if (forgotPasswordForm) {
   const submitBtn = forgotPasswordForm.querySelector('button[type="submit"]');
   submitBtn.dataset.label = submitBtn.textContent;
 
-  forgotPasswordForm.addEventListener('submit', (e) => {
+  forgotPasswordForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     clearError();
-    setLoading(submitBtn, true);
 
     const email = document.getElementById('email').value.trim();
     if (!email) {
       showError('Please enter your email address.');
-      setLoading(submitBtn, false);
       return;
     }
 
-    // Simulate network request since there is no actual email/SMTP backend yet
-    setTimeout(() => {
-      setLoading(submitBtn, false);
-      if (typeof toast !== 'undefined') {
-        toast('If an account with that email exists, a password reset link has been sent.', 'success');
+    setLoading(submitBtn, true);
+    try {
+      const res  = await fetch(`${API_BASE}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (typeof toast !== 'undefined') {
+          toast('If that email exists, a reset link has been sent. Check your inbox (or ask your admin).', 'success');
+        }
+        setTimeout(() => { window.location.href = 'login.html'; }, 3500);
       } else {
-        alert('If an account with that email exists, a password reset link has been sent.');
+        showError(data.message || 'Something went wrong. Please try again.');
       }
-      setTimeout(() => {
-        window.location.href = 'login.html';
-      }, 3000);
-    }, 800);
+    } catch {
+      showError('Cannot connect to server. Please try again.');
+    } finally {
+      setLoading(submitBtn, false);
+    }
   });
 }
+
 

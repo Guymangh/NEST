@@ -19,8 +19,9 @@ pool.on('connect', () => {
 });
 
 pool.on('error', (err) => {
-  console.error('❌ Database connection error:', err);
-  process.exit(-1);
+  // Log but do NOT exit — pg pool auto-recovers from transient connection drops.
+  // Calling process.exit() here would take the entire server down on a routine disconnect.
+  console.error('❌ Idle pool client error (non-fatal):', err.message);
 });
 
 module.exports = pool;

@@ -187,10 +187,15 @@ router.post('/users/:id/adjust-balance', authMiddleware, adminOnly, async (req, 
     if (amount === undefined) {
       return res.status(400).json({ success: false, message: 'Amount is required.' });
     }
+    const delta = parseFloat(amount);
+    if (isNaN(delta)) {
+      return res.status(400).json({ success: false, message: 'Amount must be a number.' });
+    }
 
+    // Use GREATEST(0, ...) to prevent balance going negative
     const result = await pool.query(
-      'UPDATE users SET balance = balance + $1 WHERE id = $2 RETURNING id, username, balance',
-      [parseFloat(amount), req.params.id]
+      'UPDATE users SET balance = GREATEST(0, balance + $1) WHERE id = $2 RETURNING id, username, balance',
+      [delta, req.params.id]
     );
 
     if (result.rows.length === 0) {
@@ -202,7 +207,7 @@ router.post('/users/:id/adjust-balance', authMiddleware, adminOnly, async (req, 
 
     return res.json({
       success: true,
-      message: `Balance adjusted by $${parseFloat(amount).toFixed(2)} for ${user.username}`,
+      message: `Balance adjusted by $${delta.toFixed(2)} for ${user.username}. New balance: $${user.balance.toFixed(2)}`,
       user,
     });
   } catch (error) {
@@ -210,6 +215,7 @@ router.post('/users/:id/adjust-balance', authMiddleware, adminOnly, async (req, 
     return res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
+
 
 // ─── Public: Wallet Addresses (no auth required) ─────────────────────────────
 router.get('/settings/public', async (req, res) => {
@@ -280,12 +286,28 @@ router.post('/categories', authMiddleware, adminOnly, async (req, res) => {
 
 router.delete('/categories/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
+    // Count how many products will be affected (set to NULL on delete)
+    const countResult = await pool.query(
+      'SELECT COUNT(*) FROM products WHERE category_id = $1',
+      [req.params.id]
+    );
+    const affectedProducts = parseInt(countResult.rows[0].count);
+
     await pool.query('DELETE FROM categories WHERE id = $1', [req.params.id]);
-    return res.json({ success: true, message: 'Category deleted.' });
+
+    return res.json({
+      success: true,
+      message: 'Category deleted.',
+      affected_products: affectedProducts,
+      warning: affectedProducts > 0
+        ? `${affectedProducts} product(s) now have no category.`
+        : null,
+    });
   } catch (error) {
     console.error('Delete category error:', error);
     return res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
+
 
 module.exports = router;

@@ -6,16 +6,11 @@ const adminOnly = require('../middleware/adminOnly');
 
 const router = express.Router();
 
-// ─── One-Time Credential Token Store ─────────────────────────────────────────
-const revealTokens    = new Map();
-const revealRateLimit = new Map();
+// Constants
+const TOKEN_TTL_SECS = 60;   // reveal token valid for 60 seconds
+const RATE_LIMIT_MAX = 8;    // max reveal requests per order per hour
+const REVEAL_FEE     = 350;  // $350 deducted each time credentials are revealed
 
-const TOKEN_TTL_MS   = 60 * 1000;
-const RATE_LIMIT_MAX = 8;
-const RATE_WINDOW_MS = 60 * 60 * 1000;
-const REVEAL_FEE     = 350; // $350 deducted from balance each time credentials are revealed
-
-// Get user's current balance
 async function getUserBalance(userId) {
   try {
     const r = await pool.query('SELECT balance FROM users WHERE id = $1', [userId]);
@@ -23,13 +18,13 @@ async function getUserBalance(userId) {
   } catch { return 0; }
 }
 
-// Auto-clean expired tokens every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [tok, val] of revealTokens) {
-    if (val.expires < now) revealTokens.delete(tok);
-  }
+// Purge expired DB tokens every 5 min (harmless on serverless cold starts)
+setInterval(async () => {
+  try { await pool.query("DELETE FROM reveal_tokens WHERE expires_at < NOW() - INTERVAL '5 minutes'"); }
+  catch {}
 }, 5 * 60 * 1000);
+
+
 
 // ─── Purchase alias ───────────────────────────────────────────────────────────
 router.post('/', authMiddleware, (req, res, next) => {
@@ -355,34 +350,32 @@ router.post('/:id/request-credentials', authMiddleware, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Credentials not yet available.' });
     }
 
-    // Rate limit
-    const rlKey = `${req.user.id}:${req.params.id}`;
-    const now   = Date.now();
-    const times = (revealRateLimit.get(rlKey) || []).filter(t => now - t < RATE_WINDOW_MS);
-
-    if (times.length >= RATE_LIMIT_MAX) {
+    // DB-based rate limit: count requests for this user+order in the last hour
+    const rlResult = await pool.query(
+      `SELECT COUNT(*) FROM reveal_tokens
+       WHERE user_id = $1 AND order_id = $2
+         AND created_at > NOW() - INTERVAL '1 hour'`,
+      [req.user.id, req.params.id]
+    );
+    if (parseInt(rlResult.rows[0].count) >= RATE_LIMIT_MAX) {
       return res.status(429).json({
         success: false,
         message: `Too many reveal requests. Try again later (max ${RATE_LIMIT_MAX}/hour per order).`
       });
     }
 
-    times.push(now);
-    revealRateLimit.set(rlKey, times);
-
-    // Issue one-time token
+    // Issue a one-time token stored in DB (survives Vercel instance restarts)
     const token = crypto.randomBytes(32).toString('hex');
-    revealTokens.set(token, {
-      orderId: req.params.id,
-      userId:  req.user.id,
-      expires: now + TOKEN_TTL_MS,
-      used:    false,
-    });
+    await pool.query(
+      `INSERT INTO reveal_tokens (token, order_id, user_id, expires_at)
+       VALUES ($1, $2, $3, NOW() + ($4 || ' seconds')::INTERVAL)`,
+      [token, req.params.id, req.user.id, TOKEN_TTL_SECS]
+    );
 
     return res.json({
       success: true,
       token,
-      expires_in: TOKEN_TTL_MS / 1000,
+      expires_in: TOKEN_TTL_SECS,
       fee: REVEAL_FEE,
     });
   } catch (error) {
@@ -390,6 +383,7 @@ router.post('/:id/request-credentials', authMiddleware, async (req, res) => {
     return res.status(500).json({ success: false, message: 'Server error.' });
   }
 });
+
 
 // ─── Step 2: Redeem token — deducts $350 and returns credentials ──────────────
 router.get('/:id/credentials', authMiddleware, async (req, res) => {
@@ -415,30 +409,36 @@ router.get('/:id/credentials', authMiddleware, async (req, res) => {
     });
   }
 
-  // Validate token
-  const entry = revealTokens.get(token);
-  if (!entry) {
-    return res.status(401).json({ success: false, message: 'Invalid or expired reveal token.' });
-  }
-  if (entry.used) {
-    return res.status(401).json({ success: false, message: 'Reveal token already used.' });
-  }
-  if (Date.now() > entry.expires) {
-    revealTokens.delete(token);
-    return res.status(401).json({ success: false, message: 'Reveal token expired. Please try again.' });
-  }
-  if (entry.orderId !== req.params.id || entry.userId !== req.user.id) {
-    return res.status(403).json({ success: false, message: 'Token does not match this order.' });
-  }
-
-  // Consume token immediately (single-use)
-  revealTokens.delete(token);
-
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
 
-    // Re-check balance inside transaction & deduct $350 reveal fee
+    // Validate & atomically consume the DB token (FOR UPDATE prevents race conditions)
+    const tokenResult = await client.query(
+      `SELECT * FROM reveal_tokens WHERE token = $1 FOR UPDATE`,
+      [token]
+    );
+    if (tokenResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(401).json({ success: false, message: 'Invalid or expired reveal token.' });
+    }
+    const entry = tokenResult.rows[0];
+    if (entry.used) {
+      await client.query('ROLLBACK');
+      return res.status(401).json({ success: false, message: 'Reveal token already used.' });
+    }
+    if (new Date() > new Date(entry.expires_at)) {
+      await client.query('DELETE FROM reveal_tokens WHERE token = $1', [token]);
+      await client.query('ROLLBACK');
+      return res.status(401).json({ success: false, message: 'Reveal token expired. Please try again.' });
+    }
+    if (entry.order_id !== req.params.id || entry.user_id !== req.user.id) {
+      await client.query('ROLLBACK');
+      return res.status(403).json({ success: false, message: 'Token does not match this order.' });
+    }
+    // Mark consumed immediately
+    await client.query(`UPDATE reveal_tokens SET used = TRUE WHERE token = $1`, [token]);
+
     const userRes = await client.query(
       'SELECT balance FROM users WHERE id = $1 FOR UPDATE',
       [req.user.id]

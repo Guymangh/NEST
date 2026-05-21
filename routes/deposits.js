@@ -422,23 +422,25 @@ router.get('/nowpayments/status/:depositId', authMiddleware, async (req, res) =>
 });
 
 // ─── NowPayments: IPN Webhook (auto-credit on confirmed payment) ────────────────────────────────────────────────
-router.post('/nowpayments/webhook', express.json(), async (req, res) => {
+router.post('/nowpayments/webhook', async (req, res) => {
   try {
     const ipnSecret = process.env.NOWPAYMENTS_IPN_SECRET || '';
 
-    // Verify HMAC-SHA512 signature
+    // Verify HMAC-SHA512 signature using the RAW body bytes (not re-stringified)
+    // NowPayments signs the JSON-sorted body — we verify against req.rawBody captured in server.js
     if (ipnSecret) {
       const receivedSig = req.headers['x-nowpayments-sig'];
       if (!receivedSig) {
         console.warn('NowPayments webhook: missing signature header');
         return res.status(400).json({ success: false, message: 'Missing signature.' });
       }
+      // NowPayments sorts keys before signing — replicate that on the parsed body
       const sortedBody = JSON.stringify(
         Object.keys(req.body).sort().reduce((acc, k) => { acc[k] = req.body[k]; return acc; }, {})
       );
       const expected = crypto.createHmac('sha512', ipnSecret).update(sortedBody).digest('hex');
       if (expected !== receivedSig) {
-        console.warn('NowPayments webhook: invalid signature');
+        console.warn('NowPayments webhook: invalid signature — possible raw body mismatch');
         return res.status(403).json({ success: false, message: 'Invalid signature.' });
       }
     }
@@ -685,21 +687,25 @@ router.get('/oxapay/status/:depositId', authMiddleware, async (req, res) => {
 });
 
 // ─── OxaPay: IPN Webhook (auto-credit on paid) ───────────────────────────────
-router.post('/oxapay/webhook', express.json(), async (req, res) => {
+router.post('/oxapay/webhook', async (req, res) => {
   try {
     const merchantKey = process.env.OXAPAY_MERCHANT_KEY || '';
 
-    // Verify HMAC-SHA512 signature
+    // Verify HMAC-SHA512 signature using the RAW body bytes captured in server.js
+    // Previously used JSON.stringify(req.body) which does NOT match OxaPay's original
+    // signed bytes (key order / whitespace differences) — causing every webhook to silently fail.
     if (merchantKey) {
       const receivedHmac = req.headers['hmac'];
       if (!receivedHmac) {
-        console.warn('OxaPay webhook: missing HMAC header');
-        return res.status(400).send('ok'); // Still return ok to avoid retries
+        console.warn('OxaPay webhook: missing HMAC header — check OxaPay dashboard HMAC setting');
+        return res.status(400).send('ok'); // Return ok to avoid retries
       }
-      const rawBody = JSON.stringify(req.body);
-      const expected = crypto.createHmac('sha512', merchantKey).update(rawBody).digest('hex');
+      const rawBodyStr = req.rawBody
+        ? req.rawBody.toString('utf8')
+        : JSON.stringify(req.body); // fallback if rawBody unavailable
+      const expected = crypto.createHmac('sha512', merchantKey).update(rawBodyStr).digest('hex');
       if (expected !== receivedHmac) {
-        console.warn('OxaPay webhook: invalid HMAC signature');
+        console.warn('OxaPay webhook: HMAC mismatch — payment NOT credited. Received:', receivedHmac, 'Expected:', expected);
         return res.status(403).send('ok');
       }
     }
@@ -710,11 +716,13 @@ router.post('/oxapay/webhook', express.json(), async (req, res) => {
     const depositId = order_id ? order_id.replace('deposit_', '') : null;
     if (!depositId) return res.send('ok');
 
-    // Only credit on 'paid' status
-    if (status !== 'paid') {
+    // Credit on 'paid' or 'completed' — OxaPay uses both depending on config
+    const PAID_STATUSES = ['paid', 'completed'];
+    if (!PAID_STATUSES.includes(status)) {
       console.log(`OxaPay webhook: status "${status}" for deposit #${depositId} — no action.`);
       return res.send('ok');
     }
+
 
     const client = await pool.connect();
     try {

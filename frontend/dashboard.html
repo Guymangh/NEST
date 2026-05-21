@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -105,6 +105,31 @@
     .security-text strong { font-size: 0.82rem; color: var(--text-main); display: block; }
     .security-text span   { font-size: 0.76rem; color: var(--text-muted); }
 
+    /* ── Support Card ── */
+    .support-card {
+      background: linear-gradient(135deg, #0088cc11 0%, #0088cc08 100%);
+      border: 1.5px solid #0088cc33;
+      border-radius: 14px;
+      padding: 1.25rem;
+      text-align: center;
+    }
+    .support-card .tg-icon {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: #0088cc; display: flex; align-items: center;
+      justify-content: center; margin: 0 auto 0.75rem;
+      font-size: 1.4rem;
+    }
+    .support-card h4 { font-size: 0.95rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.35rem; }
+    .support-card p  { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1rem; }
+    .tg-btn {
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      background: #0088cc; color: #fff;
+      border-radius: 10px; padding: 0.6rem 1.2rem;
+      font-size: 0.88rem; font-weight: 700;
+      text-decoration: none; transition: background 0.2s, transform 0.15s;
+    }
+    .tg-btn:hover { background: #0077b5; transform: translateY(-1px); }
+
     @media (max-width: 900px) {
       .dash-grid    { grid-template-columns: 1fr; }
       .actions-grid { grid-template-columns: repeat(2, 1fr); }
@@ -156,7 +181,7 @@
                 <div class="action-sub">View purchase history</div>
               </div>
             </a>
-            <a href="deposit.html" class="action-card">
+            <a href="add-funds.html" class="action-card">
               <div class="action-icon">💰</div>
               <div>
                 <div class="action-label">Add Funds</div>
@@ -168,6 +193,13 @@
               <div>
                 <div class="action-label">Your Cart</div>
                 <div class="action-sub">Review &amp; checkout</div>
+              </div>
+            </a>
+            <a href="https://t.me/lognest_admin" target="_blank" rel="noopener" class="action-card">
+              <div class="action-icon" style="background:#0088cc15; border-color:#0088cc33;">✈️</div>
+              <div>
+                <div class="action-label">Contact Support</div>
+                <div class="action-sub">Telegram @lognest_admin</div>
               </div>
             </a>
           </div>
@@ -230,12 +262,23 @@
           </div>
         </div>
 
+        <!-- ── Support Card ── -->
+        <div class="support-card">
+          <div class="tg-icon">✈️</div>
+          <h4>Need Help?</h4>
+          <p>Have a question about your order or deposit? Our support team is on Telegram.</p>
+          <a href="https://t.me/lognest_admin" target="_blank" rel="noopener" class="tg-btn">
+            ✈️ @lognest_admin
+          </a>
+        </div>
+
       </div><!-- /.dash-right -->
+
     </div><!-- /.dash-grid -->
   </main>
 
   <footer class="footer">
-    <div class="container"><p>&copy; 2026 LogNest. All rights reserved.</p></div>
+    <div class="container"><p>&copy; 2026 LogNest. All rights reserved.</p> <a href="https://t.me/lognest_admin" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:0.4rem;color:#0088cc;font-size:0.85rem;font-weight:600;text-decoration:none;">&#9992;&#65039; @lognest_admin</a></div>
   </footer>
 
   <script>

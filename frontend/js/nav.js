@@ -27,16 +27,7 @@ window.API_BASE = window.__API_BASE__ || 'http://localhost:5000/api';
   }
 })();
 
-// ── Homepage = public landing page: always log out when landing here ───────────
-(function logoutOnHomepage() {
-  const p = window.location.pathname;
-  const isHome = p === '/' || p.endsWith('/index.html') || p.endsWith('/index');
-  if (isHome) {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('lognest_cart');
-  }
-})();
+
 
 (function () {
   function getCartCount() {
@@ -201,7 +192,7 @@ window.API_BASE = window.__API_BASE__ || 'http://localhost:5000/api';
             <a href="${dashLink}">📊 Dashboard</a>
             <a href="profile.html">👤 Profile</a>
             <a href="orders.html">📦 My Orders</a>
-            <a href="deposit.html">💰 Add Funds</a>
+            <a href="add-funds.html">💰 Add Funds</a>
             <div class="nav-dropdown-sep"></div>
             <button class="dark-toggle" id="nav-dark-toggle">
               <span id="nav-dark-icon">🌙</span>
@@ -210,6 +201,8 @@ window.API_BASE = window.__API_BASE__ || 'http://localhost:5000/api';
             </button>
             <div class="nav-dropdown-sep"></div>
             ${user.role === 'admin' ? '<a href="admin/index.html">🛡 Admin Panel</a><div class="nav-dropdown-sep"></div>' : ''}
+            <a href="https://t.me/lognest_admin" target="_blank" rel="noopener" style="color:#0088cc !important;">✈️ Support</a>
+            <div class="nav-dropdown-sep"></div>
             <a href="#" id="nav-logout" class="logout-link">🚪 Logout</a>
           </div>
         </div>
