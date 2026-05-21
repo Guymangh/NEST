@@ -59,6 +59,11 @@ body.dark-mode h1,
 body.dark-mode h2,
 body.dark-mode h3,
 body.dark-mode h4               { color: var(--primary-deep); }
+/* Welcome banner sits on a dark teal gradient — text must always be white */
+body.dark-mode .welcome-banner h2,
+body.dark-mode .welcome-banner p,
+body.dark-mode .welcome-text h2,
+body.dark-mode .welcome-text p  { color: #fff !important; }
 body.dark-mode .nav-balance,
 body.dark-mode .nav-cart,
 body.dark-mode .nav-user-btn    { background: #0a2020; border-color: var(--border-soft); }
