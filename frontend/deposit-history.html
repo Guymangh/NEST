@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -235,12 +235,25 @@
     const API_BASE  = window.__API_BASE__ || window.API_BASE || 'http://localhost:5000/api';
     const PAGE_SIZE = 8;
     let currentPage = 1, allLoaded = [];
-    const ICONS = { BTC:'₿', USDT:'₮', TRX:'🔴', LTC:'🥈', ETH:'Ξ' };
+    const METHOD_LABELS = {
+      manual: { icon: '🏦', label: 'Manual' },
+      bitcoin: { icon: '₿', label: 'Bitcoin' },
+      usdt: { icon: '💵', label: 'USDT' },
+      oxapay: { icon: '🔐', label: 'OxaPay' },
+      nowpayments: { icon: '⚡', label: 'NowPayments' },
+    };
+    const COIN_ICONS = { BTC:'₿', USDT:'💵', TRX:'🔴', LTC:'🥈', ETH:'Ξ', DOGE:'🐕', BNB:'🟡' };
 
     function coinPill(notes, method) {
-      const m    = (notes || '').match(/Crypto deposit - (\w+)/);
-      const coin = m ? m[1] : (method === 'manual' ? 'Manual' : method.toUpperCase());
-      return `<span class="coin-pill">${ICONS[coin]||'💰'} ${coin}</span>`;
+      // First try to extract specific coin from notes (e.g. "Crypto deposit - BTC")
+      const m = (notes || '').match(/Crypto deposit - (\w+)/);
+      if (m) {
+        const coin = m[1];
+        return `<span class="coin-pill">${COIN_ICONS[coin] || '💰'} ${coin}</span>`;
+      }
+      // Fall back to method label
+      const ml = METHOD_LABELS[method] || { icon: '💰', label: (method || 'Unknown').toUpperCase() };
+      return `<span class="coin-pill">${ml.icon} ${ml.label}</span>`;
     }
 
     function updateStats(deps) {

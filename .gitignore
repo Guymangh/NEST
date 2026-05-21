@@ -4,6 +4,10 @@ backend/node_modules/
 npm-debug.log*
 yarn-error.log*
 
+# One-time scripts
+run-migration.js
+
+
 # ── Environment / Secrets (NEVER commit these) ────────────────────
 .env
 .env.local

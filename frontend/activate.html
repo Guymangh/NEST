@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -240,44 +240,59 @@
 
   <script>
     const API_BASE = window.__API_BASE__ || window.API_BASE || 'http://localhost:5000/api';
+    let pollTimer = null;
+    let alreadyActivated = false;
 
     async function loadActivationStatus() {
       const token = localStorage.getItem('token');
-      if (!token) return;
+      if (!token) { window.location.href = 'login.html'; return; }
 
       try {
         const res  = await fetch(`${API_BASE}/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
         const data = await res.json();
         if (!data.success) return;
 
-        const u    = data.user;
-        const pct  = u.activation_pct  || 0;
-        const dep  = u.total_deposited || 0;
-        const rem  = u.activation_remaining ?? 350;
+        const u   = data.user;
+        const pct = u.activation_pct   ?? 0;
+        const dep = u.total_deposited  ?? 0;
+        const rem = u.activation_remaining ?? 350;
 
-        document.getElementById('dep-so-far').textContent  = `$${dep.toFixed(2)}`;
-        document.getElementById('still-needed').textContent = `$${rem.toFixed(2)}`;
+        // Update localStorage with fresh balance so nav syncs
+        const stored = JSON.parse(localStorage.getItem('user') || '{}');
+        stored.balance = u.balance;
+        localStorage.setItem('user', JSON.stringify(stored));
+
+        document.getElementById('dep-so-far').textContent   = `$${parseFloat(dep).toFixed(2)}`;
+        document.getElementById('still-needed').textContent = `$${parseFloat(rem).toFixed(2)}`;
         document.getElementById('prog-pct').textContent     = `${pct}% complete`;
 
-        // Animate progress bar after short delay
+        // Animate progress bar
         setTimeout(() => {
           document.getElementById('prog-fill').style.width = pct + '%';
         }, 300);
 
-        if (u.is_activated) {
+        if (u.is_activated && !alreadyActivated) {
+          alreadyActivated = true;
+          clearInterval(pollTimer); // stop polling
+
           document.getElementById('act-icon').textContent         = '🔓';
-          document.getElementById('act-title').textContent        = 'Account Activated!';
-          document.getElementById('act-sub').textContent          = 'Your account is fully activated. You can access all your purchased log details.';
+          document.getElementById('act-title').textContent        = 'Account Activated! 🎉';
+          document.getElementById('act-sub').textContent          = 'Your account is fully activated. Redirecting you to your orders…';
           document.getElementById('remaining-row').style.display  = 'none';
           document.getElementById('activated-banner').classList.add('show');
           document.getElementById('act-cta').textContent          = '📋 View My Orders';
           document.getElementById('act-cta').href                 = 'orders.html';
           document.getElementById('act-cta').style.background     = 'linear-gradient(135deg,#15803d,#16a34a)';
+
+          // Auto-redirect after 3 seconds
+          setTimeout(() => { window.location.href = 'orders.html'; }, 3000);
         }
-      } catch (e) { console.error(e); }
+      } catch (e) { console.error('Activation status error:', e); }
     }
 
+    // Load immediately, then poll every 10 seconds for real-time updates
     loadActivationStatus();
+    pollTimer = setInterval(loadActivationStatus, 10000);
   </script>
 </body>
 </html>
