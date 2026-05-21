@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -344,19 +344,61 @@
 
     (function init() {
       const raw = sessionStorage.getItem('pending_payment');
-      if (!raw) { window.location.href = 'deposit.html'; return; }
+      if (!raw) { window.location.href = 'add-funds.html'; return; }
       try {
         const p = JSON.parse(raw);
         document.getElementById('coin-tag').textContent  = `${p.pay_currency} · ${p.network}`;
-        document.getElementById('qr-img').src            = p.qr_code;
+        document.getElementById('qr-img').src            = p.qr_code || '';
         document.getElementById('addr-val').textContent  = p.address;
         document.getElementById('pay-crypto').textContent= `${p.pay_amount} ${p.pay_currency}`;
         document.getElementById('pay-usd').textContent   = `≈ $${parseFloat(p.usd_amount||0).toFixed(2)} USD`;
         document.getElementById('warn-amt').textContent  = `${p.pay_amount} ${p.pay_currency}`;
         document.getElementById('dep-ref').textContent   = p.deposit_id;
         startTimer(p.expired_at);
-      } catch { window.location.href = 'deposit.html'; }
+        startPolling(p.deposit_id);
+      } catch { window.location.href = 'add-funds.html'; }
     })();
+
+    // ── Poll deposit status every 15s — auto-redirect when confirmed ──
+    let pollId = null;
+    const API_BASE = window.__API_BASE__ || 'http://localhost:5000/api';
+
+    async function checkDepositStatus(depositId) {
+      const token = localStorage.getItem('token');
+      if (!token || !depositId) return;
+      try {
+        const res  = await fetch(`${API_BASE}/deposits/my-deposits?limit=20`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!data.success) return;
+        const dep = (data.deposits || []).find(d => d.id === depositId);
+        if (dep && dep.status === 'approved') {
+          clearInterval(pollId);
+          clearInterval(timerInterval);
+          sessionStorage.removeItem('pending_payment');
+          // Update local balance
+          const user = JSON.parse(localStorage.getItem('user') || '{}');
+          if (user) {
+            const meRes = await fetch(`${API_BASE}/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
+            const meData = await meRes.json();
+            if (meData.success) {
+              user.balance = meData.user.balance;
+              localStorage.setItem('user', JSON.stringify(user));
+            }
+          }
+          toast('✅ Deposit confirmed! Redirecting…', 'success');
+          setTimeout(() => { window.location.href = 'deposit-history.html'; }, 2000);
+        }
+      } catch { /* silent — keep polling */ }
+    }
+
+    function startPolling(depositId) {
+      if (!depositId) return;
+      // Poll immediately, then every 15 seconds
+      checkDepositStatus(depositId);
+      pollId = setInterval(() => checkDepositStatus(depositId), 15000);
+    }
   </script>
 </body>
 </html>

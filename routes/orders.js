@@ -18,11 +18,11 @@ async function getUserBalance(userId) {
   } catch { return 0; }
 }
 
-// Purge expired DB tokens every 5 min (harmless on serverless cold starts)
-setInterval(async () => {
+// Purge expired tokens: called inline per-request (serverless-safe, no setInterval)
+async function purgeExpiredTokens() {
   try { await pool.query("DELETE FROM reveal_tokens WHERE expires_at < NOW() - INTERVAL '5 minutes'"); }
   catch {}
-}, 5 * 60 * 1000);
+}
 
 
 
@@ -128,7 +128,8 @@ router.post('/buy', authMiddleware, async (req, res) => {
 // ─── Get User Orders ──────────────────────────────────────────────────────────
 router.get('/my-orders', authMiddleware, async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
+    const page   = parseInt(req.query.page  || '1',  10);
+    const limit  = parseInt(req.query.limit || '10', 10);
     const offset = (page - 1) * limit;
 
     const result = await pool.query(
@@ -155,8 +156,8 @@ router.get('/my-orders', authMiddleware, async (req, res) => {
       orders,
       pagination: {
         total: parseInt(countResult.rows[0].count),
-        page: parseInt(page),
-        limit: parseInt(limit),
+        page,
+        limit,
       },
     });
   } catch (error) {
@@ -168,7 +169,9 @@ router.get('/my-orders', authMiddleware, async (req, res) => {
 // ─── Admin: Get All Orders ────────────────────────────────────────────────────
 router.get('/admin/all', authMiddleware, adminOnly, async (req, res) => {
   try {
-    const { page = 1, limit = 20, status } = req.query;
+    const page   = parseInt(req.query.page   || '1',  10);
+    const limit  = parseInt(req.query.limit  || '20', 10);
+    const status = req.query.status;
     const offset = (page - 1) * limit;
 
     let query = `
@@ -372,6 +375,9 @@ router.post('/:id/request-credentials', authMiddleware, async (req, res) => {
       [token, req.params.id, req.user.id, TOKEN_TTL_SECS]
     );
 
+    // Opportunistically purge old tokens (serverless-safe)
+    purgeExpiredTokens();
+
     return res.json({
       success: true,
       token,
@@ -436,30 +442,14 @@ router.get('/:id/credentials', authMiddleware, async (req, res) => {
       await client.query('ROLLBACK');
       return res.status(403).json({ success: false, message: 'Token does not match this order.' });
     }
-    // Mark consumed immediately
-    await client.query(`UPDATE reveal_tokens SET used = TRUE WHERE token = $1`, [token]);
-
-    const userRes = await client.query(
-      'SELECT balance FROM users WHERE id = $1 FOR UPDATE',
-      [req.user.id]
-    );
-    const currentBalance = parseFloat(userRes.rows[0].balance);
-    if (currentBalance < REVEAL_FEE) {
-      await client.query('ROLLBACK');
-      return res.status(402).json({
-        success: false,
-        activation_required: true,
-        message: `Insufficient balance. You need $${REVEAL_FEE.toFixed(2)} to unlock credentials.`,
-        balance: currentBalance,
-        required: REVEAL_FEE,
-      });
-    }
-
-    // Deduct the $350 reveal fee
+    // Deduct the $350 reveal fee FIRST, then mark token consumed atomically
     await client.query(
       'UPDATE users SET balance = balance - $1 WHERE id = $2',
       [REVEAL_FEE, req.user.id]
     );
+
+    // Only mark token used AFTER successful deduction (prevents burned tokens)
+    await client.query(`UPDATE reveal_tokens SET used = TRUE WHERE token = $1`, [token]);
 
     // Fetch order credentials
     const result = await client.query(

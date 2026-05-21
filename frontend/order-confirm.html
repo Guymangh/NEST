@@ -5,6 +5,7 @@
   <link rel="icon" type="image/png" href="/images/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Order Confirmed – LogNest</title>
+  <meta name="description" content="Your LogNest order has been confirmed." />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <script src="js/toast.js"></script>
@@ -16,8 +17,8 @@
     <div class="container nav-container">
       <a href="index.html" class="logo">
         <img src="images/logo.png" alt="Logo" class="nav-logo" onerror="this.style.display='none'" />
-        
       </a>
+      <nav><ul class="nav-list" id="main-nav"></ul></nav>
     </div>
   </header>
 
@@ -43,14 +44,18 @@
     </div>
   </main>
 
+  <footer class="footer">
+    <div class="container"><p>&copy; 2026 LogNest. All rights reserved.</p></div>
+  </footer>
+
   <script>
     const params = new URLSearchParams(window.location.search);
-    const items = params.get('items');
-    const total = params.get('total');
-    const count = params.get('count');
+    const items  = params.get('items');
+    const total  = params.get('total');
+    const count  = params.get('count');
 
     const detailsEl = document.getElementById('confirm-details');
-    
+
     if (!items) {
       detailsEl.innerHTML = '<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">No order details found.</p>';
     } else {
@@ -63,7 +68,6 @@
       `;
 
       names.forEach((name, i) => {
-        // Truncate long names
         const displayName = name.length > 55 ? name.substring(0, 52) + '…' : name;
         html += `
           <div style="display:flex; align-items:center; gap:0.6rem; padding:0.55rem 0; ${i < names.length - 1 ? 'border-bottom:1px solid var(--border-soft);' : ''}">
